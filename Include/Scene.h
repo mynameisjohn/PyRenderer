@@ -10,7 +10,6 @@ class Scene
 public:
     // Constructors
 	Scene();
-	void Init(std::string XmlSource);
     
     // Render function
 	int Draw();
@@ -18,6 +17,7 @@ public:
 private:
 	Shader m_Shader; // May be a container soon
 	Camera m_Camera;
-	std::string m_XmlSource;
+	
+	
 };
 
