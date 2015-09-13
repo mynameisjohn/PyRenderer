@@ -1,0 +1,1 @@
+This will use C++, Python3.4, tinyxml2, SDL2, glm, and OpenGL to load IQM files from disk. 
