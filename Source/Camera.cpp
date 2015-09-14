@@ -26,6 +26,14 @@ Camera::Camera(float fovy, float aspect, glm::vec2 nf) :
 	m_m4Proj(glm::perspective(fovy, aspect, nf[0], nf[1]))
 {}
 
+void Camera::InitOrtho(float l, float r, float t, float b, float n, float f) {
+	*this = Camera({ l,r }, { t,b }, { n, f });
+}
+
+void Camera::InitPersp(float fovy, float aspect, float n, float f) {
+	*this = Camera(fovy, aspect, { n,f });
+}
+
 vec3 Camera::GetPos() {
 	return m_v3Pos;
 }

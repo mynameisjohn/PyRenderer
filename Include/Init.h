@@ -2,6 +2,8 @@
 
 #include "Scene.h"
 
+#include <memory>
+
 bool InitGL();
 bool InitPython();
-bool InitScene(Scene& s);
+bool InitScene(std::unique_ptr<Scene>& pScene);

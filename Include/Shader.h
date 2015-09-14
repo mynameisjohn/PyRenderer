@@ -36,7 +36,8 @@ public:
 	int PrintSrc_F() const;
     
     // Public Accessors
-	GLint getHandle(const std::string idx);
+	GLint GetHandle(const std::string& idx);
+	GLint operator[](const std::string& idx);
     
     // Why not?
 	inline HandleMap getHandleMap() { return m_Handles; }

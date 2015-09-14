@@ -110,8 +110,12 @@ int Shader::CompileAndLink(){
 	return ERR_N;
 }
 
+GLint Shader::operator[](const string& idx) {
+	return GetHandle(idx);
+}
+
 // Accessor for shader handles
-GLint Shader::getHandle (const string idx){
+GLint Shader::GetHandle (const string& idx){
 	// If we have the handle, return it
 	if (m_Handles.find(idx) != m_Handles.end())
 		return m_Handles.find(idx)->second;

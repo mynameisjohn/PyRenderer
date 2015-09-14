@@ -7,8 +7,6 @@
 
 #include <SDL.h>
 
-#include <gtx/transform.hpp>
-
 // Screen dims
 const int WIDTH = 600;
 const int HEIGHT = 600;
@@ -89,54 +87,17 @@ bool InitPython() {
 	//Py_Add_Func("InitScene", InitScene, "Init Scene with a correctly formatted XML File");
 	Python::initialize();
 
+	Python::Register_Class<Camera, __LINE__>("Camera");
+	std::function<void(Camera *, float, float, float, float, float, float)> cam_InitOrtho(&Camera::InitOrtho);
+	Python::_add_Func<__LINE__, Camera>("InitOrtho", cam_InitOrtho, METH_VARARGS, "Initialize Ortho Camera with lr/tb/nf");
+
 	return true;
 }
 
-bool InitScene(Scene& s) {
+bool InitScene(std::unique_ptr<Scene>& pScene) {
 	// Get the python init module
 	std::string pyinitScript = SCRIPT_DIR + "init.py";
-	auto pyinitModule = Python::Object::from_script(pyinitScript);
-
-	// Get all the info you need
-	using float2 = std::array<float, 2>;
-	using float3 = std::array<float, 3>;
-	using float4 = std::array<float, 4>;
-	using EntInfo = std::tuple<float3, float3, float4, float4, std::string>;
-	auto check = [](bool cond, std::string msg = "") {
-		if (!msg.empty())
-			std::cout << msg << "----" << (cond ? " failed! " : " succeeded! ") <<  std::endl;
-		assert(cond);
-	};
-
-	std::vector<EntInfo> v_EntInfo;
-	auto pyl_EntInfo = pyinitModule.call_function("GetEntities");
-	check(pyl_EntInfo.convert(v_EntInfo), "Getting all Entity info");
-
-
-	std::map<std::string, Python::Object> map_CachedPyModules;
-
-	for (auto& ei : v_EntInfo) {
-		vec3 pos(std::get<0>(ei)[0], std::get<0>(ei)[1], std::get<0>(ei)[2]);
-		vec3 scale(std::get<1>(ei)[0], std::get<1>(ei)[1], std::get<1>(ei)[2]);
-		fquat rot(std::get<2>(ei)[0], std::get<2>(ei)[1], std::get<2>(ei)[2], std::get<2>(ei)[3]);
-		vec4 color(std::get<3>(ei)[0], std::get<3>(ei)[1], std::get<3>(ei)[2], std::get<3>(ei)[3]);
-		std::string module = std::get<4>(ei);
-
-		// Load the python module
-		map_CachedPyModules[module] = std::move(Python::Object::from_script(module));
-
-		// Get drawable info
-		mat4 MV = glm::translate(pos) * glm::mat4_cast(rot) * glm::scale(scale);
-		color = glm::clamp(color, vec4(0), vec4(1));
-		//std::string iqmFile;
-		//check(map_CachedPyModules[module].get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module "+module);
-
-		// Get collision info
-		//std::array<float2, 2> a_ColInfo;
-		//check(map_CachedPyModules[module].get_attr("r_Collider").convert(a_ColInfo), "Getting IqmFile from module " + module);
-		//vec2 c_Pos(a_ColInfo[0][0], a_ColInfo[0][1]);
-		//vec2 c_Pos(a_ColInfo[1][0], a_ColInfo[1][1]);
-	}
-
+	pScene = std::move(std::unique_ptr<Scene>(new Scene(pyinitScript)));
+	
 	return true;
 }
