@@ -26,8 +26,8 @@ Camera::Camera(float fovy, float aspect, glm::vec2 nf) :
 	m_m4Proj(glm::perspective(fovy, aspect, nf[0], nf[1]))
 {}
 
-int Camera::InitOrtho(float l, float r, float t, float b, float n, float f) {
-	*this = Camera({ l,r }, { t,b }, { n, f });
+int Camera::InitOrtho(vec2 X, vec2 Y, vec2 Z) {
+	*this = Camera(X, Y, Z);
 	return 0;
 }
 
