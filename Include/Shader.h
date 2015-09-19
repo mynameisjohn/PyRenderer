@@ -34,6 +34,7 @@ public:
 	int PrintLog_F() const;
 	int PrintSrc_V() const;
 	int PrintSrc_F() const;
+	int PrintLog_P() const;
     
     // Public Accessors
 	GLint GetHandle(const std::string& idx);

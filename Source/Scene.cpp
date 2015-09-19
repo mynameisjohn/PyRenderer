@@ -7,7 +7,7 @@
 Scene::Scene(std::string& pyinitScript) {	
 	auto check = [](bool cond, std::string msg = "") {
 		if (!msg.empty())
-			std::cout << msg << "----" << (cond ? " failed! " : " succeeded! ") << std::endl;
+			std::cout << msg << "----" << (cond ? " succeeded! " : " failed! ") << std::endl;
 		assert(cond);
 	};
 
@@ -25,10 +25,13 @@ Scene::Scene(std::string& pyinitScript) {
 	std::map<std::string, std::string> shaderInfo;
 	check(pyinitModule.get_attr("r_ShaderSrc").convert(shaderInfo), "Getting shader info from pyinit module " + pyinitScript);
 	m_Shader = Shader(shaderInfo["vert"], shaderInfo["frag"], SHADER_DIR);
+
+	auto sBind = m_Shader.ScopeBind();
 	GLint posHandle = m_Shader[shaderInfo["Position"]];
 	Drawable::SetPosHandle(posHandle);
 
 	// InitOrtho / InitPersp should be exposed
+	//Python::Expose_Object(&m_Camera, "c_Camera", pyinitModule.get());
 	pyinitModule.call_function("InitCamera", &m_Camera);
 
 	// Now loop through all named tuples in the script

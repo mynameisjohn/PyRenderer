@@ -82,10 +82,21 @@ bool InitGL() {
 	return true;
 }
 
+namespace Python
+{
+	bool convert(PyObject * obj, vec2& v) {
+		return convert_buf(obj, (float *)&v[0], 2);
+	}
+}
 
 bool InitPython() {
 	// Do your shit
 	//Py_Add_Func("InitScene", InitScene, "Init Scene with a correctly formatted XML File");
+
+	Python::Register_Class<Camera, __LINE__>("Camera");
+	std::function<int(Camera *, float, float, float, float, float, float)> cam_InitOrtho(&Camera::InitOrtho);
+	Python::Register_Mem_Function<Camera, __LINE__>("InitOrtho", cam_InitOrtho, "Initialize Ortho Camera with lr/tb/nf");
+
 	Python::initialize();
 
 	//std::function<decltype(Foo::nothing)> f(&Foo::nothing);
@@ -101,7 +112,7 @@ bool InitPython() {
 
 bool InitScene(std::unique_ptr<Scene>& pScene) {
 	// Get the python init module
-	std::string pyinitScript = SCRIPT_DIR + "init.py";
+	std::string pyinitScript = SCRIPT_DIR + "InitScene.py";
 	pScene = std::move(std::unique_ptr<Scene>(new Scene(pyinitScript)));
 	
 	return true;

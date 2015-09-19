@@ -103,6 +103,7 @@ int Shader::CompileAndLink(){
 	glAttachShader(m_Program, m_hFragShader);
 	glLinkProgram(m_Program);
 	if (!check(m_Program, GL_LINK_STATUS)){
+		PrintLog_P();
 		cout << "Unable to link shader program." << endl;
 		return ERR_L;
 	}
@@ -167,6 +168,16 @@ int Shader::PrintLog_F() const{
 	int len(0);
 	char log[max];
 	glGetShaderInfoLog(m_hFragShader, max, &len, log);
+	cout << "Fragment Shader Log: \n\n" << log << "\n\n" << endl;
+
+	return len;
+}
+
+int Shader::PrintLog_P() const {
+	const int max(1024);
+	int len(0);
+	char log[max]{ 0 };
+	glGetShaderInfoLog(m_Program, max, &len, log);
 	cout << "Fragment Shader Log: \n\n" << log << "\n\n" << endl;
 
 	return len;

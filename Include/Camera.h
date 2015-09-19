@@ -27,7 +27,7 @@ public:
 	Camera();
 	Camera(vec2 X, vec2 Y, vec2 Z);
 	Camera(float fovy, float aspect, vec2 nf);
-	void InitOrtho(float, float, float, float, float, float);
+	int InitOrtho(float, float, float, float, float, float);
 	void InitPersp(float, float, float, float);
     
     // Functions to modify projection transform
