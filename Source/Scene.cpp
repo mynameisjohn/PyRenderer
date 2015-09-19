@@ -1,84 +1,16 @@
 #include "Scene.h"
 
-#include <gtx/transform.hpp>
-
-#include <pyliason.h>
-
-Scene::Scene(std::string& pyinitScript) {	
-	auto check = [](bool cond, std::string msg = "") {
-		if (!msg.empty())
-			std::cout << msg << "----" << (cond ? " succeeded! " : " failed! ") << std::endl;
-		assert(cond);
-	};
-
-	// Useful nicknames
-	using float2 = std::array<float, 2>;
-	using float3 = std::array<float, 3>;
-	using float4 = std::array<float, 4>;
-	using EntInfo = std::tuple<float3, float3, float4, float4, std::string>;
-
-	auto pyinitModule = Python::Object::from_script(pyinitScript);
-
-	// First deal with the shader and camera
-
-	// Exposing shader functions just seemed unnecessary
-	std::map<std::string, std::string> shaderInfo;
-	check(pyinitModule.get_attr("r_ShaderSrc").convert(shaderInfo), "Getting shader info from pyinit module " + pyinitScript);
-	m_Shader = Shader(shaderInfo["vert"], shaderInfo["frag"], SHADER_DIR);
-
-	auto sBind = m_Shader.ScopeBind();
-	GLint posHandle = m_Shader[shaderInfo["Position"]];
-	Drawable::SetPosHandle(posHandle);
-
-	// InitOrtho / InitPersp should be exposed
-	//Python::Expose_Object(&m_Camera, "c_Camera", pyinitModule.get());
-	pyinitModule.call_function("InitCamera", &m_Camera);
-
-	// Now loop through all named tuples in the script
-	// script must be correct...
-
-	// Get a vector of these
-	std::vector<EntInfo> v_EntInfo;
-	auto pyl_EntInfo = pyinitModule.call_function("GetEntities");
-	//check(pyl_EntInfo.convert(v_EntInfo), "Getting all Entity info");
-
-	// Once you have it, create individual entities and components
-
-	for (auto& ei : v_EntInfo) {
-		vec3 * pos = (vec3 *)(std::get<0>(ei).data());
-		vec3 * scale = (vec3 *)(std::get<1>(ei).data());
-		fquat * rot = (fquat *)(std::get<2>(ei).data());
-		vec4 * color = (vec4 *)(std::get<3>(ei).data());
-
-		// Get python module
-		std::string pyEntModScript = std::get<4>(ei);
-		auto pyEntModule = Python::Object::from_script(pyEntModScript);
-
-		// Get drawable info
-		mat4 MV = glm::translate(*pos) * glm::mat4_cast(*rot) * glm::scale(*scale);
-		*color = glm::clamp(*color, vec4(0), vec4(1));
-		std::string iqmFile;
-		check(pyEntModule.get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module " + pyEntModScript);
-		m_PyObjCache[pyEntModScript] = std::move(pyEntModule);
-
-		//check(map_CachedPyModules[module].get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module "+module);
-
-		// Get collision info
-		//std::array<float2, 2> a_ColInfo;
-		//check(map_CachedPyModules[module].get_attr("r_Collider").convert(a_ColInfo), "Getting IqmFile from module " + module);
-		//vec2 c_Pos(a_ColInfo[0][0], a_ColInfo[0][1]);
-		//vec2 c_Pos(a_ColInfo[1][0], a_ColInfo[1][1]);
-
-		int entId(m_vEntities.size());
-		int entDrOfs(m_vDrawables.size());
-		m_vEntities.emplace_back(entId, entDrOfs, -1);
-		m_vDrawables.emplace_back(MODEL_DIR + iqmFile, *color, MV);
-	}
-}
+#include <gtc/type_ptr.hpp>
 
 int Scene::Draw() {
-	for (auto& dr : m_vDrawables)
+	auto sBind = m_Shader.ScopeBind();
+	for (auto& dr : m_vDrawables) {
+		mat4 PMV = m_Camera.GetMat() * dr.GetMV();
+		vec4 c = dr.GetColor();
+		glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
+		glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
 		dr.Draw();
+	}
 	return int(m_vDrawables.size());
 }
 

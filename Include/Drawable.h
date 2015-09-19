@@ -15,6 +15,8 @@ class Drawable {
 	
 public:
 	Drawable();
+	mat4 GetMV() const;
+	vec4 GetColor() const;
 
 	Drawable(std::string&, vec4&, mat4&);
 	void Draw();

@@ -29,9 +29,14 @@ Shader::Shader(std::string v, std::string f, std::string d) :
 	Shader()
 {
 	ifstream vIn(d + v), fIn(d + f);
-	m_VertShaderSrc = std::string((istreambuf_iterator<char>(vIn)), istreambuf_iterator<char>());
-	m_FragShaderSrc = std::string((istreambuf_iterator<char>(fIn)), istreambuf_iterator<char>());
-	CompileAndLink();
+	std::string vSrc((istreambuf_iterator<char>(vIn)), istreambuf_iterator<char>());
+	std::string fSrc((istreambuf_iterator<char>(fIn)), istreambuf_iterator<char>());
+	
+	if (!(vSrc.empty() || fSrc.empty())) {
+		m_VertShaderSrc = vSrc;
+		m_FragShaderSrc = fSrc;
+		CompileAndLink();
+	}
 }
 
 Shader::~Shader()

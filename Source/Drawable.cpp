@@ -30,7 +30,7 @@ Drawable::Drawable(std::string& iqmFileName, vec4& color, mat4& MV) :
 		//Disable?
 	};
 
-	IqmFile f(m_SrcFile);
+	IqmFile f(MODEL_DIR + m_SrcFile);
 
 	std::array<GLuint, 2> vboBuf{ 0 };
 	
@@ -52,8 +52,19 @@ Drawable::Drawable(std::string& iqmFileName, vec4& color, mat4& MV) :
 	glBindVertexArray(0);
 }
 
-void Drawable::Draw() {
+mat4 Drawable::GetMV() const {
+	return m_MV;
+}
 
+vec4 Drawable::GetColor() const {
+	return m_Color;
+}
+
+void Drawable::Draw() {
+	// Bind VAO, draw
+	glBindVertexArray(m_VAO);
+	glDrawElements(GL_TRIANGLES, m_nIdx, GL_UNSIGNED_INT, NULL);
+	glBindVertexArray(m_VAO);
 }
 
 /*static*/ void Drawable::SetPosHandle(GLint pH) {
