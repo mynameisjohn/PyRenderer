@@ -1,6 +1,8 @@
 #include "Drawable.h"
 #include "IqmFile.h"
 
+#include <gtx/transform.hpp>
+
 #include <array>
 
 GLint Drawable::s_PosHandle(-1);
@@ -58,6 +60,18 @@ mat4 Drawable::GetMV() const {
 
 vec4 Drawable::GetColor() const {
 	return m_Color;
+}
+
+void Drawable::LeftMultMV(mat4 M) {
+	m_MV = M * m_MV;
+}
+
+void Drawable::Translate(vec3 T) {
+	LeftMultMV(glm::translate(T));
+}
+
+void Drawable::Rotate(fquat Q) {
+	LeftMultMV(glm::mat4_cast(Q));
 }
 
 void Drawable::Draw() {

@@ -2,7 +2,7 @@
 
 #include "Camera.h"
 #include "Shader.h"
-#include "Entity.h"
+#include "PyEntity.h"
 #include "Drawable.h"
 #include "RigidBody.h"
 

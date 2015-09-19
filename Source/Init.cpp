@@ -109,6 +109,12 @@ bool InitPython() {
 	std::function<int(Camera *, vec2, vec2, vec2)> cam_InitOrtho(&Camera::InitOrtho);
 	Python::Register_Mem_Function<Camera, __LINE__>("InitOrtho", cam_InitOrtho, "Initialize Ortho Camera with lr/tb/nf");
 
+	Python::Register_Class<Drawable, __LINE__>("Drawable");
+	std::function<void(Drawable *, vec3)> dr_Translate(&Drawable::Translate);
+	Python::Register_Mem_Function<Drawable, __LINE__>("Translate", dr_Translate, "Translate a drawable");
+
+	Python::Register_Class<Circle, __LINE__>("Circle");
+
 	Python::initialize();
 
 	//std::function<decltype(Foo::nothing)> f(&Foo::nothing);
@@ -192,9 +198,12 @@ Scene::Scene(std::string& pyinitScript) {
 		vec4 color = glm::clamp(std::get<3>(ei), vec4(0), vec4(1));
 		std::string iqmFile;
 		check(pyEntModule.get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module " + pyEntModScript);
-		m_PyObjCache[pyEntModScript] = std::move(pyEntModule);
+		m_PyObjCache[pyEntModScript] = pyEntModule;
 
 		//check(map_CachedPyModules[module].get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module "+module);
+
+		// Drawable inifo
+		Drawable dr(iqmFile, color, MV);
 
 		// Get collision info
 		float radius = std::get<1>(ei)[0]; // Assume uniform scale for now...
@@ -205,11 +214,21 @@ Scene::Scene(std::string& pyinitScript) {
 		circ.V = -0.5f*c;
 		circ.m = 1.f;
 		circ.e = 1.f;
-		m_vCircles.push_back(circ);
 
-		int entId(m_vEntities.size());
-		int entDrOfs(m_vDrawables.size());
-		m_vEntities.emplace_back(entId, entDrOfs, -1);
-		m_vDrawables.emplace_back(iqmFile, color, MV);
+		int uID(m_vEntities.size());
+		int drID(m_vDrawables.size());
+		int cID(m_vCircles.size());
+
+		m_vDrawables.push_back(dr);
+		m_vCircles.push_back(circ);
+		m_vEntities.emplace_back(uID, drID, cID, pyEntModule);
+	}
+
+	for (auto& ent : m_vEntities) {
+		auto drPtr = &m_vDrawables[ent.m_ofsDrawable];
+		auto cPtr = &m_vCircles[ent.m_ofsCollider];
+		ent.m_PyModule.call_function("AddEntity", drPtr, cPtr);
+		drPtr->PyInit(ent.m_UniqueId, ent.m_PyModule);
+		cPtr->PyInit(ent.m_UniqueId, ent.m_PyModule);
 	}
 }

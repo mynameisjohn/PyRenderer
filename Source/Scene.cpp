@@ -37,9 +37,10 @@ int Scene::Update() {
 				c2.V= v2;
 			}
 		}
-		vec2 dX = c1.V * 0.01f;
-		c1.C += dX;
-		m_vDrawables[i].m_MV = glm::translate(vec3(dX, 0.f)) * m_vDrawables[i].m_MV;
+		vec2 delta = c1.V * 0.01f;
+		c1.C += delta;
+		//m_vDrawables[i].m_MV = glm::translate(vec3(dX, 0.f)) * m_vDrawables[i].m_MV;
+		c1.m_PyModule.call_function("HandleCollision", c1.m_UniqueID, delta.x, delta.y);
 	}
 
 	return nCols;
