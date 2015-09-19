@@ -31,7 +31,7 @@ Shader::Shader(std::string v, std::string f, std::string d) :
 	ifstream vIn(d + v), fIn(d + f);
 	std::string vSrc((istreambuf_iterator<char>(vIn)), istreambuf_iterator<char>());
 	std::string fSrc((istreambuf_iterator<char>(fIn)), istreambuf_iterator<char>());
-	
+
 	if (!(vSrc.empty() || fSrc.empty())) {
 		m_VertShaderSrc = vSrc;
 		m_FragShaderSrc = fSrc;
@@ -45,29 +45,29 @@ Shader::~Shader()
 }
 
 // Managing bound state
-bool Shader::Bind(){
-	if (!m_bIsBound){
+bool Shader::Bind() {
+	if (!m_bIsBound) {
 		glUseProgram(m_Program);
 		m_bIsBound = true;
 	}
 	return m_bIsBound == true;
 }
 
-bool Shader::Unbind(){
-	if (m_bIsBound){
+bool Shader::Unbind() {
+	if (m_bIsBound) {
 		glUseProgram(0);
 		m_bIsBound = false;
 	}
 	return m_bIsBound == false;
 }
 
-bool Shader::IsBound() const{
+bool Shader::IsBound() const {
 	return m_bIsBound;
 }
 
-int Shader::CompileAndLink(){
+int Shader::CompileAndLink() {
 	// Check if the shader op went ok
-	auto check = [](GLuint id, GLuint type){
+	auto check = [](GLuint id, GLuint type) {
 		GLint status(GL_FALSE);
 		if (type == GL_COMPILE_STATUS)
 			glGetShaderiv(id, type, &status);
@@ -86,7 +86,7 @@ int Shader::CompileAndLink(){
 	m_hVertShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(m_hVertShader, 1, &(shaderSrc[0]), 0);
 	glCompileShader(m_hVertShader);
-	if (!check(m_hVertShader, GL_COMPILE_STATUS)){
+	if (!check(m_hVertShader, GL_COMPILE_STATUS)) {
 		cout << "Unable to compile vertex shader." << endl;
 		PrintLog_V();
 		return ERR_V;
@@ -96,7 +96,7 @@ int Shader::CompileAndLink(){
 	m_hFragShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(m_hFragShader, 1, &(shaderSrc[1]), 0);
 	glCompileShader(m_hFragShader);
-	if (!check(m_hFragShader, GL_COMPILE_STATUS)){
+	if (!check(m_hFragShader, GL_COMPILE_STATUS)) {
 		cout << "Unable to compile fragment shader." << endl;
 		PrintLog_F();
 		return ERR_F;
@@ -107,7 +107,7 @@ int Shader::CompileAndLink(){
 	glAttachShader(m_Program, m_hVertShader);
 	glAttachShader(m_Program, m_hFragShader);
 	glLinkProgram(m_Program);
-	if (!check(m_Program, GL_LINK_STATUS)){
+	if (!check(m_Program, GL_LINK_STATUS)) {
 		PrintLog_P();
 		cout << "Unable to link shader program." << endl;
 		return ERR_L;
@@ -121,13 +121,13 @@ GLint Shader::operator[](const string& idx) {
 }
 
 // Accessor for shader handles
-GLint Shader::GetHandle (const string& idx){
+GLint Shader::GetHandle(const string& idx) {
 	// If we have the handle, return it
 	if (m_Handles.find(idx) != m_Handles.end())
 		return m_Handles.find(idx)->second;
 
 	// Otherwise we have to find it, so client must bind
-	if (!m_bIsBound){
+	if (!m_bIsBound) {
 		cout << "Error: shader queried for untested variable " << idx
 			<< " while shader was not bound" << endl;
 		return -1;
@@ -141,7 +141,7 @@ GLint Shader::GetHandle (const string& idx){
 	// valid handles begin at 0
 	if (handle >= 0)
 		m_Handles[idx] = handle;
-	else{
+	else {
 		// We queried something bad, print the log
 		cout << "Invalid variable " << idx << " queried in shader" << endl;
 		PrintLog_V();
@@ -151,14 +151,14 @@ GLint Shader::GetHandle (const string& idx){
 	return handle;
 }
 
-void Shader::PrintHandles(){
+void Shader::PrintHandles() {
 	for (auto& h : m_Handles)
 		cout << h.first << ": " << h.second << "\n";
 	cout << endl;
 }
 
 // Print Logs
-int Shader::PrintLog_V() const{
+int Shader::PrintLog_V() const {
 	const int max(1024);
 	int len(0);
 	char log[max];
@@ -168,7 +168,7 @@ int Shader::PrintLog_V() const{
 	return len;
 }
 
-int Shader::PrintLog_F() const{
+int Shader::PrintLog_F() const {
 	const int max(1024);
 	int len(0);
 	char log[max];
@@ -189,12 +189,12 @@ int Shader::PrintLog_P() const {
 }
 
 // Print Source
-int Shader::PrintSrc_V() const{
+int Shader::PrintSrc_V() const {
 	cout << "Vertex Shader Source: \n\n" << m_VertShaderSrc << "\n\n" << endl;
 	return m_VertShaderSrc.length();
 }
 
-int Shader::PrintSrc_F() const{
+int Shader::PrintSrc_F() const {
 	cout << "Fragment Shader Source: \n\n" << m_FragShaderSrc << "\n\n" << endl;
 	return m_FragShaderSrc.length();
 }

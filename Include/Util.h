@@ -39,7 +39,7 @@ std::ostream& operator<<(std::ostream& os, const mat4& mat);
 std::ostream& operator<<(std::ostream& os, const fquat& quat);
 
 // Useful dirs
-const std::string SHADER_DIR = " ../Resources/Shaders/";
+const std::string SHADER_DIR = "../Resources/Shaders/";
 const std::string SCRIPT_DIR = "../Resources/Scripts/";
 const std::string MODEL_DIR = "../Resources/Models/";
 

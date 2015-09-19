@@ -14,11 +14,7 @@ const int HEIGHT = 600;
 // GL version
 const int glMajor(3), glMinor(0);
 
-// OpenGL context and main window
-SDL_GLContext g_Context;
-SDL_Window * g_Window = nullptr;
-
-bool InitGL() {
+bool InitGL(SDL_GLContext& g_Context, SDL_Window*& g_Window) {
 	//Init SDL Video
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());

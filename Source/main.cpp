@@ -4,9 +4,12 @@
 #include <SDL.h>
 
 std::unique_ptr<Scene> sPtr(nullptr);
+// OpenGL context and main window
+SDL_GLContext g_Context;
+SDL_Window * g_Window = nullptr;
 
 int main(int argc, char ** argv) {
-	if (!InitGL())
+	if (!InitGL(g_Context, g_Window))
 		return EXIT_FAILURE;
 
 	if (!InitPython())
@@ -34,8 +37,9 @@ int main(int argc, char ** argv) {
 			}
 			}
 		}
-
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		sPtr->Draw();
+		SDL_GL_SwapWindow(g_Window);
 	}
 	return EXIT_SUCCESS;
 }
