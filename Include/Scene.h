@@ -5,6 +5,8 @@
 #include "Entity.h"
 #include "Drawable.h"
 
+#include <pyliason.h>
+
 #include <vector>
 
 class Scene
@@ -23,5 +25,7 @@ private:
 	
 	std::vector<Entity> m_vEntities;
 	std::vector<Drawable> m_vDrawables;
+
+	std::map<std::string, Python::Object> m_PyObjCache;
 };
 

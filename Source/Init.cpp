@@ -82,14 +82,19 @@ bool InitGL() {
 	return true;
 }
 
+
 bool InitPython() {
 	// Do your shit
 	//Py_Add_Func("InitScene", InitScene, "Init Scene with a correctly formatted XML File");
 	Python::initialize();
 
-	Python::Register_Class<Camera, __LINE__>("Camera");
-	std::function<void(Camera *, float, float, float, float, float, float)> cam_InitOrtho(&Camera::InitOrtho);
-	Python::_add_Func<__LINE__, Camera>("InitOrtho", cam_InitOrtho, METH_VARARGS, "Initialize Ortho Camera with lr/tb/nf");
+	//std::function<decltype(Foo::nothing)> f(&Foo::nothing);
+	//Python::Register_Function<__LINE__>("Sdf", std::function<int(Foo *)>(&Foo::nothing), 0);
+	//Python::Register_Class<Camera, __LINE__>("Camera");
+	//Python::RegFn_RA<__LINE__>("dsf", f, METH_VARARGS);
+	//std::function<void(Camera *, float, float, float, float, float, float)> cam_InitOrtho(&Camera::InitOrtho);
+	//Python::RegMemFn_VA<__LINE__, Camera>("InitOrtho", cam_InitOrtho, METH_VARARGS, "Initialize Ortho Camera with lr/tb/nf");
+	//Python::Register_Function<__LINE__, Camera>("InitOrtho", cam_InitOrtho, METH_VARARGS, "Initialize Ortho Camera with lr/tb/nf");
 
 	return true;
 }

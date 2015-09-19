@@ -37,25 +37,26 @@ Scene::Scene(std::string& pyinitScript) {
 	// Get a vector of these
 	std::vector<EntInfo> v_EntInfo;
 	auto pyl_EntInfo = pyinitModule.call_function("GetEntities");
-	check(pyl_EntInfo.convert(v_EntInfo), "Getting all Entity info");
+	//check(pyl_EntInfo.convert(v_EntInfo), "Getting all Entity info");
 
 	// Once you have it, create individual entities and components
 
 	for (auto& ei : v_EntInfo) {
-		vec3 pos(std::get<0>(ei)[0], std::get<0>(ei)[1], std::get<0>(ei)[2]);
-		vec3 scale(std::get<1>(ei)[0], std::get<1>(ei)[1], std::get<1>(ei)[2]);
-		fquat rot(std::get<2>(ei)[0], std::get<2>(ei)[1], std::get<2>(ei)[2], std::get<2>(ei)[3]);
-		vec4 color(std::get<3>(ei)[0], std::get<3>(ei)[1], std::get<3>(ei)[2], std::get<3>(ei)[3]);
+		vec3 * pos = (vec3 *)(std::get<0>(ei).data());
+		vec3 * scale = (vec3 *)(std::get<1>(ei).data());
+		fquat * rot = (fquat *)(std::get<2>(ei).data());
+		vec4 * color = (vec4 *)(std::get<3>(ei).data());
 
 		// Get python module
 		std::string pyEntModScript = std::get<4>(ei);
 		auto pyEntModule = Python::Object::from_script(pyEntModScript);
 
 		// Get drawable info
-		mat4 MV = glm::translate(pos) * glm::mat4_cast(rot) * glm::scale(scale);
-		color = glm::clamp(color, vec4(0), vec4(1));
+		mat4 MV = glm::translate(*pos) * glm::mat4_cast(*rot) * glm::scale(*scale);
+		*color = glm::clamp(*color, vec4(0), vec4(1));
 		std::string iqmFile;
 		check(pyEntModule.get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module " + pyEntModScript);
+		m_PyObjCache[pyEntModScript] = std::move(pyEntModule);
 
 		//check(map_CachedPyModules[module].get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module "+module);
 
@@ -68,7 +69,7 @@ Scene::Scene(std::string& pyinitScript) {
 		int entId(m_vEntities.size());
 		int entDrOfs(m_vDrawables.size());
 		m_vEntities.emplace_back(entId, entDrOfs, -1);
-		m_vDrawables.emplace_back(iqmFile, color, MV);
+		m_vDrawables.emplace_back(MODEL_DIR + iqmFile, *color, MV);
 	}
 }
 

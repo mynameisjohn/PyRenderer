@@ -16,8 +16,8 @@ find_package(GLEW)
 if (WIN32)
 	add_definitions(-DGLEW_STATIC)
 	set(GLM_DIR $ENV{SDK}/glm)
-	set(PYTHON_LIBRARY C:/Python34/libs/python34_d.lib)
-	set(PYTHON_INCLUDE_DIR C:/Python34/include)
+	set(PYTHON_LIBRARY C:/Python35/libs/python35_d.lib)
+	set(PYTHON_INCLUDE_DIR C:/Python35/include)
 else (WIN32)
 	set(GLM_DIR /usr/include/glm)
 endif (WIN32)
@@ -34,7 +34,7 @@ file(GLOB SOURCES source/*.cpp)
 file(GLOB HEADERS include/*.h)
 file(GLOB_RECURSE RES Resources/*)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../PyLiaison ${CMAKE_CURRENT_BINARY_DIR}/PyLiaison)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../PyLiaison ${CMAKE_CURRENT_SOURCE_DIR}/PyLiaison)
 
 # include dirs
 include_directories(${GLM_DIR} ${GL_INC} ${SDL2_INC}  ${PYTHON_INCLUDE_DIR} 
@@ -42,4 +42,4 @@ include_directories(${GLM_DIR} ${GL_INC} ${SDL2_INC}  ${PYTHON_INCLUDE_DIR}
 					${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(PyRenderer ${SOURCES} ${HEADERS} ${SHADERS} ${SCRIPTS})
-target_link_libraries(PyRenderer ${SDL2_LIBS} ${GL_LIBS} ${PYTHON_LIBRARY} pyliaison)
+target_link_libraries(PyRenderer LINK_PUBLIC PyLiaison ${SDL2_LIBS} ${GL_LIBS} ${PYTHON_LIBRARY})
