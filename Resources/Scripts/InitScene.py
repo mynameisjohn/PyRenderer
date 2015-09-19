@@ -31,7 +31,7 @@ r_Entities.append(Entity(
 		module = b'circle.py'
 	))
 r_Entities.append(Entity(
-		pos = [0.,7.,0.],
+		pos = [1.,7.,0.],
 		scale = [1.,1.,1.],
 		rot = makeQuat(0.,0.,1.,0.),
 		color = randColor(),

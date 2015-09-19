@@ -10,8 +10,39 @@ int Scene::Draw() {
 		glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
 		glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
 		dr.Draw();
+		//m_PyObjCache.begin()->second.call_function("sayHello", &m_Camera);
 	}
 	return int(m_vDrawables.size());
+}
+#include <gtx/transform.hpp>
+int Scene::Update() {
+	int nCols(0);
+
+	for (int i = 0; i < m_vCircles.size(); i++) {
+		Circle& c1 = m_vCircles[i];
+		for (int j = i + 1; j < m_vCircles.size(); j++) {
+			Circle& c2 = m_vCircles[j];
+			float d = glm::length(c1.C - c2.C);
+			if (d < c1.r + c2.r) {
+				m_PyObjCache.begin()->second.call_function("isColliding");
+				nCols++;
+
+				float Msum_1 = 1.f / (c1.m+c2.m); // denominator
+				float Cr = 0.5f * (c1.e + c2.e); // coef of rest
+				vec2 P1 = c1.m * c1.V, P2 = c2.m * c2.V;
+				vec2 A = P1 + P2, B = Cr * (P1 - P2);
+				vec2 v1 = (A - B) * Msum_1;
+				vec2 v2 = (A + B) * Msum_1;
+				c1.V = v1;
+				c2.V= v2;
+			}
+		}
+		vec2 dX = c1.V * 0.01f;
+		c1.C += dX;
+		m_vDrawables[i].m_MV = glm::translate(vec3(dX, 0.f)) * m_vDrawables[i].m_MV;
+	}
+
+	return nCols;
 }
 
 //#include "Camera.h"

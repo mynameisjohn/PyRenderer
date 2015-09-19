@@ -22,7 +22,7 @@ Shader::Shader(std::string v, std::string f) :
 {
 	m_VertShaderSrc = v;
 	m_FragShaderSrc = f;
-	CompileAndLink();
+	int err = CompileAndLink();
 }
 
 Shader::Shader(std::string v, std::string f, std::string d) :
@@ -35,7 +35,7 @@ Shader::Shader(std::string v, std::string f, std::string d) :
 	if (!(vSrc.empty() || fSrc.empty())) {
 		m_VertShaderSrc = vSrc;
 		m_FragShaderSrc = fSrc;
-		CompileAndLink();
+		int err = CompileAndLink();
 	}
 }
 

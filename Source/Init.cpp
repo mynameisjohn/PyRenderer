@@ -1,3 +1,10 @@
+
+#include <fstream>
+#include <gtx/transform.hpp>
+#include <stdlib.h>
+#include <Windows.h>
+
+
 #include "Init.h"
 #include "Util.h"
 
@@ -134,11 +141,6 @@ bool InitScene(std::unique_ptr<Scene>& pScene) {
 	return true;
 }
 
-#include <fstream>
-#include <gtx/transform.hpp>
-#include <stdlib.h>
-#include <Windows.h>
-
 Scene::Scene(std::string& pyinitScript) {
 	auto check = [](bool cond, std::string msg = "") {
 		if (!msg.empty())
@@ -195,10 +197,15 @@ Scene::Scene(std::string& pyinitScript) {
 		//check(map_CachedPyModules[module].get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module "+module);
 
 		// Get collision info
-		//std::array<float2, 2> a_ColInfo;
-		//check(map_CachedPyModules[module].get_attr("r_Collider").convert(a_ColInfo), "Getting IqmFile from module " + module);
-		//vec2 c_Pos(a_ColInfo[0][0], a_ColInfo[0][1]);
-		//vec2 c_Pos(a_ColInfo[1][0], a_ColInfo[1][1]);
+		float radius = std::get<1>(ei)[0]; // Assume uniform scale for now...
+		vec2 c(std::get<0>(ei));
+		Circle circ;
+		circ.C = c;
+		circ.r = radius;
+		circ.V = -0.5f*c;
+		circ.m = 1.f;
+		circ.e = 1.f;
+		m_vCircles.push_back(circ);
 
 		int entId(m_vEntities.size());
 		int entDrOfs(m_vDrawables.size());

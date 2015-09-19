@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include "Entity.h"
 #include "Drawable.h"
+#include "RigidBody.h"
 
 #include <pyliason.h>
 
@@ -17,6 +18,7 @@ public:
     
     // Render function
 	int Draw();
+	int Update();
     
 	// 
 private:
@@ -25,6 +27,7 @@ private:
 	
 	std::vector<Entity> m_vEntities;
 	std::vector<Drawable> m_vDrawables;
+	std::vector<Circle> m_vCircles;
 
 	std::map<std::string, Python::Object> m_PyObjCache;
 };

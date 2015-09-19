@@ -37,6 +37,9 @@ int main(int argc, char ** argv) {
 			}
 			}
 		}
+
+		sPtr->Update();
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		sPtr->Draw();
 		SDL_GL_SwapWindow(g_Window);
