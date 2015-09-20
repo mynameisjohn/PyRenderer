@@ -2,7 +2,7 @@
 #include "Drawable.h"
 #include "RigidBody.h"
 
-Entity::Entity(uint32_t id, Circle * cCmp, Drawable * drCmp) :
+Entity::Entity(int id, Circle * cCmp, Drawable * drCmp) :
 	m_UniqueID(id),
 	m_ColCmp(cCmp),
 	m_DrCmp(drCmp)
@@ -41,6 +41,7 @@ bool Entity::PostMessage(int C, int M) {
 void Entity::Update() {
 	for (auto& msg : m_MessageQ)
 		msg();
+	m_MessageQ.clear();
 }
 
 Python::Object Entity::GetPyModule()  const {

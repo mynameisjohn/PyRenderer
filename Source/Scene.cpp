@@ -32,8 +32,16 @@ int Scene::Update() {
 	}
 
 	// Spec contacts will change all this
-	for (auto& c : m_vCircles)
+	for (auto& c : m_vCircles) {
 		c.Update();
+		c.PyUpdate();
+	}
+
+	for (auto& d : m_vDrawables) 
+		d.PyUpdate();
+
+	for (auto& e : m_vEntities)
+		e.Update();
 
 	return nCols;
 }
@@ -102,11 +110,10 @@ Scene::Scene(std::string& pyinitScript) {
 		// Get collision info
 		float radius = scale[0]; // Assume uniform scale for now...
 		vec2 c(pos);
-		Circle circ(vec2(0), vec2(pos), 1.f, 1.f, scale[0], &m_vEntities[i]);
 
 		// Reinitialize vector objects
 		m_vDrawables[i] = dr;
-		m_vCircles[i] = circ;
+		m_vCircles[i] = Circle(vec2(-pos), vec2(pos), 1.f, 1.f, scale[0], &m_vEntities[i]);
 
 		// Get the pointers (this has to change)
 		Drawable * drPtr = &m_vDrawables[i];

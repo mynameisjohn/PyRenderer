@@ -26,20 +26,17 @@ bool Circle::IsColliding(Circle& other) {
 void Circle::ApplyCollision(Circle& other) {
 	float Msum_1 = 1.f / (m+other.m); // denominator
 	float Cr = 0.5f * (e+other.e); // coef of rest
-	vec2 P1 = m * other.V, P2 = m * other.V;
+	vec2 P1 = m * V, P2 = other.m * other.V;
 	vec2 A = P1 + P2, B = Cr * (P1 - P2);
 	vec2 v1 = (A - B) * Msum_1;
 	vec2 v2 = (A + B) * Msum_1;
 	V = v1;
 	other.V = v2;
-
-	// For now just hack it
-	m_pEntity->GetPyModule().call_function("HandleCollision", m_pEntity->GetID());
 }
 
 // I guess this just advances the object?
 void Circle::Update() {
-	const float dT = 0.001f; // TODO better integration methods?
+	const float dT = 0.005f; // TODO better integration methods?
 	vec2 delta = dT * V;
 	lastT += delta; // Entity should reset this
 	C += delta;
@@ -47,7 +44,8 @@ void Circle::Update() {
 
 // TODO get this to post a translation message
 bool Circle::PyUpdate() {
-	//m_pEntity->GetPyModule().call_function
+	// For now just hack it
+	m_pEntity->GetPyModule().call_function("HandleCollision", m_pEntity->GetID());
 	return true;
 }
 

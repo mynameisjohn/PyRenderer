@@ -11,13 +11,11 @@ struct RigidBody_2D {
 	float m; // Mass
 	float e; // elasticity
 	vec2 lastT; // Last translation (doesn't belong here)
-	RigidBody_2D() { memset(this, 0, sizeof(RigidBody_2D)); }
-	RigidBody_2D(vec2 V, vec2 C, float m, float e);
+	RigidBody_2D(vec2 V=vec2(0), vec2 C = vec2(0), float m=1.f, float e=1.f);
 };
 
 struct Circle : public RigidBody_2D, public PyComponent {
-	Circle() { memset(this, 0, sizeof(Circle)); }
-	Circle(vec2 V, vec2 C, float m, float e, float r, Entity * pEnt);
+	Circle(vec2 V = vec2(0), vec2 C = vec2(0), float m = 1.f, float e = 1.f, float r = 1.f, Entity * pEnt = nullptr);
 
 	float r; // Radius
 	void Update();
