@@ -2,13 +2,13 @@
 
 #include "GL_Includes.h"
 #include "Util.h"
-#include "PyEntity.h"
+#include "Entity.h"
 
 #include <vec4.hpp>
 #include <mat4x4.hpp>
 #include <gtc/quaternion.hpp>
 
-class Drawable : public PyExposed {
+class Drawable : public PyComponent {
 	std::string m_SrcFile;
 	GLuint m_VAO;
 	GLuint m_nIdx;
@@ -26,6 +26,10 @@ public:
 	void LeftMultMV(mat4 M);
 	void Translate(vec3 T);
 	void Rotate(fquat Q);
+
+	// Python overrides
+	bool PyExpose(const std::string& name, PyObject * module) override;
+	bool PyUpdate() override;
 
 	friend class Scene;
 protected:

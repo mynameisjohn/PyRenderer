@@ -19,9 +19,9 @@ void Entity::PostMessage(CompID C, MsgID M) {
 		switch (M) {
 		case MsgID::TRANSLATE:
 			// Get last translation, apply, reset
-		/*	m_MessageQ.emplace_back(
-				std::bind(&Drawable::Translate, m_DrCmp, m_ColCmp->LastT);
-				);*/
+			m_MessageQ.emplace_back(
+				std::bind(&Drawable::Translate, m_DrCmp, m_ColCmp->lastT));
+			m_ColCmp->lastT = vec2(0.f);
 		}
 	}
 }

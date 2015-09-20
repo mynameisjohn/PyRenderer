@@ -47,10 +47,11 @@ public:
 
 // Python exposed component (Why is this here?)
 class PyComponent : public PyExposed {
+	friend class Scene;
 protected:
 	Entity * m_pEntity;
 public:
-	PyComponent(Entity * ePtr);
+	PyComponent(Entity * ePtr = nullptr);
 	Entity * GetEntity() const;
 	virtual bool PyUpdate() = 0;
 };

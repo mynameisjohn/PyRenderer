@@ -1,18 +1,14 @@
 
 #include <fstream>
 #include <gtx/transform.hpp>
-#include <stdlib.h>
-#include <Windows.h>
 
+#include <pyliason.h>
+#include <SDL.h>
 
+#include "pyl_overloads.h"
 #include "Init.h"
 #include "Util.h"
-
 #include "GL_Includes.h"
-
-#include "pyliason.h"
-
-#include <SDL.h>
 
 // Screen dims
 const int WIDTH = 600;
@@ -85,22 +81,6 @@ bool InitGL(SDL_GLContext& g_Context, SDL_Window*& g_Window) {
 	return true;
 }
 
-namespace Python
-{
-	bool convert(PyObject * o, vec2& v) {
-		return convert_buf(o, &v[0], 2);
-	}
-	bool convert(PyObject * o, vec3& v) {
-		return convert_buf(o, &v[0], 3);
-	}
-	bool convert(PyObject * o, vec4& v) {
-		return convert_buf(o, &v[0], 4);
-	}
-	bool convert(PyObject * o, fquat& v) {
-		return convert_buf(o, &v[0], 4);
-	}
-}
-
 bool InitPython() {
 	Python::Register_Class<Camera, __LINE__>("Camera");
 	std::function<int(Camera *, vec2, vec2, vec2)> cam_InitOrtho(&Camera::InitOrtho);
@@ -127,84 +107,4 @@ bool InitScene(std::unique_ptr<Scene>& pScene) {
 	return true;
 }
 
-Scene::Scene(std::string& pyinitScript) {
-	auto check = [](bool cond, std::string msg = "") {
-		if (!msg.empty())
-			std::cout << msg << "----" << (cond ? " succeeded! " : " failed! ") << std::endl;
-		assert(cond);
-	};
-
-	std::string initStrPath = RelPathToAbs(SCRIPT_DIR + pyinitScript);
-	auto pyinitModule = Python::Object::from_script(initStrPath);
-
-	// First deal with the shader and camera
-
-	// Exposing shader functions just seemed unnecessary
-	std::map<std::string, std::string> shaderInfo;
-	check(pyinitModule.get_attr("r_ShaderSrc").convert(shaderInfo), "Getting shader info from pyinit module " + pyinitScript);
-	m_Shader = Shader(shaderInfo["vert"], shaderInfo["frag"], SHADER_DIR);
-
-	// Get position handle
-	auto sBind = m_Shader.ScopeBind();
-	GLint posHandle = m_Shader[shaderInfo["Position"]];
-	Drawable::SetPosHandle(posHandle);
-
-	// InitOrtho / InitPersp should be exposed
-	pyinitModule.call_function("InitCamera", &m_Camera);
-
-	// Now loop through all named tuples in the script
-	// script must be correct...
-
-	// Get a vector of these
-	using EntInfo = std::tuple<vec3, vec3, fquat, vec4, std::string>;
-	std::vector<EntInfo> v_EntInfo;
-	check(pyinitModule.get_attr("r_Entities").convert(v_EntInfo), "Getting all Entity Info");
-	//check(pyl_EntInfo.convert(v_EntInfo), "Getting all Entity info");
-
-	// Once you have it, create individual entities and components
-
-	for (auto& ei : v_EntInfo) {
-
-		// Get python module
-		std::string pyEntModScript = std::get<4>(ei);
-		auto pyEntModule = Python::Object::from_script(SCRIPT_DIR + pyEntModScript);
-
-		// Get drawable info
-		mat4 MV = glm::translate(std::get<0>(ei)) * glm::mat4_cast(std::get<2>(ei)) * glm::scale(std::get<1>(ei));
-		vec4 color = glm::clamp(std::get<3>(ei), vec4(0), vec4(1));
-		std::string iqmFile;
-		check(pyEntModule.get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module " + pyEntModScript);
-		m_PyObjCache[pyEntModScript] = pyEntModule;
-
-		//check(map_CachedPyModules[module].get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module "+module);
-
-		// Drawable inifo
-		Drawable dr(iqmFile, color, MV);
-
-		// Get collision info
-		float radius = std::get<1>(ei)[0]; // Assume uniform scale for now...
-		vec2 c(std::get<0>(ei));
-		Circle circ;
-		circ.C = c;
-		circ.r = radius;
-		circ.V = -0.5f*c;
-		circ.m = 1.f;
-		circ.e = 1.f;
-
-		int uID(m_vEntities.size());
-		int drID(m_vDrawables.size());
-		int cID(m_vCircles.size());
-
-		m_vDrawables.push_back(dr);
-		m_vCircles.push_back(circ);
-		m_vEntities.emplace_back(uID, drID, cID, pyEntModule);
-	}
-
-	for (auto& ent : m_vEntities) {
-		auto drPtr = &m_vDrawables[ent.m_ofsDrawable];
-		auto cPtr = &m_vCircles[ent.m_ofsCollider];
-		ent.m_PyModule.call_function("AddEntity", drPtr, cPtr);
-		drPtr->PyInit(ent.m_UniqueId, ent.m_PyModule);
-		cPtr->PyInit(ent.m_UniqueId, ent.m_PyModule);
-	}
-}
+// This shouldn't go here... but it's so long

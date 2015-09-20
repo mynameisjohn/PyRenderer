@@ -84,3 +84,15 @@ void Drawable::Draw() {
 /*static*/ void Drawable::SetPosHandle(GLint pH) {
 	s_PosHandle = pH;
 }
+
+// Python overrides
+bool Drawable::PyExpose(const std::string& name, PyObject * module) {
+	Python::Expose_Object(this, name, module);
+	return true;
+}
+
+// TODO
+bool Drawable::PyUpdate() {
+
+	return true;
+}
