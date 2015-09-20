@@ -13,17 +13,28 @@ bool Entity::PyExpose(const std::string& name, PyObject * module) {
 	return true;
 }
 
-void Entity::PostMessage(CompID C, MsgID M) {
+bool Entity::PostMessage(int C, int M) {
+	bool handled = false;
+
 	switch (C) {
-	case CompID::DRAWABLE:
+	case int(CompID::DRAWABLE): // These casts are unfortunate
 		switch (M) {
-		case MsgID::TRANSLATE:
+		case int(MsgID::TRANSLATE) : {
+			const auto drPtr = m_DrCmp;
+			const vec2 lastT = m_ColCmp->lastT;
 			// Get last translation, apply, reset
-			m_MessageQ.emplace_back(
-				std::bind(&Drawable::Translate, m_DrCmp, m_ColCmp->lastT));
+			m_MessageQ.emplace_back([drPtr, lastT]() {
+				drPtr->Translate(vec3(lastT, 0.f));
+				return true;
+			});
+			//	std::bind(&Drawable::Translate, m_DrCmp, m_ColCmp->lastT));
 			m_ColCmp->lastT = vec2(0.f);
+			handled = 0;
+		}
 		}
 	}
+
+	return handled;
 }
 
 // Just run all posted messages

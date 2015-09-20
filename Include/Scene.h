@@ -2,7 +2,6 @@
 
 #include "Camera.h"
 #include "Shader.h"
-#include "PyEntity.h"
 #include "Drawable.h"
 #include "RigidBody.h"
 
@@ -28,7 +27,5 @@ private:
 	std::vector<Entity> m_vEntities;
 	std::vector<Drawable> m_vDrawables;
 	std::vector<Circle> m_vCircles;
-
-	std::map<std::string, Python::Object> m_PyObjCache;
 };
 

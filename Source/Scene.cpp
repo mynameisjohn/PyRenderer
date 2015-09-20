@@ -1,5 +1,7 @@
 #include "Scene.h"
 
+#include "pyl_overloads.h"
+
 #include <gtx/transform.hpp>
 #include <gtc/type_ptr.hpp>
 
@@ -107,12 +109,21 @@ Scene::Scene(std::string& pyinitScript) {
 		m_vCircles[i] = circ;
 
 		// Get the pointers (this has to change)
-		uint32_t uID(m_vEntities.size());
 		Drawable * drPtr = &m_vDrawables[i];
 		Circle * cPtr = &m_vCircles[i];
 
+		// ID is len of the list in python
+		int uID; 
+		pyEntModule.call_function("AddEntity", &m_vEntities[i], cPtr, drPtr).convert(uID);
+		
 		// Reinitialize entity
 		m_vEntities[i] = Entity(uID, cPtr, drPtr);
 		m_vEntities[i].m_PyModule = pyEntModule;
+		
+	}
+
+	// Now have each entity expose its components
+	for (auto& ent : m_vEntities) {
+
 	}
 }

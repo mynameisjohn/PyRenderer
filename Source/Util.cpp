@@ -34,20 +34,19 @@ std::ostream& operator<<(std::ostream& os, const fquat& quat) {
 	return os;
 }
 
-
-
 std::string RelPathToAbs(const std::string relPath) {
 	char buf[2048];
 
 #ifdef _WIN32
 	::GetFullPathName(relPath.c_str(), 1000, buf, 0);
-	std::string strBuf(buf);
 #endif
+
+	return std::string(buf);
 
 }
 
 std::string FixBackslash(const std::string& in) {
 	std::string out(in);
 	std::replace(out.begin(), out.end(), '\\', '/');
-	return out
+	return out;
 }

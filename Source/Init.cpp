@@ -82,15 +82,28 @@ bool InitGL(SDL_GLContext& g_Context, SDL_Window*& g_Window) {
 }
 
 bool InitPython() {
-	Python::Register_Class<Camera, __LINE__>("Camera");
+	// Expose camera
+	Python::Register_Class<Camera>("Camera");
 	std::function<int(Camera *, vec2, vec2, vec2)> cam_InitOrtho(&Camera::InitOrtho);
 	Python::Register_Mem_Function<Camera, __LINE__>("InitOrtho", cam_InitOrtho, "Initialize Ortho Camera with lr/tb/nf");
 
-	Python::Register_Class<Drawable, __LINE__>("Drawable");
+	// Register Entity
+	Python::Register_Class<Entity>("Entity");
+	std::function<bool(Entity *, int, int)> ent_PostMessage(&Entity::PostMessage);
+	Python::Register_Mem_Function<Entity, __LINE__>("PostMessage", ent_PostMessage, "Post a message to the Entity's queue");
+
+	// Expose Drawable
+	Python::Register_Class<Drawable>("Drawable");
 	std::function<void(Drawable *, vec3)> dr_Translate(&Drawable::Translate);
 	Python::Register_Mem_Function<Drawable, __LINE__>("Translate", dr_Translate, "Translate a drawable");
 
-	Python::Register_Class<Circle, __LINE__>("Circle");
+	// Register Circle class (nothing to expose, really)
+	Python::Register_Class<Circle>("Circle");
+
+	// Abstract interface to GetEntity, if you need it
+	//Python::Register_Class<PyComponent>("Component");
+	//std::function<Entity *(PyComponent *)> pyc_GetEntity(&PyComponent::GetEntity);
+	//Python::Register_Mem_Function<PyComponent, __LINE__>("GetEntity", pyc_GetEntity, "Get the entity pointer");
 
 	Python::initialize();
 

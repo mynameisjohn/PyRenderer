@@ -38,7 +38,7 @@ public:
 	Python::Object GetPyModule()  const;
 	
 	// Message handling stuff
-	void PostMessage(CompID C, MsgID M);
+	bool PostMessage(int C, int M);
 	void Update();
 
 	// Python expose override

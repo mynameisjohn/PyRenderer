@@ -45,6 +45,7 @@ void Circle::Update() {
 // TODO get this to post a translation message
 bool Circle::PyUpdate() {
 	//m_pEntity->GetPyModule().call_function
+	return true;
 }
 
 Circle::Circle(vec2 V, vec2 C, float m, float e, float r, Entity * pEnt):
