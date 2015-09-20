@@ -3,6 +3,10 @@
 #include <glm.hpp>
 #include <gtc/quaternion.hpp>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 // Definitions of glm print functions
 std::ostream& operator<<(std::ostream& os, const vec2& vec) {
 	os << "{" << vec.x << ", " << vec.y << "}";
@@ -28,4 +32,22 @@ std::ostream& operator<<(std::ostream& os, const mat4& mat) {
 std::ostream& operator<<(std::ostream& os, const fquat& quat) {
 	os << "{" << quat.w << ", " << quat.x << ", " << quat.y << ", " << quat.z << "}";
 	return os;
+}
+
+
+
+std::string RelPathToAbs(const std::string relPath) {
+	char buf[2048];
+
+#ifdef _WIN32
+	::GetFullPathName(relPath.c_str(), 1000, buf, 0);
+	std::string strBuf(buf);
+#endif
+
+}
+
+std::string FixBackslash(const std::string& in) {
+	std::string out(in);
+	std::replace(out.begin(), out.end(), '\\', '/');
+	return out
 }

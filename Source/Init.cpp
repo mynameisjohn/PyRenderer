@@ -102,9 +102,6 @@ namespace Python
 }
 
 bool InitPython() {
-	// Do your shit
-	//Py_Add_Func("InitScene", InitScene, "Init Scene with a correctly formatted XML File");
-
 	Python::Register_Class<Camera, __LINE__>("Camera");
 	std::function<int(Camera *, vec2, vec2, vec2)> cam_InitOrtho(&Camera::InitOrtho);
 	Python::Register_Mem_Function<Camera, __LINE__>("InitOrtho", cam_InitOrtho, "Initialize Ortho Camera with lr/tb/nf");
@@ -117,14 +114,6 @@ bool InitPython() {
 
 	Python::initialize();
 
-	//std::function<decltype(Foo::nothing)> f(&Foo::nothing);
-	//Python::Register_Function<__LINE__>("Sdf", std::function<int(Foo *)>(&Foo::nothing), 0);
-	//Python::Register_Class<Camera, __LINE__>("Camera");
-	//Python::RegFn_RA<__LINE__>("dsf", f, METH_VARARGS);
-	//std::function<void(Camera *, float, float, float, float, float, float)> cam_InitOrtho(&Camera::InitOrtho);
-	//Python::RegMemFn_VA<__LINE__, Camera>("InitOrtho", cam_InitOrtho, METH_VARARGS, "Initialize Ortho Camera with lr/tb/nf");
-	//Python::Register_Function<__LINE__, Camera>("InitOrtho", cam_InitOrtho, METH_VARARGS, "Initialize Ortho Camera with lr/tb/nf");
-
 	return true;
 }
 
@@ -132,18 +121,9 @@ bool InitScene(std::unique_ptr<Scene>& pScene) {
 	// Get the python init module
 	std::string pyinitScript = "InitScene.py";
 
-	try {
-		pScene = std::move(std::unique_ptr<Scene>(new Scene(pyinitScript)));
-	}
-	catch (...) {
+	try { pScene = std::move(std::unique_ptr<Scene>(new Scene(pyinitScript))); }
+	catch (...) { return false; }
 
-		char arr[] = "path";
-		PyObject *path(PySys_GetObject(arr));
-		std::string p;
-		Python::convert(path, p);
-
-		return false;
-	}
 	return true;
 }
 
@@ -154,12 +134,8 @@ Scene::Scene(std::string& pyinitScript) {
 		assert(cond);
 	};
 
-	char buf[1000];
-	::GetFullPathName((SCRIPT_DIR + pyinitScript).c_str(), 1000, buf, 0);
-	std::string strBuf(buf);
-	std::replace(strBuf.begin(), strBuf.end(), '\\', '/');
-
-	auto pyinitModule = Python::Object::from_script(strBuf);
+	std::string initStrPath = RelPathToAbs(SCRIPT_DIR + pyinitScript);
+	auto pyinitModule = Python::Object::from_script(initStrPath);
 
 	// First deal with the shader and camera
 
@@ -168,12 +144,12 @@ Scene::Scene(std::string& pyinitScript) {
 	check(pyinitModule.get_attr("r_ShaderSrc").convert(shaderInfo), "Getting shader info from pyinit module " + pyinitScript);
 	m_Shader = Shader(shaderInfo["vert"], shaderInfo["frag"], SHADER_DIR);
 
+	// Get position handle
 	auto sBind = m_Shader.ScopeBind();
 	GLint posHandle = m_Shader[shaderInfo["Position"]];
 	Drawable::SetPosHandle(posHandle);
 
 	// InitOrtho / InitPersp should be exposed
-	//Python::Expose_Object(&m_Camera, "c_Camera", pyinitModule.get());
 	pyinitModule.call_function("InitCamera", &m_Camera);
 
 	// Now loop through all named tuples in the script

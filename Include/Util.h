@@ -43,6 +43,12 @@ const std::string SHADER_DIR = "../Resources/Shaders/";
 const std::string SCRIPT_DIR = "../Resources/Scripts/";
 const std::string MODEL_DIR = "../Resources/Models/";
 
+// RelPathToAbs returns the absolute path of a file, given its relative path
+std::string RelPathToAbs(const std::string relPath);
+
+// Replace windows slashes with unix
+std::string FixBackslash(const std::string& in);
+
 // General purpose functions
 template <typename T>
 inline bool strAppnd(T& v, std::string s) {
