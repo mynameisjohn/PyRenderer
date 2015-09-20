@@ -1,14 +1,16 @@
-from PyLiaison import *
+﻿from PyLiaison import *
 import math
 from collections import namedtuple
-import random
-random.seed()
 
 def makeQuat(x,y,z,theta):
 	r = math.radians(theta)/2.
 	c = math.cos(r)
 	s = math.sin(r)
 	return [c, s*x, s*y, s*z] #normalize...
+
+import random
+random.seed()
+
 def randColor():
 	return [random.random() for i in range (0,3)]+[1.]
 

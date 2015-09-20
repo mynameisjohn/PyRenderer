@@ -76,6 +76,10 @@ void Drawable::Rotate(fquat Q) {
 	LeftMultMV(glm::mat4_cast(Q));
 }
 
+void Drawable::SetColor(vec4 C) {
+	m_Color = glm::clamp(C, vec4(0), vec4(1));
+}
+
 void Drawable::Draw() {
 	// Bind VAO, draw
 	glBindVertexArray(m_VAO);

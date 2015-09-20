@@ -91,11 +91,18 @@ bool InitPython() {
 	Python::Register_Class<Entity>("Entity");
 	std::function<bool(Entity *, int, int)> ent_PostMessage(&Entity::PostMessage);
 	Python::Register_Mem_Function<Entity, __LINE__>("PostMessage", ent_PostMessage, "Post a message to the Entity's queue");
+	
+	std::function<bool(Entity *, int, int, vec4)> ent_PostMessage_v4(&Entity::PostMessage<vec4>);
+	Python::Register_Mem_Function<Entity, __LINE__>("PostMessage_v4", ent_PostMessage_v4, "Post a message to the Entity's queue");
+
 
 	// Expose Drawable
 	Python::Register_Class<Drawable>("Drawable");
-	std::function<void(Drawable *, vec3)> dr_Translate(&Drawable::Translate);
-	Python::Register_Mem_Function<Drawable, __LINE__>("Translate", dr_Translate, "Translate a drawable");
+	//std::function<void(Drawable *, vec3)> dr_Translate(&Drawable::Translate);
+	//Python::Register_Mem_Function<Drawable, __LINE__>("Translate", dr_Translate, "Translate a drawable");
+	//std::function<void(Drawable *, vec4)> dr_SetColor(&Drawable::SetColor);
+	//Python::Register_Mem_Function<Drawable, __LINE__>("Translate", dr_SetColor, "Translate a drawable");
+
 
 	// Register Circle class (nothing to expose, really)
 	Python::Register_Class<Circle>("Circle");

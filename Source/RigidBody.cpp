@@ -32,6 +32,8 @@ void Circle::ApplyCollision(Circle& other) {
 	vec2 v2 = (A + B) * Msum_1;
 	V = v1;
 	other.V = v2;
+	m_pEntity->GetPyModule().call_function("HandleCollision", m_pEntity->GetID(),
+		other.m_pEntity->GetID());
 }
 
 // I guess this just advances the object?
@@ -45,7 +47,7 @@ void Circle::Update() {
 // TODO get this to post a translation message
 bool Circle::PyUpdate() {
 	// For now just hack it
-	m_pEntity->GetPyModule().call_function("HandleCollision", m_pEntity->GetID());
+	m_pEntity->GetPyModule().call_function("UpdateCollision", m_pEntity->GetID());
 	return true;
 }
 

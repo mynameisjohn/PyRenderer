@@ -27,6 +27,8 @@ public:
 	void Translate(vec3 T);
 	void Rotate(fquat Q);
 
+	void SetColor(vec4 C);
+
 	// Python overrides
 	bool PyExpose(const std::string& name, PyObject * module) override;
 	bool PyUpdate() override;

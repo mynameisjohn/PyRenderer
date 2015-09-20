@@ -1,6 +1,8 @@
 #pragma once
 
 #include <pyliason.h>
+#include "Util.h"
+#include <vec4.hpp>
 
 // Forwards
 class Circle;
@@ -21,7 +23,8 @@ public:
 		COLLISION
 	};
 	enum class MsgID : int {
-		TRANSLATE
+		DR_TRANSLATE,
+		DR_COLOR
 	};
 
 	// Maybe not the best idea
@@ -39,7 +42,12 @@ public:
 	int GetID() const;
 	
 	// Message handling stuff
+	template <typename D>
+	bool PostMessage(int C, int M, D data);
+
+	// Void (no data) case
 	bool PostMessage(int C, int M);
+
 	void Update();
 
 	// Python expose override
