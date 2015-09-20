@@ -42,7 +42,6 @@ std::string RelPathToAbs(const std::string relPath) {
 #endif
 
 	return std::string(buf);
-
 }
 
 std::string FixBackslash(const std::string& in) {

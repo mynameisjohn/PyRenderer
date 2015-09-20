@@ -47,6 +47,10 @@ Python::Object Entity::GetPyModule()  const {
 	return m_PyModule;
 }
 
+int Entity::GetID() const {
+	return m_UniqueID;
+}
+
 // I'm putting this here, but I don't know why
 PyComponent::PyComponent(Entity * ePtr) :
 	m_pEntity(ePtr)

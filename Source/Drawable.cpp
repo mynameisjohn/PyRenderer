@@ -15,7 +15,7 @@ Drawable::Drawable() :
 {}
 
 // This will probably have to be a bit more flexible
-Drawable::Drawable(std::string& iqmFileName, vec4& color, mat4& MV) :
+Drawable::Drawable(std::string& iqmFileName, vec4& color, mat4& MV, Entity * pEnt) :
 	m_SrcFile(iqmFileName),
 	m_VAO(0),
 	m_nIdx(0),
@@ -52,6 +52,8 @@ Drawable::Drawable(std::string& iqmFileName, vec4& color, mat4& MV) :
 	m_nIdx = idx.count();
 	
 	glBindVertexArray(0);
+
+	m_pEntity = pEnt;
 }
 
 mat4 Drawable::GetMV() const {

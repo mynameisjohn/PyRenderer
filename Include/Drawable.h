@@ -20,7 +20,7 @@ public:
 	mat4 GetMV() const;
 	vec4 GetColor() const;
 
-	Drawable(std::string&, vec4&, mat4&);
+	Drawable(std::string&, vec4&, mat4&, Entity *);
 	void Draw();
 
 	void LeftMultMV(mat4 M);

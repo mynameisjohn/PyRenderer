@@ -46,7 +46,7 @@ Scene::Scene(std::string& pyinitScript) {
 	};
 
 	// Convert the relative python path to the absolute, load module
-	std::string initStrPath = RelPathToAbs(SCRIPT_DIR + pyinitScript);
+	std::string initStrPath = FixBackslash(RelPathToAbs(SCRIPT_DIR + pyinitScript));
 	auto pyinitModule = Python::Object::from_script(initStrPath);
 
 	// Set up the shader
@@ -97,7 +97,7 @@ Scene::Scene(std::string& pyinitScript) {
 		check(pyEntModule.get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module " + pyEntModScript);
 
 		// Make drawable
-		Drawable dr(iqmFile, color, MV);
+		Drawable dr(iqmFile, color, MV, &m_vEntities[i]);
 
 		// Get collision info
 		float radius = scale[0]; // Assume uniform scale for now...
@@ -114,16 +114,10 @@ Scene::Scene(std::string& pyinitScript) {
 
 		// ID is len of the list in python
 		int uID; 
-		pyEntModule.call_function("AddEntity", &m_vEntities[i], cPtr, drPtr).convert(uID);
+		pyEntModule.call_function("AddEntity", &m_vEntities[i]).convert(uID);
 		
 		// Reinitialize entity
 		m_vEntities[i] = Entity(uID, cPtr, drPtr);
 		m_vEntities[i].m_PyModule = pyEntModule;
-		
-	}
-
-	// Now have each entity expose its components
-	for (auto& ent : m_vEntities) {
-
 	}
 }

@@ -1,24 +1,14 @@
-from PyLiaison import *
+﻿from PyLiaison import *
 
 r_IqmFile = b'circle.iqm'
 
-class Entity:
-	def __init__(self, drPtr, cPtr):
-		self.dr = Drawable(drPtr)
-		self.c = Circle(cPtr)
-
 g_Entities = []
-
-def sayHello(ptr):
-	print(str(ptr)+" says hello")
 	
-def isColliding():
-	print('Collision Detected')
-	
-def HandleCollision(id, tX, tY):
+def HandleCollision(id):
 	e = g_Entities[id]
-	e.dr.Translate([tX, tY, 0.])
+	e.PostMessage(0, 0) #drawable : tranlsate
 	
-def AddEntity(drPtr, cPtr):
-	g_Entities.append(Entity(drPtr, cPtr))
-	return len(g_Entities)-1
+def AddEntity(ePtr):
+# I think this is kosher? Things are stored twice...
+    g_Entities.append(Entity(ePtr))
+    return len(g_Entities)-1

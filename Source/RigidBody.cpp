@@ -32,6 +32,9 @@ void Circle::ApplyCollision(Circle& other) {
 	vec2 v2 = (A + B) * Msum_1;
 	V = v1;
 	other.V = v2;
+
+	// For now just hack it
+	m_pEntity->GetPyModule().call_function("HandleCollision", m_pEntity->GetID());
 }
 
 // I guess this just advances the object?

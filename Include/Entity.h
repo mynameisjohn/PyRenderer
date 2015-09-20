@@ -27,15 +27,16 @@ public:
 	// Maybe not the best idea
 	friend class Scene;
 protected:
-	uint32_t m_UniqueID;
+	int m_UniqueID;
 	Circle * m_ColCmp;
 	Drawable * m_DrCmp;
 	MessageQueue m_MessageQ;
 	Python::Object m_PyModule;
 public:
-	Entity(uint32_t id = -1, Circle * cCmp = nullptr, Drawable * drCmp = nullptr);
+	Entity(int id = -1, Circle * cCmp = nullptr, Drawable * drCmp = nullptr);
 	
 	Python::Object GetPyModule()  const;
+	int GetID() const;
 	
 	// Message handling stuff
 	bool PostMessage(int C, int M);
