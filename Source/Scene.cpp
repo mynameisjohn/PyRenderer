@@ -1,9 +1,10 @@
-#include "Scene.h"
-
 #include "pyl_overloads.h"
 
 #include <gtx/transform.hpp>
 #include <gtc/type_ptr.hpp>
+
+#include "Scene.h"
+#include "SpeculativeContacts.h"
 
 int Scene::Draw() {
 	auto sBind = m_Shader.ScopeBind();
@@ -21,15 +22,24 @@ int Scene::Draw() {
 int Scene::Update() {
 	int nCols(0);
 
+	// I think there's the same # of these every time...
+	std::list<Contact> speculativeContacts;
+	Solver solve;
+
 	for (auto it1 = m_vCircles.begin(); it1 != m_vCircles.end(); ++it1) {
 		for (auto it2 = it1 + 1; it2 != m_vCircles.end(); ++it2) {
-			bool isColliding = it1->IsColliding(*it2);
-			if (isColliding) {
-				it1->ApplyCollision(*it2);
-				nCols++;
-			}
+			auto sC = it1->GetClosestPoints(*it2);
+			std::copy(sC.begin(), sC.end(), speculativeContacts.end());
+
+			//bool isColliding = it1->IsColliding(*it2);
+			//if (isColliding) {
+			//	it1->ApplyCollision(*it2);
+			//	nCols++;
+			//}
 		}
 	}
+
+	solve(speculativeContacts);
 
 	// Spec contacts will change all this
 	for (auto& c : m_vCircles) {

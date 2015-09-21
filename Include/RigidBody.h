@@ -14,6 +14,8 @@ struct RigidBody_2D {
 	RigidBody_2D(vec2 V=vec2(0), vec2 C = vec2(0), float m=1.f, float e=1.f);
 };
 
+struct Contact;
+
 struct Circle : public RigidBody_2D, public PyComponent {
 	Circle(vec2 V = vec2(0), vec2 C = vec2(0), float m = 1.f, float e = 1.f, float r = 1.f, Entity * pEnt = nullptr);
 
@@ -27,4 +29,8 @@ struct Circle : public RigidBody_2D, public PyComponent {
 	// TODO make these abstract in rb
 	bool IsColliding(Circle& other);
 	void ApplyCollision(Circle& other);
+
+	// Will have to be more abstract
+	std::list<Contact> GetClosestPoints(const Circle& other);
 };
+

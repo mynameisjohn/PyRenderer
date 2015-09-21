@@ -1,6 +1,7 @@
-#include "RigidBody.h"
-
 #include <glm.hpp>
+
+#include "RigidBody.h"
+#include "SpeculativeContacts.h"
 
 RigidBody_2D::RigidBody_2D(vec2 V, vec2 C, float m, float e) :
 	V(V),
@@ -24,8 +25,8 @@ bool Circle::IsColliding(Circle& other) {
 }
 
 void Circle::ApplyCollision(Circle& other) {
-	float Msum_1 = 1.f / (m+other.m); // denominator
-	float Cr = 0.5f * (e+other.e); // coef of rest
+	float Msum_1 = 1.f / (m + other.m); // denominator
+	float Cr = 0.5f * (e + other.e); // coef of rest
 	vec2 P1 = m * V, P2 = other.m * other.V;
 	vec2 A = P1 + P2, B = Cr * (P1 - P2);
 	vec2 v1 = (A - B) * Msum_1;
@@ -51,8 +52,20 @@ bool Circle::PyUpdate() {
 	return true;
 }
 
-Circle::Circle(vec2 V, vec2 C, float m, float e, float r, Entity * pEnt):
-	RigidBody_2D(V,C,m,e), PyComponent(pEnt)
+Circle::Circle(vec2 V, vec2 C, float m, float e, float r, Entity * pEnt) :
+	RigidBody_2D(V, C, m, e), PyComponent(pEnt)
 {
 	this->r = r;
+}
+
+// Kind of a waste
+std::list<Contact> Circle::GetClosestPoints(const Circle& other) {
+	// watch for low values here
+	vec2 d = C - other.C;
+	vec2 n = glm::normalize(d);
+	vec2 a_pos = C + n*r;
+	vec2 b_pos = other.C + n*other.r;
+	float dist = glm::length(d);
+	Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, a_pos, b_pos, n, 0.f, dist);
+	return{ c };
 }
