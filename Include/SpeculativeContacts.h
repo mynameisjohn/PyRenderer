@@ -1,6 +1,6 @@
 #pragma once
 
-class RigidBody_2D;
+class Circle;
 
 #include "Util.h"
 #include <vec2.hpp>
@@ -8,14 +8,14 @@ class RigidBody_2D;
 
 // Speculative contacts stuff
 struct Contact {
-	RigidBody_2D * pair[2];
+	Circle * pair[2];
 	vec2 pos[2];
 	vec2 normal;
 	float impulse;
 	float dist;
 	// He owns the objects themselves, which I could probably get away with too
-	Contact(RigidBody_2D * a, 
-		RigidBody_2D * b, 
+	Contact(Circle * a,
+		Circle * b,
 		const vec2 p_a,
 		const vec2 p_b,
 		const vec2 nrm, 

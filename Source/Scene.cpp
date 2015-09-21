@@ -29,7 +29,7 @@ int Scene::Update() {
 	for (auto it1 = m_vCircles.begin(); it1 != m_vCircles.end(); ++it1) {
 		for (auto it2 = it1 + 1; it2 != m_vCircles.end(); ++it2) {
 			auto sC = it1->GetClosestPoints(*it2);
-			std::copy(sC.begin(), sC.end(), speculativeContacts.end());
+			speculativeContacts.insert(speculativeContacts.end(), sC.begin(), sC.end());
 
 			//bool isColliding = it1->IsColliding(*it2);
 			//if (isColliding) {
