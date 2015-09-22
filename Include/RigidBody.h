@@ -5,60 +5,74 @@
 #include "Util.h"
 #include "Entity.h"
 
-struct RigidBody_2D {
+// Contact forward
+struct Contact;
+
+// Forward all primitives, and make RB2D abstractly support all
+struct Circle;
+struct AABB;
+
+// I don't know if the base collision primitive should be a pycomponent
+struct RigidBody_2D : public PyComponent{
 	vec2 V; // Velocity
 	vec2 C; // Center point
 	float m; // Mass
 	float e; // elasticity
 	vec2 lastT; // Last translation (doesn't belong here)
-	RigidBody_2D(vec2 V=vec2(0), vec2 C = vec2(0), float m=1.f, float e=1.f);
-};
+	RigidBody_2D(vec2 V=vec2(0), vec2 C = vec2(0), float m=1.f, float e=1.f, Entity * pEnt = nullptr);
+	
+	// Overlap
+	virtual bool IsOverlapping (const Circle& other) const = 0;
+	virtual bool IsOverlapping(const AABB& other) const = 0;
 
-struct Contact;
+	// Contacts
+	virtual std::list<Contact> GetClosestPoints(const Circle& other) const = 0;
+	virtual std::list<Contact> GetClosestPoints(const AABB& other) const = 0;
 
-struct Circle : public RigidBody_2D, public PyComponent {
-	Circle(vec2 V = vec2(0), vec2 C = vec2(0), float m = 1.f, float e = 1.f, float r = 1.f, Entity * pEnt = nullptr);
+	// I bet this'll have to move down
+	void ApplyCollisionImpulse(RigidBody_2D * other);
 
-	float r; // Radius
-	void Update();
+	// Integrate velocity over time
+	void Integrate();
 
-	// Python overrides
+	// Python overrides, Not really primitive specific
 	bool PyExpose(const std::string& name, PyObject * module) override;
 	bool PyUpdate() override;
-
-	// TODO make these abstract in rb
-	bool IsColliding(Circle& other);
-	void ApplyCollision(Circle& other);
-
-	// Will have to be more abstract
-	std::list<Contact> GetClosestPoints(const Circle& other);
 };
 
-struct AABB {
-	AABB();
-	vec2 C; // Center point of box
+struct Circle : public RigidBody_2D {
+	float r; // Radius
+
+	Circle(vec2 V = vec2(0), vec2 C = vec2(0), float m = 1.f, float e = 1.f, float radius = 1.f, Entity * pEnt = nullptr);
+
+	// Collision Overrides
+	bool IsOverlapping(const Circle& other) const override;
+	bool IsOverlapping(const AABB& other) const override;
+
+	// Contacts
+	std::list<Contact> GetClosestPoints(const Circle& other) const override;
+	std::list<Contact> GetClosestPoints(const AABB& other) const override;
+};
+
+struct AABB : public RigidBody_2D{
 	vec2 R; // half widths along x, y
-	vec2 V; // velocity
 
-			// TODO consider moving mass, elasticity
-			// and collide to base collision primitive
-	float M;// mass
-	float E;// elasticity
+	AABB(float x = 0.f, float y = 0.f, float w=1.f, float h=1.f, Entity * pEnt = nullptr);
+	
+	// useful things
+	float width() const;
+	float height() const;
+	float left() const;
+	float right() const;
+	float top()const ;
+	float bottom()const;
+	vec2 clamp(vec2 p) const;
 
-	float width();
-	float height();
-	float left();
-	float right();
-	float top();
-	float bottom();
-	float dX(AABB& other);
-	float dY(AABB& other);
-	float dist(AABB& other);
-	bool overlaps(AABB& other);
-	void advance(float dt = 0.001f);
-	void translate(vec2 d);
-	vec2 momentum();
-	float kinetic();
-	bool collide(AABB& other);
-	// TODO rotate func, Ericson 86
+	// Collision Overrides
+	bool IsOverlapping(const Circle& other) const override;
+	bool IsOverlapping(const AABB& other) const override;
+
+	// Contacts
+	std::list<Contact> GetClosestPoints(const Circle& other) const override;
+	std::list<Contact> GetClosestPoints(const AABB& other) const override;
 };

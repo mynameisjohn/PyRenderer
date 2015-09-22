@@ -25,6 +25,7 @@ int Scene::Update() {
 	// I think there's the same # of these every time...
 	std::list<Contact> speculativeContacts;
 	Solver solve;
+	AABB walls(0,0,20,20);
 
 	for (auto it1 = m_vCircles.begin(); it1 != m_vCircles.end(); ++it1) {
 		for (auto it2 = it1 + 1; it2 != m_vCircles.end(); ++it2) {
@@ -37,13 +38,37 @@ int Scene::Update() {
 			//	nCols++;
 			//}
 		}
+
+		float lC = (it1->C.x - it1->r);
+		float lW = walls.left();
+
+		float rC = (it1->C.x + it1->r);
+		float rW = walls.right();
+		
+		float tC = (it1->C.y + it1->r);
+		float tW = walls.top();
+
+		float bC = (it1->C.y - it1->r);
+		float bW = walls.bottom();
+
+		if (tC > tW)
+			it1->V.y *= -1.f;
+
+		if (bC < bW)
+			it1->V.y *= -1.f;
+
+		if (rC > rW)
+			it1->V.x *= -1.f;
+
+		if (lC < lW)
+			it1->V.y *= -1.f;
 	}
 
 	solve(speculativeContacts);
 
 	// Spec contacts will change all this
 	for (auto& c : m_vCircles) {
-		c.Update();
+		c.Integrate();
 		c.PyUpdate();
 	}
 

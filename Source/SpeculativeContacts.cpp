@@ -3,7 +3,7 @@
 #include "SpeculativeContacts.h"
 #include "RigidBody.h"
 
-Contact::Contact(Circle * a, Circle * b, const vec2 p_a, const vec2 p_b, const vec2 nrm, const float i, const float d) :
+Contact::Contact(RigidBody_2D * a, RigidBody_2D * b, const vec2 p_a, const vec2 p_b, const vec2 nrm, const float i, const float d) :
 	pair{ a, b },
 	pos{ p_a,p_b },
 	normal(nrm),
@@ -35,17 +35,6 @@ void Solver::operator()(std::list<Contact>& contacts) {
 
 		// If that value was negative, the objects will penetrate in the next frame
 		if (dV < 0)
-			c.pair[0]->ApplyCollision(*c.pair[1]);
-		//{
-		//	// This may be more useful than m
-		//	float ma_inv = 1.f / c.pair[0]->m;
-		//	float mb_inv = 1.f / c.pair[1]->m;
-
-		//	// find the magnitude of the collision impulse (fn of relative velocity, mass)
-		//	float mag = dV / (ma_inv + mb_inv); //yeesh
-
-		//	// Apply impulse (will be along n)
-		//	c.ApplyImpulse(mag);
-		//}
+			c.pair[0]->ApplyCollisionImpulse(c.pair[1]);
 	}
 }
