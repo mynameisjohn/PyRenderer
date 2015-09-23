@@ -37,4 +37,8 @@ public:
 protected:
 	static GLint s_PosHandle;
 	static void SetPosHandle(GLint);
+
+private:
+	// Static VAO cache (string to VAO/nIdx)
+	static std::map<std::string, std::array<GLuint, 2> > s_VAOCache;
 };

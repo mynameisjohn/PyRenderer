@@ -29,39 +29,11 @@ int Scene::Update() {
 
 	for (auto it1 = m_vCircles.begin(); it1 != m_vCircles.end(); ++it1) {
 		for (auto it2 = it1 + 1; it2 != m_vCircles.end(); ++it2) {
-			auto sC = it1->GetClosestPoints(*it2);
-			speculativeContacts.insert(speculativeContacts.end(), sC.begin(), sC.end());
-
-			//bool isColliding = it1->IsColliding(*it2);
-			//if (isColliding) {
-			//	it1->ApplyCollision(*it2);
-			//	nCols++;
-			//}
+			auto circleContacts = it1->GetClosestPoints(*it2);
+			speculativeContacts.insert(speculativeContacts.end(), circleContacts.begin(), circleContacts.end());
 		}
-
-		float lC = (it1->C.x - it1->r);
-		float lW = walls.left();
-
-		float rC = (it1->C.x + it1->r);
-		float rW = walls.right();
-		
-		float tC = (it1->C.y + it1->r);
-		float tW = walls.top();
-
-		float bC = (it1->C.y - it1->r);
-		float bW = walls.bottom();
-
-		if (tC > tW)
-			it1->V.y *= -1.f;
-
-		if (bC < bW)
-			it1->V.y *= -1.f;
-
-		if (rC > rW)
-			it1->V.x *= -1.f;
-
-		if (lC < lW)
-			it1->V.y *= -1.f;
+		auto wallContacts = walls.GetClosestPoints(*it1);
+		speculativeContacts.insert(speculativeContacts.end(), wallContacts.begin(), wallContacts.end());
 	}
 
 	solve(speculativeContacts);
@@ -81,7 +53,9 @@ int Scene::Update() {
 	return nCols;
 }
 
-Scene::Scene(std::string& pyinitScript) {
+Scene::Scene(std::string& pyinitScript) :
+	m_Walls({ 0 })
+{
 	auto check = [](bool cond, std::string msg = "") {
 		if (!msg.empty())
 			std::cout << msg << "----" << (cond ? " succeeded! " : " failed! ") << std::endl;
@@ -105,6 +79,31 @@ Scene::Scene(std::string& pyinitScript) {
 	// Initialize Camera
 	pyinitModule.call_function("InitCamera", &m_Camera);
 
+	// These should match the camera
+	vec4 wB; // vec4(x,y,w,h)
+	pyinitModule.call_function("GetWalls").convert(wB);
+	
+	// The walls are actually four boxes
+	m_Walls[0] = AABB(wB.x - wB.z, wB.y, wB.z, wB.w); // (x-w,y,w,h)
+	m_Walls[1] = AABB(wB.x, wB.y - wB.w, wB.z, wB.w); // (x,y-h,w,h)
+	m_Walls[2] = AABB(wB.x + wB.z, wB.y, wB.z, wB.w); // (x+w,y,w,h)
+	m_Walls[3] = AABB(wB.x, wB.y + wB.w, wB.z, wB.w); // (x, y+h, w, h)
+
+	// Make drawables for them, because why not
+	const std::string quad("quad.iqm");
+	vec4 wallColor(1);
+	mat4 MV = glm::translate(vec3(-wB.z, 0.f, 0.f))*glm::scale(vec3(wB.z, wB.w, 1.f));
+	m_vDrawables.emplace_back(quad, wallColor, MV);
+
+	MV = glm::translate(vec3(wB.z, 0.f, 0.f))*glm::scale(vec3(wB.z, wB.w, 1.f));
+	m_vDrawables.emplace_back(quad, wallColor, MV);
+
+	MV = glm::translate(vec3(0.f, wB.w, 0.f))*glm::scale(vec3(wB.z, wB.w, 1.f));
+	m_vDrawables.emplace_back(quad, wallColor, MV);
+
+	MV = glm::translate(vec3(0.f, -wB.w, 0.f))*glm::scale(vec3(wB.z, wB.w, 1.f));
+	m_vDrawables.emplace_back(quad, wallColor, MV);
+
 	// Like a mini factory (no collision info for now, just circles)
 	using EntInfo = std::tuple<vec3, vec3, fquat, vec4, std::string>;
 
@@ -115,7 +114,7 @@ Scene::Scene(std::string& pyinitScript) {
 	// Precreate all entities, which may be a bad idea
 	m_vEntities.resize(v_EntInfo.size());
 	m_vCircles.resize(v_EntInfo.size());
-	m_vDrawables.resize(v_EntInfo.size());
+	m_vDrawables.resize(4 + v_EntInfo.size());
 
 	// Once you have it, create individual entities and components
 	for (int i = 0; i < m_vEntities.size(); i++) {
