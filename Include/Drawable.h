@@ -14,13 +14,13 @@ class Drawable : public PyComponent {
 	GLuint m_nIdx;
 	vec4 m_Color;
 	mat4 m_MV;
-	
+
 public:
 	Drawable();
 	mat4 GetMV() const;
 	vec4 GetColor() const;
 
-	Drawable(std::string&, vec4&, mat4&, Entity *);
+	Drawable(std::string, vec4, mat4, Entity * pEnt = nullptr);
 	void Draw();
 
 	void LeftMultMV(mat4 M);

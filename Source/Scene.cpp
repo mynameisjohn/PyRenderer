@@ -19,7 +19,10 @@ int Scene::Draw() {
 
 	std::list<Drawable> dr_ContactPoints;
 	for (auto& contact : m_SpeculativeContacts) {
-		dr_ContactPoints.emplace_back("circle.iqm", );
+		for (auto& p : contact.pos) {
+			glm::mat4 MV(glm::translate(vec3(contact.pos[0], 0.f))*glm::scale(vec3(0.5f)));
+			dr_ContactPoints.emplace_back("circle.iqm", vec4(1, 0, 1, 1), MV);
+		}
 	}
 
 	m_SpeculativeContacts.clear();
@@ -101,19 +104,10 @@ Scene::Scene(std::string& pyinitScript) :
 	m_Walls[3] = AABB(vec2(0), FLT_MAX / 2.f, 1.f, wB.x, wB.y + wB.w, wB.z, wB.w); // (x, y+h, w, h)
 
 	// Make drawables for them, because why not
-	const std::string quad("quad.iqm");
-	vec4 wallColor(1);
-	mat4 MV = glm::translate(vec3(-wB.z, 0.f, 0.f))*glm::scale(vec3(wB.z, wB.w, 1.f));
-	m_vDrawables.emplace_back(quad, wallColor, MV);
-
-	MV = glm::translate(vec3(wB.z, 0.f, 0.f))*glm::scale(vec3(wB.z, wB.w, 1.f));
-	m_vDrawables.emplace_back(quad, wallColor, MV);
-
-	MV = glm::translate(vec3(0.f, wB.w, 0.f))*glm::scale(vec3(wB.z, wB.w, 1.f));
-	m_vDrawables.emplace_back(quad, wallColor, MV);
-
-	MV = glm::translate(vec3(0.f, -wB.w, 0.f))*glm::scale(vec3(wB.z, wB.w, 1.f));
-	m_vDrawables.emplace_back(quad, wallColor, MV);
+	m_vDrawables.emplace_back("quad.iqm", vec4(1), glm::translate(vec3(-wB.z, 0.f, 0.f))*glm::scale(vec3(wB.z, wB.w, 1.f)));
+	m_vDrawables.emplace_back("quad.iqm", vec4(1), glm::translate(vec3(wB.z, 0.f, 0.f))*glm::scale(vec3(wB.z, wB.w, 1.f)));
+	m_vDrawables.emplace_back("quad.iqm", vec4(1), glm::translate(vec3(0.f, wB.w, 0.f))*glm::scale(vec3(wB.z, wB.w, 1.f)));
+	m_vDrawables.emplace_back("quad.iqm", vec4(1), glm::translate(vec3(0.f, -wB.w, 0.f))*glm::scale(vec3(wB.z, wB.w, 1.f)));
 
 	// Like a mini factory (no collision info for now, just circles)
 	using EntInfo = std::tuple<vec3, vec3, fquat, vec4, std::string>;

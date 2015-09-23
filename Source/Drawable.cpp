@@ -16,7 +16,7 @@ Drawable::Drawable() :
 {}
 
 // This will probably have to be a bit more flexible
-Drawable::Drawable(std::string& iqmFileName, vec4& color, mat4& MV, Entity * pEnt) :
+Drawable::Drawable(std::string iqmFileName, vec4 color, mat4 MV, Entity * pEnt) :
 	PyComponent(pEnt),
 	m_VAO(0),
 	m_nIdx(0),
