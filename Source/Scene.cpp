@@ -16,6 +16,14 @@ int Scene::Draw() {
 		dr.Draw();
 		//m_PyObjCache.begin()->second.call_function("sayHello", &m_Camera);
 	}
+
+	std::list<Drawable> dr_ContactPoints;
+	for (auto& contact : m_SpeculativeContacts) {
+		dr_ContactPoints.emplace_back("circle.iqm", );
+	}
+
+	m_SpeculativeContacts.clear();
+
 	return int(m_vDrawables.size());
 }
 
@@ -23,20 +31,23 @@ int Scene::Update() {
 	int nCols(0);
 
 	// I think there's the same # of these every time...
-	std::list<Contact> speculativeContacts;
-	Solver solve;
-	AABB walls(0,0,20,20);
+	Solver solve; 
 
 	for (auto it1 = m_vCircles.begin(); it1 != m_vCircles.end(); ++it1) {
 		for (auto it2 = it1 + 1; it2 != m_vCircles.end(); ++it2) {
+			// Get circle collisions
 			auto circleContacts = it1->GetClosestPoints(*it2);
-			speculativeContacts.insert(speculativeContacts.end(), circleContacts.begin(), circleContacts.end());
+			m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), circleContacts.begin(), circleContacts.end());
 		}
-		auto wallContacts = walls.GetClosestPoints(*it1);
-		speculativeContacts.insert(speculativeContacts.end(), wallContacts.begin(), wallContacts.end());
+
+		// Get collisions with wall
+		for (auto& wall : m_Walls) {
+			auto wallContacts = wall.GetClosestPoints(*it1);
+			m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), wallContacts.begin(), wallContacts.end());
+		}
 	}
 
-	solve(speculativeContacts);
+	solve(m_SpeculativeContacts);
 
 	// Spec contacts will change all this
 	for (auto& c : m_vCircles) {
@@ -54,7 +65,7 @@ int Scene::Update() {
 }
 
 Scene::Scene(std::string& pyinitScript) :
-	m_Walls({ 0 })
+	m_Walls({AABB(), AABB(), AABB(), AABB()})
 {
 	auto check = [](bool cond, std::string msg = "") {
 		if (!msg.empty())
@@ -84,10 +95,10 @@ Scene::Scene(std::string& pyinitScript) :
 	pyinitModule.call_function("GetWalls").convert(wB);
 	
 	// The walls are actually four boxes
-	m_Walls[0] = AABB(wB.x - wB.z, wB.y, wB.z, wB.w); // (x-w,y,w,h)
-	m_Walls[1] = AABB(wB.x, wB.y - wB.w, wB.z, wB.w); // (x,y-h,w,h)
-	m_Walls[2] = AABB(wB.x + wB.z, wB.y, wB.z, wB.w); // (x+w,y,w,h)
-	m_Walls[3] = AABB(wB.x, wB.y + wB.w, wB.z, wB.w); // (x, y+h, w, h)
+	m_Walls[0] = AABB(vec2(0), FLT_MAX/2.f, 1.f, wB.x - wB.z, wB.y, wB.z, wB.w); // (x-w,y,w,h)
+	m_Walls[1] = AABB(vec2(0), FLT_MAX / 2.f, 1.f, wB.x, wB.y - wB.w, wB.z, wB.w); // (x,y-h,w,h)
+	m_Walls[2] = AABB(vec2(0), FLT_MAX / 2.f, 1.f, wB.x + wB.z, wB.y, wB.z, wB.w); // (x+w,y,w,h)
+	m_Walls[3] = AABB(vec2(0), FLT_MAX / 2.f, 1.f, wB.x, wB.y + wB.w, wB.z, wB.w); // (x, y+h, w, h)
 
 	// Make drawables for them, because why not
 	const std::string quad("quad.iqm");

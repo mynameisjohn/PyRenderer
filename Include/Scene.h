@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include "Drawable.h"
 #include "RigidBody.h"
+#include "SpeculativeContacts.h"
 
 #include <pyliason.h>
 

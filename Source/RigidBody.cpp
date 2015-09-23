@@ -71,9 +71,9 @@ Circle::Circle(vec2 V, vec2 C, float m, float e, float radius, Entity * pEnt) :
 	RigidBody_2D(V, C, m, e, pEnt)
 {}
 
-AABB::AABB(float x, float y, float w, float h, Entity * pEnt):
+AABB::AABB(vec2 v, float mass, float el, float x, float y, float w, float h, Entity * pEnt):
 	R(vec2(w, h) / 2.f),
-	RigidBody_2D(vec2(0),vec2(x,y),1.f,1.f, pEnt)
+	RigidBody_2D(v,vec2(x,y)+ vec2(w, h) / 2.f,mass, el, pEnt)
 {}
 
 float AABB::width()const { return 2.f*R.x; }

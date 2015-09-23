@@ -57,7 +57,7 @@ struct Circle : public RigidBody_2D {
 struct AABB : public RigidBody_2D{
 	vec2 R; // half widths along x, y
 
-	AABB(float x = 0.f, float y = 0.f, float w=1.f, float h=1.f, Entity * pEnt = nullptr);
+	AABB(vec2 V = vec2(0), float m = 1.f, float e = 1.f, float x = 0.f, float y = 0.f, float w=1.f, float h=1.f, Entity * pEnt = nullptr);
 	
 	// useful things
 	float width() const;
