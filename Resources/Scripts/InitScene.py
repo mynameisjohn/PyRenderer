@@ -21,7 +21,10 @@ r_ShaderSrc = { b'vert':b'simple.vert',
 def InitCamera(camPtr):
 	c_Camera = Camera(camPtr)
 	c_Camera.InitOrtho([-10., 10.], [-10., 10.], [-10., 10.])
-		
+
+def GetWalls():
+    return [-9.,-9.,18.,18.]
+
 r_Entities = []
 Entity = namedtuple('Entity', ('pos', 'scale', 'rot', 'color', 'module'))
 
