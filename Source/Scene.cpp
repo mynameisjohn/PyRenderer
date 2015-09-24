@@ -23,6 +23,12 @@ int Scene::Draw() {
 		mat4 MV = glm::translate(T)*glm::scale(S);
 		return Drawable("quad.iqm", vec4(1), MV);
 	};
+	auto CircletoDrawable = [](const Circle& circ) {
+		vec3 S(circ.r, circ.r, 0.f); // scale
+		vec3 T(circ.C, 0.f);
+		mat4 MV = glm::translate(T)*glm::scale(S);
+		return Drawable("circle.iqm", vec4(1), MV);
+	};
 
 	for (auto& wall : m_Walls) {
 		Drawable drWall(AABBtoDrawable(wall));
@@ -33,13 +39,17 @@ int Scene::Draw() {
 		drWall.Draw();
 	}
 
-	//std::list<Drawable> dr_ContactPoints;
-	//for (auto& contact : m_SpeculativeContacts) {
-	//	for (auto& p : contact.pos) {
-	//		glm::mat4 MV(glm::translate(vec3(contact.pos[0], 0.f))*glm::scale(vec3(0.5f)));
-	//		dr_ContactPoints.emplace_back("circle.iqm", vec4(1, 0, 1, 1), MV);
-	//	}
-	//}
+	for (auto& contact : m_SpeculativeContacts) {
+		for (auto& p : contact.pos) {
+			mat4 MV = glm::translate(vec3(p, 0.f)) * glm::scale(vec3(0.18f));
+			Drawable drContact("circle.iqm", vec4(0,0.7,0.4,1), MV);
+			mat4 PMV = m_Camera.GetMat() * drContact.GetMV();
+			vec4 c = drContact.GetColor();
+			glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
+			glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
+			drContact.Draw();
+		}
+	}
 
 	m_SpeculativeContacts.clear();
 

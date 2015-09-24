@@ -76,7 +76,7 @@ bool AABB::IsOverlapping(const Circle& other) const {
 }
 
 vec2 AABB::clamp(vec2 p) const {
-	return  glm::clamp(p, -R, R);
+	return  glm::clamp(p, C-R, C+R);
 }
 
 // Closest Point methods
@@ -102,7 +102,7 @@ std::list<Contact> Circle::GetClosestPoints(const AABB& other) const {
 	vec2 n = glm::normalize(d);
 	vec2 a_pos = C + n*r;
 	// d points from the circle to the box, so negate and clamp
-	vec2 b_pos = other.clamp(d);
+	vec2 b_pos = other.clamp(a_pos);
 	float dist = glm::length(a_pos - b_pos);
 	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, 0.f, dist);
 	return{ c };
