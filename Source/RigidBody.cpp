@@ -98,11 +98,13 @@ std::list<Contact> Circle::GetClosestPoints(const Circle& other) const {
 
 std::list<Contact> Circle::GetClosestPoints(const AABB& other) const {
 	// watch for low values here
-	vec2 d = other.C - C;
-	vec2 n = glm::normalize(d);
-	vec2 a_pos = C + n*r;
+	//vec2 d = other.C - C;
+	//vec2 n = glm::normalize(d);
+	//vec2 a_pos = C + n*r;
 	// d points from the circle to the box, so negate and clamp
-	vec2 b_pos = other.clamp(a_pos);
+	vec2 b_pos = other.clamp(C);
+	vec2 n = glm::normalize(b_pos - C);
+	vec2 a_pos = C + r*n;
 	float dist = glm::length(a_pos - b_pos);
 	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, 0.f, dist);
 	return{ c };
