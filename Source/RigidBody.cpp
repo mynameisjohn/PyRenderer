@@ -12,26 +12,6 @@ RigidBody_2D::RigidBody_2D(vec2 V, vec2 C, float m, float e, Entity * pEnt) :
 	PyComponent(pEnt)
 {}
 
-void RigidBody_2D::ApplyCollisionImpulse(RigidBody_2D * other) {
-	// This is expensive, but right now I really don't care
-	if (glm::length(V - other->V) < 0.001f)
-		return;
-
-	float Msum_1 = 1.f / (m + other->m); // denominator
-	float Cr = 0.5f * (e + other->e); // coef of rest
-	vec2 P1 = m * V, P2 = other->m * other->V;
-	vec2 A = P1 + P2, B = Cr * (P1 - P2);
-	vec2 v1 = (A - B) * Msum_1;
-	vec2 v2 = (A + B) * Msum_1;
-	vec2 n = glm::normalize(other->C - C);
-	V = v1*n;
-	other->V = v2*n;
-
-	// Not the time
-	//m_pEntity->GetPyModule().call_function("HandleCollision", m_pEntity->GetID(),
-	//	other->m_pEntity->GetID());
-}
-
 // I guess this just advances the object?
 void RigidBody_2D::Integrate() {
 	const float dT = 0.005f; // TODO better integration methods?
@@ -122,7 +102,7 @@ std::list<Contact> Circle::GetClosestPoints(const AABB& other) const {
 	vec2 n = glm::normalize(d);
 	vec2 a_pos = C + n*r;
 	// d points from the circle to the box, so negate and clamp
-	vec2 b_pos = other.clamp(-d);
+	vec2 b_pos = other.clamp(d);
 	float dist = glm::length(a_pos - b_pos);
 	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, 0.f, dist);
 	return{ c };
@@ -137,8 +117,87 @@ std::list<Contact> AABB::GetClosestPoints(const AABB& other) const {
 	vec2 d = C - other.C;
 	vec2 n = glm::normalize(d);
 	vec2 a_pos = clamp(d);
-	vec2 b_pos = other.clamp(-d);
+	vec2 b_pos = other.clamp(d);
 	float dist = glm::length(a_pos-b_pos);
 	Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, a_pos, b_pos, n, 0.f, dist);
 	return{ c };
+}
+
+// Impuse application methods
+static void ApplyCollisionImpulse_Generic(RigidBody_2D * a, RigidBody_2D * b, vec2 n) {
+	// Solve 1-D collision along normal between objects
+	float v1i = glm::dot(n, a->V);
+	float v2i = glm::dot(n, b->V);
+
+	// 1/(m1+m2),  coef of restitution
+	const float Msum_1 = 1.f / (a->m + b->m);
+	const float Cr = 0.5f * (a->e + b->e);
+
+	// find momentum, solve for final velocity
+	float pa = a->m * v1i, pb = b->m * v2i;
+	float Cr_diff = Cr*(v2i - v1i);
+	float psum = pa + pb;
+
+	float v1f = Msum_1*(b->m*Cr_diff + psum);
+	float v2f = Msum_1*(-a->m*Cr_diff + psum);
+
+	// do this more cute (needed for "conservation of momentum")
+	if (fabs(v1f) < 0.001f) v1f = 0.f;
+	if (fabs(v2f) < 0.001f) v2f = 0.f;
+
+	std::cout << "p0: " << pa + pb << ", p1: " << v1f*a->m + v2f*b->m << std::endl;
+
+	// apply velocity along normal direction
+	a->V = v1f*n;
+	b->V = v2f*n;
+}
+
+// Apply collision impulse between two circles
+void Circle::ApplyCollisionImpulse(RigidBody_2D * const other) {
+	// This is expensive, but right now I really don't care
+	if (glm::length(V - other->V) < 0.001f)
+		return;
+
+	vec2 n = glm::normalize(other->C - C);
+	ApplyCollisionImpulse_Generic((RigidBody_2D *)this, other, n);
+
+	//// Solve 1-D collision along normal between objects
+	//vec2 n = glm::normalize(other->C - C);
+	//float v1i = glm::dot(n, V);
+	//float v2i = glm::dot(n, other->V);
+
+	//// 1/(m1+m2),  coef of restitution
+	//const float Msum_1 = 1.f / (m + other->m);
+	//const float Cr = 0.5f * (e + other->e);
+
+	//// find momentum, solve for final velocity
+	//float p1 = m * v1i, p2 = other->m * v2i;
+	//float A = p1 + p2, B = Cr*(p1 - p2);
+	//float v1f = (A - B)*Msum_1;
+	//float v2f = (A + B)*Msum_1;
+
+	//// apply velocity along normal direction
+	//V = v1f*n;
+	//other->V = v2f*n;
+}
+
+// This could be a lot cheaper
+void AABB::ApplyCollisionImpulse(RigidBody_2D * const other) {
+	// This is expensive, but right now I really don't care
+	if (glm::length(V - other->V) < 0.001f)
+		return;
+
+	// Find the collision normal, and the half width normal in that direction
+	vec2 n = glm::normalize(other->C - C);
+	vec2 rN = glm::normalize(R*n);
+
+	// If 
+	if (glm::dot(n, rN) > 0.001f) {
+		if (fabs(rN.x) > fabs(rN.y))
+			n = glm::normalize(vec2(rN.x, 0));
+		else
+			n = glm::normalize(vec2(0, rN.y));
+	}
+
+	ApplyCollisionImpulse_Generic((RigidBody_2D *)this, (RigidBody_2D *)other, n);
 }

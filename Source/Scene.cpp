@@ -60,10 +60,10 @@ int Scene::Update() {
 		}
 
 		// Get collisions with wall
-		//for (auto& wall : m_Walls) {
-		//	auto wallContacts = wall.GetClosestPoints(*it1);
-		//	m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), wallContacts.begin(), wallContacts.end());
-		//}
+		for (auto& wall : m_Walls) {
+			auto wallContacts = wall.GetClosestPoints(*it1);
+			m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), wallContacts.begin(), wallContacts.end());
+		}
 	}
 
 	solve(m_SpeculativeContacts);
@@ -115,10 +115,10 @@ Scene::Scene(std::string& pyinitScript) :
 	pyinitModule.call_function("GetWalls").convert(wB);
 	
 	// The walls are actually four boxes
-	m_Walls[0] = AABB(vec2(0), FLT_MAX/2.f, 1.f, wB.x - wB.z, wB.y, wB.z, wB.w); // (x-w,y,w,h)
-	m_Walls[1] = AABB(vec2(0), FLT_MAX / 2.f, 1.f, wB.x, wB.y - wB.w, wB.z, wB.w); // (x,y-h,w,h)
-	m_Walls[2] = AABB(vec2(0), FLT_MAX / 2.f, 1.f, wB.x + wB.z, wB.y, wB.z, wB.w); // (x+w,y,w,h)
-	m_Walls[3] = AABB(vec2(0), FLT_MAX / 2.f, 1.f, wB.x, wB.y + wB.w, wB.z, wB.w); // (x, y+h, w, h)
+	m_Walls[0] = AABB(vec2(0), 1e10f, 1.f, wB.x - wB.z, wB.y, wB.z, wB.w); // (x-w,y,w,h)
+	m_Walls[1] = AABB(vec2(0), 1e10f, 1.f, wB.x, wB.y - wB.w, wB.z, wB.w); // (x,y-h,w,h)
+	m_Walls[2] = AABB(vec2(0), 1e10f, 1.f, wB.x + wB.z, wB.y, wB.z, wB.w); // (x+w,y,w,h)
+	m_Walls[3] = AABB(vec2(0), 1e10f, 1.f, wB.x, wB.y + wB.w, wB.z, wB.w); // (x, y+h, w, h)
 
 	// Like a mini factory (no collision info for now, just circles)
 	using EntInfo = std::tuple<vec3, vec3, fquat, vec4, std::string>;
@@ -163,7 +163,7 @@ Scene::Scene(std::string& pyinitScript) :
 
 		// Reinitialize vector objects
 		m_vDrawables[i] = dr;
-		m_vCircles[i] = Circle(vec2(-pos), vec2(pos), 1.f, 1.f, scale[0], &m_vEntities[i]);
+		m_vCircles[i] = Circle(2.f*vec2(-pos), vec2(pos), 1.f, 1.f, scale[0], &m_vEntities[i]);
 
 		// Get the pointers (this has to change)
 		Drawable * drPtr = &m_vDrawables[i];

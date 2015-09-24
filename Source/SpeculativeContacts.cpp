@@ -22,7 +22,7 @@ vec2 Contact::relVel() const {
 }
 
 void Solver::operator()(std::list<Contact>& contacts) {
-	const float dT(0.001f);
+	const float dT(0.005f);
 	for (auto& c : contacts) {
 		// Find the relative velocity of the system along the normal
 		float relNv = glm::dot(c.normal, c.relVel());
