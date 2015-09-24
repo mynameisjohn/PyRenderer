@@ -23,9 +23,9 @@ void RigidBody_2D::ApplyCollisionImpulse(RigidBody_2D * other) {
 	vec2 A = P1 + P2, B = Cr * (P1 - P2);
 	vec2 v1 = (A - B) * Msum_1;
 	vec2 v2 = (A + B) * Msum_1;
-	vec2 n = glm::normalize(C - other->C);
+	vec2 n = glm::normalize(other->C - C);
 	V = v1*n;
-	other->V = -v2*n;
+	other->V = v2*n;
 
 	// Not the time
 	//m_pEntity->GetPyModule().call_function("HandleCollision", m_pEntity->GetID(),
@@ -74,7 +74,9 @@ Circle::Circle(vec2 V, vec2 C, float m, float e, float radius, Entity * pEnt) :
 AABB::AABB(vec2 v, float mass, float el, float x, float y, float w, float h, Entity * pEnt):
 	R(vec2(w, h) / 2.f),
 	RigidBody_2D(v,vec2(x,y)+ vec2(w, h) / 2.f,mass, el, pEnt)
-{}
+{
+	R = vec2(w, h) / 2.f;
+}
 
 float AABB::width()const { return 2.f*R.x; }
 float AABB::height()const { return 2.f*R.y; }

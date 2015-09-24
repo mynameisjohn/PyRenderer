@@ -29,23 +29,23 @@ r_Entities = []
 Entity = namedtuple('Entity', ('pos', 'scale', 'rot', 'color', 'module'))
 
 r_Entities.append(Entity(
-		pos = [0.,0.,0.],
+		pos = [-9.,0.,0.],
 		scale = [1.,1.,1.],
 		rot = makeQuat(0.,0.,1.,0.),
 		color = randColor(),
 		module = b'circle.py'
 	))
 r_Entities.append(Entity(
-		pos = [1.,7.,0.],
+		pos = [1.,6.,0.],
 		scale = [1.,1.,1.],
 		rot = makeQuat(0.,0.,1.,0.),
 		color = randColor(),
 		module = b'circle.py'
 	))
-r_Entities.append(Entity(
-		pos = [-2.,-2.,0.],
-		scale = [1.,1.,1.],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = b'circle.py'
-	))	
+#r_Entities.append(Entity(
+#		pos = [-2.,-2.,0.],
+#		scale = [1.,1.,1.],
+#		rot = makeQuat(0.,0.,1.,0.),
+#		color = randColor(),
+#		module = b'circle.py'
+#	))	

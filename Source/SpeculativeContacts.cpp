@@ -18,7 +18,7 @@ void Contact::ApplyImpulse(float mag) {
 }
 
 vec2 Contact::relVel() const {
-	return pair[0]->V - pair[1]->V;
+	return pair[1]->V - pair[0]->V;
 }
 
 void Solver::operator()(std::list<Contact>& contacts) {

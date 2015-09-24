@@ -18,13 +18,14 @@ Drawable::Drawable() :
 // This will probably have to be a bit more flexible
 Drawable::Drawable(std::string iqmFileName, vec4 color, mat4 MV, Entity * pEnt) :
 	PyComponent(pEnt),
+	m_SrcFile(iqmFileName),
 	m_VAO(0),
 	m_nIdx(0),
 	m_Color(color),
 	m_MV(MV)
 {
 	// Get rid of the .iqm extension (for no real reason) (and it better be there)
-	m_SrcFile = m_SrcFile.substr(m_SrcFile.find(".iqm"), m_SrcFile.length());
+	m_SrcFile = m_SrcFile.substr(0, m_SrcFile.find(".iqm"));
 
 	// See if we've loaded this Iqm File before
 	if (s_VAOCache.find(m_SrcFile) == s_VAOCache.end()) {
