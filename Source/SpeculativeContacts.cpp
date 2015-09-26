@@ -48,7 +48,7 @@ void Solver::operator()(std::list<Contact>& contacts) {
 				vec2 pSum = pA + pB;
 				vec2 Cr_diff = Cr*(c.pair[0]->V - c.pair[1]->V);
 				vec2 v1f = Msum_1*(c.pair[1]->m*Cr_diff + pSum);
-				vec2 v2f = Msum_1*(c.pair[0]->m*Cr_diff + pSum);
+				vec2 v2f = Msum_1*(-c.pair[0]->m*Cr_diff + pSum);
 
 				// Apply new velocity along reflection direction
 				c.pair[0]->V = glm::reflect(v1f, c.normal);
