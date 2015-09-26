@@ -33,6 +33,14 @@ bool RigidBody_2D::PyExpose(const std::string& name, PyObject * module) {
 	return true;
 }
 
+vec2 RigidBody_2D::GetMomentum() const {
+	return m * V;
+}
+
+float RigidBody_2D::GetKineticEnergy() const {
+	return 0.5f * m * glm::dot(V, V);
+}
+
 bool Circle::IsOverlapping(const Circle& other) const {
 	float dist = glm::length(C - other.C);
 	float totalRadius = r + other.r;

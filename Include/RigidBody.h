@@ -21,6 +21,10 @@ struct RigidBody_2D : public PyComponent {
 	vec2 lastT; // Last translation (doesn't belong here)
 	RigidBody_2D(vec2 V = vec2(0), vec2 C = vec2(0), float m = 1.f, float e = 1.f, Entity * pEnt = nullptr);
 
+	// Get Physical Quantities
+	vec2 GetMomentum() const;
+	float GetKineticEnergy() const;
+
 	// Overlap
 	virtual bool IsOverlapping(const Circle& other) const = 0;
 	virtual bool IsOverlapping(const AABB& other) const = 0;
@@ -38,6 +42,8 @@ struct RigidBody_2D : public PyComponent {
 	// Python overrides, Not really primitive specific
 	bool PyExpose(const std::string& name, PyObject * module) override;
 	bool PyUpdate() override;
+
+
 };
 
 struct Circle : public RigidBody_2D {
