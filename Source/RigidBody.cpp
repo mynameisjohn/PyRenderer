@@ -101,9 +101,12 @@ std::list<Contact> Circle::GetClosestPoints(const AABB& other) const {
 	//vec2 d = other.C - C;
 	//vec2 n = glm::normalize(d);
 	//vec2 a_pos = C + n*r;
+
 	// d points from the circle to the box, so negate and clamp
 	vec2 b_pos = other.clamp(C);
 	vec2 n = glm::normalize(b_pos - C);
+
+
 	vec2 a_pos = C + r*n;
 	float dist = glm::length(a_pos - b_pos);
 	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, 0.f, dist);
@@ -126,8 +129,9 @@ std::list<Contact> AABB::GetClosestPoints(const AABB& other) const {
 }
 
 // Impuse application methods
-static void ApplyCollisionImpulse_Generic(RigidBody_2D * a, RigidBody_2D * b, vec2 n) {
+static void ApplyCollisionImpulse_Generic(RigidBody_2D * a, RigidBody_2D * b, vec2 N) {
 	// Solve 1-D collision along normal between objects
+	glm::vec2 n = glm::normalize(a->C - b->C);
 	float v1i = glm::dot(n, a->V);
 	float v2i = glm::dot(n, b->V);
 
@@ -148,58 +152,62 @@ static void ApplyCollisionImpulse_Generic(RigidBody_2D * a, RigidBody_2D * b, ve
 	if (fabs(v2f) < 0.001f) v2f = 0.f;
 
 	std::cout << "p0: " << pa + pb << ", p1: " << v1f*a->m + v2f*b->m << std::endl;
-
+	
 	// apply velocity along normal direction
 	a->V = v1f*n;
 	b->V = v2f*n;
 }
 
-// Apply collision impulse between two circles
-void Circle::ApplyCollisionImpulse(RigidBody_2D * const other) {
-	// This is expensive, but right now I really don't care
-	if (glm::length(V - other->V) < 0.001f)
-		return;
-
-	vec2 n = glm::normalize(other->C - C);
-	ApplyCollisionImpulse_Generic((RigidBody_2D *)this, other, n);
-
-	//// Solve 1-D collision along normal between objects
-	//vec2 n = glm::normalize(other->C - C);
-	//float v1i = glm::dot(n, V);
-	//float v2i = glm::dot(n, other->V);
-
-	//// 1/(m1+m2),  coef of restitution
-	//const float Msum_1 = 1.f / (m + other->m);
-	//const float Cr = 0.5f * (e + other->e);
-
-	//// find momentum, solve for final velocity
-	//float p1 = m * v1i, p2 = other->m * v2i;
-	//float A = p1 + p2, B = Cr*(p1 - p2);
-	//float v1f = (A - B)*Msum_1;
-	//float v2f = (A + B)*Msum_1;
-
-	//// apply velocity along normal direction
-	//V = v1f*n;
-	//other->V = v2f*n;
+void RigidBody_2D::ApplyCollisionImpulse(RigidBody_2D * const other, vec2 n) {
+	ApplyCollisionImpulse_Generic(this, other, n);
 }
 
-// This could be a lot cheaper
-void AABB::ApplyCollisionImpulse(RigidBody_2D * const other) {
-	// This is expensive, but right now I really don't care
-	if (glm::length(V - other->V) < 0.001f)
-		return;
-
-	// Find the collision normal, and the half width normal in that direction
-	vec2 n = glm::normalize(other->C - C);
-	vec2 rN = glm::normalize(R*n);
-
-	// If 
-	if (glm::dot(n, rN) > 0.001f) {
-		if (fabs(rN.x) > fabs(rN.y))
-			n = glm::normalize(vec2(rN.x, 0));
-		else
-			n = glm::normalize(vec2(0, rN.y));
-	}
-
-	ApplyCollisionImpulse_Generic((RigidBody_2D *)this, (RigidBody_2D *)other, n);
-}
+//// Apply collision impulse between two circles
+//void Circle::ApplyCollisionImpulse(RigidBody_2D * const other) {
+//	// This is expensive, but right now I really don't care
+//	if (glm::length(V - other->V) < 0.001f)
+//		return;
+//
+//	vec2 n = glm::normalize(other->C - C);
+//	ApplyCollisionImpulse_Generic((RigidBody_2D *)this, other, n);
+//
+//	//// Solve 1-D collision along normal between objects
+//	//vec2 n = glm::normalize(other->C - C);
+//	//float v1i = glm::dot(n, V);
+//	//float v2i = glm::dot(n, other->V);
+//
+//	//// 1/(m1+m2),  coef of restitution
+//	//const float Msum_1 = 1.f / (m + other->m);
+//	//const float Cr = 0.5f * (e + other->e);
+//
+//	//// find momentum, solve for final velocity
+//	//float p1 = m * v1i, p2 = other->m * v2i;
+//	//float A = p1 + p2, B = Cr*(p1 - p2);
+//	//float v1f = (A - B)*Msum_1;
+//	//float v2f = (A + B)*Msum_1;
+//
+//	//// apply velocity along normal direction
+//	//V = v1f*n;
+//	//other->V = v2f*n;
+//}
+//
+//// This could be a lot cheaper
+//void AABB::ApplyCollisionImpulse(RigidBody_2D * const other) {
+//	// This is expensive, but right now I really don't care
+//	if (glm::length(V - other->V) < 0.001f)
+//		return;
+//
+//	// Find the collision normal, and the half width normal in that direction
+//	vec2 n = glm::normalize(other->C - C);
+//	vec2 rN = glm::normalize(R*n);
+//
+//	// If 
+//	if (glm::dot(n, rN) > 0.001f) {
+//		if (fabs(rN.x) > fabs(rN.y))
+//			n = glm::normalize(vec2(rN.x, 0));
+//		else
+//			n = glm::normalize(vec2(0, rN.y));
+//	}
+//
+//	ApplyCollisionImpulse_Generic((RigidBody_2D *)this, (RigidBody_2D *)other, n);
+//}

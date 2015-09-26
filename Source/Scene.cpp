@@ -42,7 +42,7 @@ int Scene::Draw() {
 	for (auto& contact : m_SpeculativeContacts) {
 		for (auto& p : contact.pos) {
 			mat4 MV = glm::translate(vec3(p, 0.f)) * glm::scale(vec3(0.18f));
-			Drawable drContact("circle.iqm", vec4(0,0.7,0.4,1), MV);
+			Drawable drContact("circle.iqm", vec4(contact.normal, 1.f, 1.f), MV);
 			mat4 PMV = m_Camera.GetMat() * drContact.GetMV();
 			vec4 c = drContact.GetColor();
 			glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));

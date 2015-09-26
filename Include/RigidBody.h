@@ -30,7 +30,7 @@ struct RigidBody_2D : public PyComponent {
 	virtual std::list<Contact> GetClosestPoints(const AABB& other) const = 0;
 
 	// Applying collision between objects
-	virtual void ApplyCollisionImpulse(RigidBody_2D * const other) = 0;
+	void ApplyCollisionImpulse(RigidBody_2D * const other, vec2 n);
 
 	// Integrate velocity over time
 	void Integrate();
@@ -52,11 +52,6 @@ struct Circle : public RigidBody_2D {
 	// Contacts
 	std::list<Contact> GetClosestPoints(const Circle& other) const override;
 	std::list<Contact> GetClosestPoints(const AABB& other) const override;
-
-	// Applying collision between objects
-	// This is a really bad idea because it matters whom gets applied to whom, 
-	// i.e a box can collide with a circle, but a circle can't collide with a box (correctly)
-	void ApplyCollisionImpulse(RigidBody_2D * const other) override;
 };
 
 struct AABB : public RigidBody_2D {
@@ -80,7 +75,4 @@ struct AABB : public RigidBody_2D {
 	// Contacts
 	std::list<Contact> GetClosestPoints(const Circle& other) const override;
 	std::list<Contact> GetClosestPoints(const AABB& other) const override;
-
-	// Applying collision between objects
-	void ApplyCollisionImpulse(RigidBody_2D * const other) override;
 };

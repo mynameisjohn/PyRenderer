@@ -33,8 +33,27 @@ void Solver::operator()(std::list<Contact>& contacts) {
 		// adding dV * dT makes the objects touch
 		float dV = relNv + c.dist / dT;
 
-		// If that value was negative, the objects will penetrate in the next frame
-		if (dV < 0)
-			c.pair[0]->ApplyCollisionImpulse(c.pair[1]);
+		if (dV < 0) {
+			// 1/(m1+m2),  coef of restitution
+			const float Msum_1 = 1.f / (c.pair[0]->m + c.pair[1]->m);
+			const float Cr = 0.5f * (c.pair[0]->e + c.pair[1]->e);
+			const float EPS = 0.001f;
+
+			vec2 pA = c.pair[0]->m * c.pair[0]->V;
+			vec2 pB = c.pair[1]->m * c.pair[1]->V;
+			vec2 pSum = pA + pB;
+			vec2 Cr_diff = Cr*(c.pair[0]->V - c.pair[1]->V);
+
+			vec2 v1f = Msum_1*(c.pair[1]->m*Cr_diff + pSum);
+			vec2 v2f = Msum_1*(c.pair[0]->m*Cr_diff + pSum);
+
+			c.pair[0]->V = glm::reflect(v1f, c.normal);
+
+			c.pair[1]->V = glm::reflect(v2f, c.normal);
+
+
+			// Check conservation of momentum
+			//std::cout << glm::length(pSum) << std::endl;
+		}
 	}
 }
