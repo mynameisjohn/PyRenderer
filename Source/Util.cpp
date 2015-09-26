@@ -49,3 +49,14 @@ std::string FixBackslash(const std::string& in) {
 	std::replace(out.begin(), out.end(), '\\', '/');
 	return out;
 }
+
+
+//This returns a rotation quat that will line something
+//up with the given vec2 in x,y (meaning rotation is about z)
+fquat getQuatFromVec2(vec2 r) {
+	r = glm::normalize(r);
+	float s(sqrt((1 - r.x) / 2));
+	float c((r.y>0) ? sqrt((1 + r.x) / 2) : -sqrt((1 + r.x) / 2));
+
+	return fquat(c, s*vec3(0, 0, 1));
+}

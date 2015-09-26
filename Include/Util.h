@@ -81,6 +81,11 @@ inline auto timeNow() -> decltype(std::chrono::high_resolution_clock::now()) {
 	return std::chrono::high_resolution_clock::now();
 }
 
+
+//This returns a rotation quat that will line something
+//up with the given vec2 in x,y (meaning rotation is about z)
+fquat getQuatFromVec2(vec2 r);
+
 // Always useful
 class StopWatch {
 	decltype(timeNow()) m_Begin, m_End;

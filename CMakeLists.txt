@@ -9,6 +9,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11")
 
 # Find these libraries
 find_package(SDL2)
+find_package(SDL2_mixer)
 find_package(OpenGL)
 find_package(GLEW)
 
@@ -24,10 +25,10 @@ endif (WIN32)
 
 # Library variables
 set(GL_LIBS ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
-set(SDL2_LIBS ${SDL2_LIBRARY})
+set(SDL2_LIBS ${SDL2_LIBRARY} ${SDLMIXER_LIBRARY})
 
 set(GL_INC ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
-set(SDL2_INC ${SDL2_INCLUDE_DIR})
+set(SDL2_INC ${SDL2_INCLUDE_DIR} ${SDLMIXER_INCLUDE_DIR})
 
 # Local files
 file(GLOB SOURCES source/*.cpp)

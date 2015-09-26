@@ -6,6 +6,8 @@
 #include "Scene.h"
 #include "SpeculativeContacts.h"
 
+
+
 int Scene::Draw() {
 	auto sBind = m_Shader.ScopeBind();
 	for (auto& dr : m_vDrawables) {
@@ -40,14 +42,18 @@ int Scene::Draw() {
 	}
 
 	for (auto& contact : m_SpeculativeContacts) {
+		float nrm(-1);
 		for (auto& p : contact.pos) {
-			mat4 MV = glm::translate(vec3(p, 0.f)) * glm::scale(vec3(0.18f));
-			Drawable drContact("circle.iqm", vec4(contact.normal, 1.f, 1.f), MV);
+			fquat rot = getQuatFromVec2(nrm*vec2(contact.normal.y, contact.normal.x));
+			mat4 MV = glm::translate(vec3(p, 0.f)) *  glm::mat4_cast(rot) * glm::scale(vec3(0.78f));
+			
+			Drawable drContact("pointer.iqm", vec4(contact.normal, 1.f, 1.f), MV);
 			mat4 PMV = m_Camera.GetMat() * drContact.GetMV();
 			vec4 c = drContact.GetColor();
 			glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
 			glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
 			drContact.Draw();
+			nrm = -nrm;
 		}
 	}
 

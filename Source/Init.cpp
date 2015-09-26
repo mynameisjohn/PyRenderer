@@ -10,6 +10,8 @@
 #include "Util.h"
 #include "GL_Includes.h"
 
+#include <SDL_mixer.h>
+
 // Screen dims
 const int WIDTH = 600;
 const int HEIGHT = 600;
@@ -19,8 +21,13 @@ const int glMajor(3), glMinor(0);
 
 bool InitGL(SDL_GLContext& g_Context, SDL_Window*& g_Window) {
 	//Init SDL Video
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
 		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
+		return false;
+	}
+
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+		std::cout << "Error initializing SDL_Mixer!" << SDL_GetError() << std::endl;
 		return false;
 	}
 
@@ -77,6 +84,11 @@ bool InitGL(SDL_GLContext& g_Context, SDL_Window*& g_Window) {
 
 	//For debugging
 	glLineWidth(8.f);
+
+	return true;
+}
+
+bool InitSound() {
 
 	return true;
 }
