@@ -23,8 +23,8 @@ vec2 Contact::relVel() const {
 
 void Solver::operator()(std::list<Contact>& contacts) {
 	const float dT(0.005f);
-
-	for (int i = 0; i < m_nIterations; i++)
+	
+	for (int nIt = 0; nIt < m_nIterations; nIt++)
 	{
 		for (auto& c : contacts) {
 			// Find the relative velocity of the system along the normal
@@ -53,9 +53,6 @@ void Solver::operator()(std::list<Contact>& contacts) {
 				// Apply new velocity along reflection direction
 				c.pair[0]->V = glm::reflect(v1f, c.normal);
 				c.pair[1]->V = glm::reflect(v2f, c.normal);
-
-				// Check conservation of Energy
-				std::cout << c.pair[0]->GetKineticEnergy() << "\n" << c.pair[1]->GetKineticEnergy() << "\n" << std::endl;
 			}
 		}
 	}

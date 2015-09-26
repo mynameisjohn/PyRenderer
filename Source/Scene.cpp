@@ -58,6 +58,7 @@ int Scene::Draw() {
 
 int Scene::Update() {
 	int nCols(0);
+	float totalEnergy(0.f);
 
 	// I think there's the same # of these every time...
 	Solver solve; 
@@ -74,7 +75,12 @@ int Scene::Update() {
 			auto wallContacts = wall.GetClosestPoints(*it1);
 			m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), wallContacts.begin(), wallContacts.end());
 		}
+
+		totalEnergy += it1->GetKineticEnergy();
 	}
+
+	// Conservation of energy
+	//std::cout << totalEnergy << "\n" << std::endl;
 
 	solve(m_SpeculativeContacts);
 
@@ -173,7 +179,7 @@ Scene::Scene(std::string& pyinitScript) :
 
 		// Reinitialize vector objects
 		m_vDrawables[i] = dr;
-		m_vCircles[i] = Circle(2.f*vec2(-pos), vec2(pos), 1.f, 1.f, scale[0], &m_vEntities[i]);
+		m_vCircles[i] = Circle(2.f*vec2(-pos), vec2(pos), scale[0], 1.f, scale[0], &m_vEntities[i]);
 
 		// Get the pointers (this has to change)
 		Drawable * drPtr = &m_vDrawables[i];
