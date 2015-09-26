@@ -23,37 +23,40 @@ vec2 Contact::relVel() const {
 
 void Solver::operator()(std::list<Contact>& contacts) {
 	const float dT(0.005f);
-	for (auto& c : contacts) {
-		// Find the relative velocity of the system along the normal
-		float relNv = glm::dot(c.normal, c.relVel());
 
-		// Find the amount of velocity to remove, along the normal, such that the objects touch
+	for (int i = 0; i < m_nIterations; i++)
+	{
+		for (auto& c : contacts) {
+			// Find the relative velocity of the system along the normal
+			float relNv = glm::dot(c.normal, c.relVel());
 
-		// Find the amount of velocity (along n) needed such that
-		// adding dV * dT makes the objects touch
-		float dV = relNv + c.dist / dT;
+			// Find the amount of velocity to remove, along the normal, such that the objects touch
 
-		if (dV < 0) {
-			// 1/(m1+m2),  coef of restitution
-			const float Msum_1 = 1.f / (c.pair[0]->m + c.pair[1]->m);
-			const float Cr = 0.5f * (c.pair[0]->e + c.pair[1]->e);
-			const float EPS = 0.001f;
+			// Find the amount of velocity (along n) needed such that
+			// adding dV * dT makes the objects touch
+			float dV = relNv + c.dist / dT;
 
-			vec2 pA = c.pair[0]->m * c.pair[0]->V;
-			vec2 pB = c.pair[1]->m * c.pair[1]->V;
-			vec2 pSum = pA + pB;
-			vec2 Cr_diff = Cr*(c.pair[0]->V - c.pair[1]->V);
+			if (dV < 0) {
+				// 1/(m1+m2),  coef of restitution
+				const float Msum_1 = 1.f / (c.pair[0]->m + c.pair[1]->m);
+				const float Cr = 0.5f * (c.pair[0]->e + c.pair[1]->e);
+				const float EPS = 0.001f;
 
-			vec2 v1f = Msum_1*(c.pair[1]->m*Cr_diff + pSum);
-			vec2 v2f = Msum_1*(c.pair[0]->m*Cr_diff + pSum);
+				vec2 pA = c.pair[0]->m * c.pair[0]->V;
+				vec2 pB = c.pair[1]->m * c.pair[1]->V;
+				vec2 pSum = pA + pB;
+				vec2 Cr_diff = Cr*(c.pair[0]->V - c.pair[1]->V);
 
-			c.pair[0]->V = glm::reflect(v1f, c.normal);
+				vec2 v1f = Msum_1*(c.pair[1]->m*Cr_diff + pSum);
+				vec2 v2f = Msum_1*(c.pair[0]->m*Cr_diff + pSum);
 
-			c.pair[1]->V = glm::reflect(v2f, c.normal);
+				c.pair[0]->V = glm::reflect(v1f, c.normal);
 
+				c.pair[1]->V = glm::reflect(v2f, c.normal);
 
-			// Check conservation of momentum
-			//std::cout << glm::length(pSum) << std::endl;
+				// Check conservation of momentum
+				std::cout << glm::length(pA)+glm::length(pB) << std::endl;
+			}
 		}
 	}
 }

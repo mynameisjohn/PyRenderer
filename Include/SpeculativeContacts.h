@@ -27,7 +27,8 @@ struct Contact {
 
 // Really just a namespace...
 class Solver {
+	uint32_t m_nIterations;
 public:
-	Solver() {}
+	Solver(int nIt = 10) : m_nIterations(nIt) {}
 	void operator()(std::list<Contact>& contacts);
 };
