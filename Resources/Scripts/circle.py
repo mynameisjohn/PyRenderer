@@ -8,23 +8,27 @@ def randColor():
 
 r_IqmFile = b'circle.iqm'
 r_Sounds = ['C.wav', 'F.wav', 'A.wav', 'B.wav']
+r_ColPrim = 'Circle'
 
-g_Entities = []
+g_Entities = {}
 
 #Updatecollision just posts the translate message
 def UpdateCollision(id):
     g_Entities[id].PostMessage(0,0)
 
-def HandleCollision(id1, id2):
-	e1 = g_Entities[id1]
-	e2 = g_Entities[id2]
+def HandleCollision(myID, theirID):
+	e1 = g_Entities[myID]
+	#e2 = g_Entities[myID]
 	e1.PostMessage_v4(0,1,randColor())
-	e2.PostMessage_v4(0,1,randColor())
+	#e2.PostMessage_v4(0,1,randColor())
 	PlaySound(random.choice(r_Sounds))
 	#print(str(e1)+' is colliding with '+str(e2))
 	
-def AddEntity(ePtr):
-# I think this is kosher? Things are stored twice...
-    g_Entities.append(Entity(ePtr))
-    print(ePtr)
-    return len(g_Entities)-1
+def AddEntity(eID, ePtr):
+	g_Entities[eID] = Entity(ePtr)
+
+#def AddEntity(ePtr):
+## I think this is kosher? Things are stored twice...
+#    g_Entities.append(Entity(ePtr))
+#    print(ePtr)
+#    return len(g_Entities)-1

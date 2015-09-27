@@ -159,6 +159,10 @@ Scene::Scene(std::string& pyinitScript) {
 		// Load the python module
 		auto pyEntModule = Python::Object::from_script(SCRIPT_DIR + pyEntModScript);
 
+		// Create Entity
+		Entity ent(i, this, pyEntModule);
+		m_vEntities[i] = ent;
+
 		// IQM File
 		std::string iqmFile;
 		check(pyEntModule.get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module " + pyEntModScript);
@@ -190,10 +194,6 @@ Scene::Scene(std::string& pyinitScript) {
 		Drawable dr(iqmFile, color, pos, maxEl(scale), rot);
 		dr.SetEntity(&m_vEntities[i]);
 		m_vDrawables.push_back(dr);
-
-		// Create Entity
-		Entity ent(m_vEntities.size(), this, pyEntModule);
-		m_vEntities.push_back(ent);
 	}
 
 	// Fix entity pointers (I hate this)
