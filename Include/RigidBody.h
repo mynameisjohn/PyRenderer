@@ -47,6 +47,8 @@ public:
 
 	// Update
 	void Update();
+
+	uint32_t GetEntID() const;
 };
 
 struct Circle : public RigidBody_2D {
@@ -68,6 +70,7 @@ struct AABB : public RigidBody_2D {
 	vec2 R; // half widths along x, y
 
 	AABB();
+	AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r, uint32_t ID);
 	AABB(vec2 vel, float m, float e, float x, float y, float w, float h, uint32_t ID);
 
 	// useful things

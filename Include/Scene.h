@@ -35,6 +35,7 @@ private:
 	std::vector<Entity> m_vEntities;
 	std::vector<Drawable> m_vDrawables;
 	std::vector<Circle> m_vCircles;
+	std::vector<AABB> m_vAABB;
 	std::list<Contact> m_SpeculativeContacts; // no need to be a list, will be (n^2+n)/2
 };
 

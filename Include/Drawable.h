@@ -34,6 +34,8 @@ public:
 
 	void SetColor(vec4 C);
 
+	uint32_t GetEntID() const;
+
 	friend class Scene;
 protected:
 	static GLint s_PosHandle;

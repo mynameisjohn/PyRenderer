@@ -10,7 +10,7 @@
 // Collision Debug Functions
 Drawable ToDrawable(AABB box);
 Drawable ToDrawable(Circle circ);
-Drawable ToDrawable(Contact con);
+std::array<Drawable, 2> ToDrawable(Contact con);
 
 int Scene::Draw() {
 	auto sBind = m_Shader.ScopeBind();
@@ -20,17 +20,16 @@ int Scene::Draw() {
 		glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
 		glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
 		dr.Draw();
-		//m_PyObjCache.begin()->second.call_function("sayHello", &m_Camera);
 	}
 
-	for (auto& wall : m_Walls) {
-		Drawable drWall(ToDrawable(wall));
-		mat4 PMV = m_Camera.GetMat() * drWall.GetMV();
-		vec4 c = drWall.GetColor();
-		glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
-		glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
-		drWall.Draw();
-	}
+	//for (auto& wall : m_Walls) {
+	//	Drawable drWall(ToDrawable(wall));
+	//	mat4 PMV = m_Camera.GetMat() * drWall.GetMV();
+	//	vec4 c = drWall.GetColor();
+	//	glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
+	//	glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
+	//	drWall.Draw();
+	//}
 
 	//for (auto& contact : m_SpeculativeContacts) {
 	//	float nrm(-1);
@@ -47,14 +46,13 @@ int Scene::Draw() {
 	//	}
 	//}
 
-	m_SpeculativeContacts.clear();
-
 	return int(m_vDrawables.size());
 }
 
 int Scene::Update() {
 	int nCols(0);
 	float totalEnergy(0.f);
+	m_SpeculativeContacts.clear();
 
 	// I think there's the same # of these every time...
 	Solver solve; 
@@ -84,8 +82,8 @@ int Scene::Update() {
 	solve(m_SpeculativeContacts);
 	for (auto& c : m_SpeculativeContacts) {
 		if (c.isColliding) {
-			int id1 = c.pair[0]->entID;
-			int id2 = c.pair[1]->entID;
+			int id1 = c.pair[0]->GetEntID();
+			int id2 = c.pair[1]->GetEntID();
 			m_vEntities[id1].GetPyModule().call_function("HandleCollision", id1, id2);
 			m_vEntities[id2].GetPyModule().call_function("HandleCollision", id1, id2);
 		}
@@ -138,10 +136,10 @@ Scene::Scene(std::string& pyinitScript) :
 	pyinitModule.call_function("GetWalls").convert(wB);
 	
 	// The walls are actually four boxes
-	m_Walls[0] = AABB(vec2(0), 1e10f, 1.f, wB.x - wB.z, wB.y, wB.z, wB.w); // (x-w,y,w,h)
-	m_Walls[1] = AABB(vec2(0), 1e10f, 1.f, wB.x, wB.y - wB.w, wB.z, wB.w); // (x,y-h,w,h)
-	m_Walls[2] = AABB(vec2(0), 1e10f, 1.f, wB.x + wB.z, wB.y, wB.z, wB.w); // (x+w,y,w,h)
-	m_Walls[3] = AABB(vec2(0), 1e10f, 1.f, wB.x, wB.y + wB.w, wB.z, wB.w); // (x, y+h, w, h)
+	//m_Walls[0] = AABB(vec2(0), 1e10f, 1.f, wB.x - wB.z, wB.y, wB.z, wB.w); // (x-w,y,w,h)
+	//m_Walls[1] = AABB(vec2(0), 1e10f, 1.f, wB.x, wB.y - wB.w, wB.z, wB.w); // (x,y-h,w,h)
+	//m_Walls[2] = AABB(vec2(0), 1e10f, 1.f, wB.x + wB.z, wB.y, wB.z, wB.w); // (x+w,y,w,h)
+	//m_Walls[3] = AABB(vec2(0), 1e10f, 1.f, wB.x, wB.y + wB.w, wB.z, wB.w); // (x, y+h, w, h)
 
 	// Like a mini factory (no collision info for now, just circles)
 	using EntInfo = std::tuple<vec3, vec3, fquat, vec4, std::string>;
@@ -149,11 +147,6 @@ Scene::Scene(std::string& pyinitScript) :
 	// Now loop through all named tuples in the script
 	std::vector<EntInfo> v_EntInfo;
 	check(pyinitModule.get_attr("r_Entities").convert(v_EntInfo), "Getting all Entity Info");
-
-	// Precreate all entities, which may be a bad idea
-	//m_vEntities.resize(v_EntInfo.size());
-	//m_vCircles.resize(v_EntInfo.size());
-	//m_vDrawables.resize(v_EntInfo.size());
 
 	// Once you have it, create individual entities and components
 	for (int i = 0; i < m_vEntities.size(); i++) {
@@ -180,16 +173,27 @@ Scene::Scene(std::string& pyinitScript) :
 		for (auto& file : sndFiles) 
 			Audio::LoadSound(file);
 
+		// Collision primitives (this will get more complicated)
+		std::string colPrim;
+		check(pyEntModule.get_attr("r_ColPrim").convert(colPrim), "Getting basic collision primitive from ent module");
+
+		// Make collision resource, (assume uniform scale, used for mass and r)
+		// TODO add mass, elasticity to init tuple
+		if (colPrim == "AABB")  // AABBs are assumed to be "walls" of high mass for now
+			m_vAABB.emplace_back(3.f*vec2(-pos), vec2(pos), 1e10f, 1.f, vec2(scale) / 2.f, m_vEntities.size());
+		else 
+			m_vCircles.emplace_back(3.f*vec2(-pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale), m_vEntities.size());
+		
 		// Make drawable
 		m_vDrawables.emplace_back(iqmFile, color, pos, maxEl(scale), rot);
 
 		// Get collision info (assume uniform scale, used for mass and r)
 		m_vCircles.emplace_back(3.f*vec2(-pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale), m_vEntities.size());
 
-		// ID is len of the list in python
+		// Create component/entity identifiers
+		int colID = m_vCircles.size() + m_vDrawables.size() - 1;
+		int drID = m_vDrawables.size() - 1;
 		int uID = m_vEntities.size();
-		int colID = m_vCircles.size();
-		int drID = m_vDrawables.size();
 		m_vEntities.emplace_back(uID, this, pyEntModule, colID, drID);
 		pyEntModule.call_function("AddEntity", &m_vEntities[i]).convert(uID);
 		
@@ -209,8 +213,11 @@ Drawable * Scene::GetDrByID(uint32_t id) const {
 	return nullptr;
 }
 
+// This could be in another container, so linear search
 RigidBody_2D * Scene::GetColByID(uint32_t id) const {
-	if (id < m_vCircles.size())
+	if (id < m_Walls.size())
+		return (RigidBody_2D *)&m_Walls[id];
+	else if (id < m_vCircles.size())
 		return (RigidBody_2D *)&m_vCircles[id];
 	return nullptr;
 }
