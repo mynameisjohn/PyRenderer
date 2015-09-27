@@ -16,12 +16,14 @@ class Drawable {
 	vec4 m_Color;
 	quatvec m_QV;
 	float m_Scale; // Could be a part of quatvec...
+	uint32_t m_EntID;
 public:
 	Drawable();
+	Drawable(std::string iqmSrc, vec4 clr, vec3 pos, uint32_t ID, float scale = 1.f, fquat rot = fquat(0, 0, 0, 0));
+
 	mat4 GetMV() const;
 	vec4 GetColor() const;
-
-	Drawable(std::string iqmSrc, vec4 clr, vec3 pos = vec3(0), float scale = 1.f, fquat rot = fquat(0,0,0,0));
+	
 	void Draw();
 
 	void SetPos(vec3 T);

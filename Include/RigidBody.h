@@ -14,18 +14,24 @@ struct AABB;
 
 // I don't know if the base collision primitive should be a pycomponent
 struct RigidBody_2D {
+protected:
+	// Protect the ent ID
+	uint32_t m_EntID; // Entity ID, should be in a base class but whatever
+
+public:
 	vec2 V; // Velocity
 	vec2 C; // Center point
 	float m; // Mass
 	float e; // elasticity
-	int entID;
-	RigidBody_2D(vec2 V = vec2(0), vec2 C = vec2(0), float m = 1.f, float e = 1.f);
+
+	RigidBody_2D();
+	RigidBody_2D(vec2 vel, vec2 c, float mass, float elasticity, uint32_t ID);
 
 	// Get Physical Quantities
 	vec2 GetMomentum() const;
 	float GetKineticEnergy() const;
 
-	// Overlap
+	// Overlap, everyone needs to be compatible
 	virtual bool IsOverlapping(const Circle& other) const = 0;
 	virtual bool IsOverlapping(const AABB& other) const = 0;
 
@@ -46,7 +52,8 @@ struct RigidBody_2D {
 struct Circle : public RigidBody_2D {
 	float r; // Radius
 
-	Circle(vec2 V = vec2(0), vec2 C = vec2(0), float m = 1.f, float e = 1.f, float radius = 1.f);
+	Circle();
+	Circle(vec2 vel, vec2 c, float mass, float elasticity, float radius, uint32_t ID);
 
 	// Collision Overrides
 	bool IsOverlapping(const Circle& other) const override;
@@ -60,7 +67,8 @@ struct Circle : public RigidBody_2D {
 struct AABB : public RigidBody_2D {
 	vec2 R; // half widths along x, y
 
-	AABB(vec2 V = vec2(0), float m = 1.f, float e = 1.f, float x = 0.f, float y = 0.f, float w = 1.f, float h = 1.f);
+	AABB();
+	AABB(vec2 vel, float m, float e, float x, float y, float w, float h, uint32_t ID);
 
 	// useful things
 	float width() const;

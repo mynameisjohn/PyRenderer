@@ -184,7 +184,7 @@ Scene::Scene(std::string& pyinitScript) :
 		m_vDrawables.emplace_back(iqmFile, color, pos, maxEl(scale), rot);
 
 		// Get collision info (assume uniform scale, used for mass and r)
-		m_vCircles.emplace_back(3.f*vec2(-pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale));
+		m_vCircles.emplace_back(3.f*vec2(-pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale), m_vEntities.size());
 
 		// ID is len of the list in python
 		int uID = m_vEntities.size();
