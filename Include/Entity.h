@@ -4,13 +4,17 @@
 #include "Util.h"
 #include <vec4.hpp>
 
-// Generic pythone exposed object (should this be in PyLiaison?)
-class PyExposed {
+class OwnedByEnt {
+protected:
+	Entity * m_pEntity;
 public:
-	virtual bool PyExpose(const std::string& name, PyObject * module) = 0;
+	OwnedByEnt();
+	OwnedByEnt(Entity * pEnt);
+	Entity * GetEntity();
+	uint32_t GetEntID() const;
 };
 
-class Entity : public PyExposed {
+class Entity {
 public:
 	// Probably end up making a class out of this
 	using MessageQueue = std::list<std::function<bool(void)>>;
@@ -23,18 +27,23 @@ public:
 		DR_COLOR
 	};
 
-	// Maybe not the best idea
-	friend class Scene;
-protected:
+private:
 	int m_UniqueID;
-	int m_ColID;
-	int m_DrID;
+	RigidBody_2D * m_ColCmp;
+	Drawable * m_DrCmp;
 	Scene * m_Scene;
 	MessageQueue m_MessageQ;
 	Python::Object m_PyModule;
+
+
+protected:
+	friend class Scene;
+	void SetColCmp(RigidBody_2D * colPtr);
+	void SetDrCmp(Drawable * drPtr);
+
 public:
 	Entity();
-	Entity(int id, Scene * scnPtr, Python::Object module, int cId = -1, int drId = -1);
+	Entity(int id, Scene * scnPtr, Python::Object module);
 	
 	Python::Object GetPyModule()  const;
 	int GetID() const;
@@ -50,7 +59,4 @@ public:
 	//bool PostMessage(int C, int M, Python::Object data);
 
 	void Update();
-
-	// Python expose override
-	bool PyExpose(const std::string& name, PyObject * module) override;
 };

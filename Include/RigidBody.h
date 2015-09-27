@@ -13,19 +13,14 @@ struct Circle;
 struct AABB;
 
 // I don't know if the base collision primitive should be a pycomponent
-struct RigidBody_2D {
-protected:
-	// Protect the ent ID
-	uint32_t m_EntID; // Entity ID, should be in a base class but whatever
-
-public:
+struct RigidBody_2D : public OwnedByEnt {
 	vec2 V; // Velocity
 	vec2 C; // Center point
 	float m; // Mass
 	float e; // elasticity
 
 	RigidBody_2D();
-	RigidBody_2D(vec2 vel, vec2 c, float mass, float elasticity, uint32_t ID);
+	RigidBody_2D(vec2 vel, vec2 c, float mass, float elasticity);
 
 	// Get Physical Quantities
 	vec2 GetMomentum() const;
@@ -55,7 +50,7 @@ struct Circle : public RigidBody_2D {
 	float r; // Radius
 
 	Circle();
-	Circle(vec2 vel, vec2 c, float mass, float elasticity, float radius, uint32_t ID);
+	Circle(vec2 vel, vec2 c, float mass, float elasticity, float radius);
 
 	// Collision Overrides
 	bool IsOverlapping(const Circle& other) const override;
@@ -70,8 +65,8 @@ struct AABB : public RigidBody_2D {
 	vec2 R; // half widths along x, y
 
 	AABB();
-	AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r, uint32_t ID);
-	AABB(vec2 vel, float m, float e, float x, float y, float w, float h, uint32_t ID);
+	AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r);
+	AABB(vec2 vel, float m, float e, float x, float y, float w, float h);
 
 	// useful things
 	float width() const;

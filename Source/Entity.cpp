@@ -5,35 +5,28 @@
 
 Entity::Entity() :
 	m_UniqueID(-1),
-	m_ColID(-1),
-	m_DrID(-1),
+	m_ColCmp(nullptr),
+	m_DrCmp(nullptr),
 	m_Scene(nullptr)
 {}
 
-Entity::Entity(int id, Scene * scnPtr, Python::Object pyObj, int cId, int drId) :
+Entity::Entity(int id, Scene * scnPtr, Python::Object module) :
 	m_UniqueID(id),
-	m_ColID(cId),
-	m_DrID(drId),
+	m_ColCmp(nullptr),
+	m_DrCmp(nullptr),
 	m_Scene(scnPtr),
-	m_PyModule(pyObj)
+	m_PyModule(module)
 {}
-
-bool Entity::PyExpose(const std::string& name, PyObject * module) {
-	Python::Expose_Object(this, name, module);
-	return true;
-}
 
 bool Entity::PostMessage(int C, int M) {
 	bool handled = false;
 
 	switch (C) {
 	case int(CompID::DRAWABLE) : // These casts are unfortunate
-		if (m_DrID < 0 || m_ColID < 0)
-			return false;
 		switch (M) {
 		case int(MsgID::DR_TRANSLATE) : {
-			Drawable * const drPtr = m_Scene->GetDrByID(m_DrID);
-			const vec2 pos = m_Scene->GetColByID(m_ColID)->C;
+			Drawable * const drPtr = m_DrCmp;
+			const vec2 pos = m_ColCmp->C;
 			// Get last translation, apply, reset
 			m_MessageQ.emplace_back([drPtr, pos]() {
 				drPtr->SetPos(vec3(pos, 0.f));
@@ -57,7 +50,7 @@ bool Entity::PostMessage<vec4>(int C, int M, vec4 v) {
 	case int(CompID::DRAWABLE) : // These casts are unfortunate
 		switch (M) {
 		case int(MsgID::DR_COLOR) : {
-			const auto drPtr = m_Scene->GetDrByID(m_DrID);
+			Drawable * const drPtr = m_DrCmp;
 			// Get last translation, apply, reset
 			m_MessageQ.emplace_back([drPtr, v]() {
 				drPtr->SetColor(v);
@@ -85,3 +78,11 @@ Python::Object Entity::GetPyModule()  const {
 int Entity::GetID() const {
 	return m_UniqueID;
 }
+
+OwnedByEnt::OwnedByEnt() :
+	m_pEntity(nullptr)
+{}
+
+OwnedByEnt::OwnedByEnt(Entity * pEnt) :
+	m_pEntity(pEnt)
+{}

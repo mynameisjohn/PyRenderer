@@ -3,34 +3,18 @@
 #include "RigidBody.h"
 #include "SpeculativeContacts.h"
 
-RigidBody_2D::RigidBody_2D(vec2 V, vec2 C, float m, float e, Entity * pEnt) :
+RigidBody_2D::RigidBody_2D(vec2 V, vec2 C, float m, float e) :
 	V(V),
 	C(C),
 	m(m),
-	e(e),
-	lastT(0),
-	PyComponent(pEnt)
+	e(e)
 {}
 
 // I guess this just advances the object?
 void RigidBody_2D::Integrate() {
 	const float dT = 0.005f; // TODO better integration methods?
 	vec2 delta = dT * V;
-	lastT += delta; // Entity should reset this
 	C += delta;
-}
-
-// TODO get this to post a translation message
-bool RigidBody_2D::PyUpdate() {
-	// For now just hack it
-	m_pEntity->GetPyModule().call_function("UpdateCollision", m_pEntity->GetID());
-	return true;
-}
-
-bool RigidBody_2D::PyExpose(const std::string& name, PyObject * module) {
-	Python::Expose_Object(this, name, module);
-
-	return true;
 }
 
 vec2 RigidBody_2D::GetMomentum() const {
@@ -54,14 +38,14 @@ bool Circle::IsOverlapping(const AABB& other) const {
 	return x && y;
 }
 
-Circle::Circle(vec2 V, vec2 C, float m, float e, float radius, Entity * pEnt) :
+Circle::Circle(vec2 V, vec2 C, float m, float e, float radius) :
 	r(radius),
-	RigidBody_2D(V, C, m, e, pEnt)
+	RigidBody_2D(V, C, m, e)
 {}
 
-AABB::AABB(vec2 v, float mass, float el, float x, float y, float w, float h, Entity * pEnt):
+AABB::AABB(vec2 v, float mass, float el, float x, float y, float w, float h):
 	R(vec2(w, h) / 2.f),
-	RigidBody_2D(v,vec2(x,y)+ vec2(w, h) / 2.f,mass, el, pEnt)
+	RigidBody_2D(v,vec2(x,y)+ vec2(w, h) / 2.f,mass, el)
 {
 	R = vec2(w, h) / 2.f;
 }
@@ -169,53 +153,3 @@ static void ApplyCollisionImpulse_Generic(RigidBody_2D * a, RigidBody_2D * b, ve
 void RigidBody_2D::ApplyCollisionImpulse(RigidBody_2D * const other, vec2 n) {
 	ApplyCollisionImpulse_Generic(this, other, n);
 }
-
-//// Apply collision impulse between two circles
-//void Circle::ApplyCollisionImpulse(RigidBody_2D * const other) {
-//	// This is expensive, but right now I really don't care
-//	if (glm::length(V - other->V) < 0.001f)
-//		return;
-//
-//	vec2 n = glm::normalize(other->C - C);
-//	ApplyCollisionImpulse_Generic((RigidBody_2D *)this, other, n);
-//
-//	//// Solve 1-D collision along normal between objects
-//	//vec2 n = glm::normalize(other->C - C);
-//	//float v1i = glm::dot(n, V);
-//	//float v2i = glm::dot(n, other->V);
-//
-//	//// 1/(m1+m2),  coef of restitution
-//	//const float Msum_1 = 1.f / (m + other->m);
-//	//const float Cr = 0.5f * (e + other->e);
-//
-//	//// find momentum, solve for final velocity
-//	//float p1 = m * v1i, p2 = other->m * v2i;
-//	//float A = p1 + p2, B = Cr*(p1 - p2);
-//	//float v1f = (A - B)*Msum_1;
-//	//float v2f = (A + B)*Msum_1;
-//
-//	//// apply velocity along normal direction
-//	//V = v1f*n;
-//	//other->V = v2f*n;
-//}
-//
-//// This could be a lot cheaper
-//void AABB::ApplyCollisionImpulse(RigidBody_2D * const other) {
-//	// This is expensive, but right now I really don't care
-//	if (glm::length(V - other->V) < 0.001f)
-//		return;
-//
-//	// Find the collision normal, and the half width normal in that direction
-//	vec2 n = glm::normalize(other->C - C);
-//	vec2 rN = glm::normalize(R*n);
-//
-//	// If 
-//	if (glm::dot(n, rN) > 0.001f) {
-//		if (fabs(rN.x) > fabs(rN.y))
-//			n = glm::normalize(vec2(rN.x, 0));
-//		else
-//			n = glm::normalize(vec2(0, rN.y));
-//	}
-//
-//	ApplyCollisionImpulse_Generic((RigidBody_2D *)this, (RigidBody_2D *)other, n);
-//}

@@ -104,9 +104,7 @@ int Scene::Update() {
 	return nCols;
 }
 
-Scene::Scene(std::string& pyinitScript) :
-	m_Walls({AABB(), AABB(), AABB(), AABB()})
-{
+Scene::Scene(std::string& pyinitScript) {
 	auto check = [](bool cond, std::string msg = "") {
 		if (!msg.empty())
 			std::cout << msg << "----" << (cond ? " succeeded! " : " failed! ") << std::endl;
@@ -130,23 +128,20 @@ Scene::Scene(std::string& pyinitScript) :
 	// Initialize Camera
 	pyinitModule.call_function("InitCamera", &m_Camera);
 
-	// These should match the camera
-	vec4 wB; // vec4(x,y,w,h)
-	
-	pyinitModule.call_function("GetWalls").convert(wB);
-	
-	// The walls are actually four boxes
-	//m_Walls[0] = AABB(vec2(0), 1e10f, 1.f, wB.x - wB.z, wB.y, wB.z, wB.w); // (x-w,y,w,h)
-	//m_Walls[1] = AABB(vec2(0), 1e10f, 1.f, wB.x, wB.y - wB.w, wB.z, wB.w); // (x,y-h,w,h)
-	//m_Walls[2] = AABB(vec2(0), 1e10f, 1.f, wB.x + wB.z, wB.y, wB.z, wB.w); // (x+w,y,w,h)
-	//m_Walls[3] = AABB(vec2(0), 1e10f, 1.f, wB.x, wB.y + wB.w, wB.z, wB.w); // (x, y+h, w, h)
-
 	// Like a mini factory (no collision info for now, just circles)
-	using EntInfo = std::tuple<vec3, vec3, fquat, vec4, std::string>;
+	using EntInfo = std::tuple<
+		vec2, // Position
+		vec2, // Scale
+		fquat, // Rotation
+		vec4, // Color
+		std::string>;
 
 	// Now loop through all named tuples in the script
 	std::vector<EntInfo> v_EntInfo;
 	check(pyinitModule.get_attr("r_Entities").convert(v_EntInfo), "Getting all Entity Info");
+
+	// Preallocate all entities
+	m_vEntities.resize(v_EntInfo.size());
 
 	// Once you have it, create individual entities and components
 	for (int i = 0; i < m_vEntities.size(); i++) {
@@ -154,8 +149,8 @@ Scene::Scene(std::string& pyinitScript) :
 		auto ei = v_EntInfo[i];
 
 		// Unpack tuple
-		vec3 pos = std::get<0>(ei);
-		vec3 scale = std::get<1>(ei);
+		vec3 pos(std::get<0>(ei), 0.f);
+		vec3 scale(std::get<1>(ei), 1.f);
 		fquat rot = std::get<2>(ei);
 		vec4 color = glm::clamp(std::get<3>(ei), vec4(0), vec4(1));
 		std::string pyEntModScript = std::get<4>(ei);
@@ -190,19 +185,20 @@ Scene::Scene(std::string& pyinitScript) :
 		// Get collision info (assume uniform scale, used for mass and r)
 		m_vCircles.emplace_back(3.f*vec2(-pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale), m_vEntities.size());
 
-		// Create component/entity identifiers
-		int colID = m_vCircles.size() + m_vDrawables.size() - 1;
-		int drID = m_vDrawables.size() - 1;
-		int uID = m_vEntities.size();
-		m_vEntities.emplace_back(uID, this, pyEntModule, colID, drID);
-		pyEntModule.call_function("AddEntity", &m_vEntities[i]).convert(uID);
-		
 		// Create Entity
-		Entity ent(m_vEntities.size(), this, pyEntModule, m_vCircles.size() - 1, m_vDrawables.size() - 1);
+		Entity ent(m_vEntities.size(), this, pyEntModule);
 		m_vEntities.push_back(ent);
 	}
 
-	// Expose in python, mapping vector idx to a python dict (is this bad?)
+	// Fix entity pointers (I hate this)
+	for (auto& circle : m_vCircles)
+		circle.GetEntity()->SetColCmp(&circle);
+	for (auto& box : m_vAABB)
+		box.GetEntity()->SetColCmp(&box);
+	for (auto& drawable : m_vDrawables)
+		drawable.GetEntity()->SetDrCmp(&drawable);
+
+	// Expose in python, mapping ent ID to Exposed Entity
 	for (auto& ent : m_vEntities)
 		ent.GetPyModule().call_function("AddEntity", ent.GetID(), &ent);
 }
