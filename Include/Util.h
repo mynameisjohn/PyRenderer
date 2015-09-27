@@ -74,6 +74,10 @@ inline float radToDeg(float r)  {
 	return float(r * 180.f / M_PI);
 }
 
+float maxEl(vec2 v);
+float maxEl(vec3 v);
+float maxEl(vec4 v);
+
 inline uint32_t wrapIdx(int dim, int idx)  {
 	return (dim + idx) % dim;
 }

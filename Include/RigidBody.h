@@ -13,13 +13,13 @@ struct Circle;
 struct AABB;
 
 // I don't know if the base collision primitive should be a pycomponent
-struct RigidBody_2D : public PyComponent {
+struct RigidBody_2D {
 	vec2 V; // Velocity
 	vec2 C; // Center point
 	float m; // Mass
 	float e; // elasticity
 	vec2 lastT; // Last translation (doesn't belong here)
-	RigidBody_2D(vec2 V = vec2(0), vec2 C = vec2(0), float m = 1.f, float e = 1.f, Entity * pEnt = nullptr);
+	RigidBody_2D(vec2 V = vec2(0), vec2 C = vec2(0), float m = 1.f, float e = 1.f);
 
 	// Get Physical Quantities
 	vec2 GetMomentum() const;
@@ -38,18 +38,12 @@ struct RigidBody_2D : public PyComponent {
 
 	// Integrate velocity over time
 	void Integrate();
-
-	// Python overrides, Not really primitive specific
-	bool PyExpose(const std::string& name, PyObject * module) override;
-	bool PyUpdate() override;
-
-
 };
 
 struct Circle : public RigidBody_2D {
 	float r; // Radius
 
-	Circle(vec2 V = vec2(0), vec2 C = vec2(0), float m = 1.f, float e = 1.f, float radius = 1.f, Entity * pEnt = nullptr);
+	Circle(vec2 V = vec2(0), vec2 C = vec2(0), float m = 1.f, float e = 1.f, float radius = 1.f;
 
 	// Collision Overrides
 	bool IsOverlapping(const Circle& other) const override;
@@ -63,7 +57,7 @@ struct Circle : public RigidBody_2D {
 struct AABB : public RigidBody_2D {
 	vec2 R; // half widths along x, y
 
-	AABB(vec2 V = vec2(0), float m = 1.f, float e = 1.f, float x = 0.f, float y = 0.f, float w = 1.f, float h = 1.f, Entity * pEnt = nullptr);
+	AABB(vec2 V = vec2(0), float m = 1.f, float e = 1.f, float x = 0.f, float y = 0.f, float w = 1.f, float h = 1.f);
 
 	// useful things
 	float width() const;

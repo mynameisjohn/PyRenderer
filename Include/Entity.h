@@ -34,7 +34,7 @@ protected:
 	Python::Object m_PyModule;
 public:
 	Entity();
-	Entity(int id, Scene * scnPtr, int cId = -1, int drId = -1);
+	Entity(int id, Scene * scnPtr, Python::Object module, int cId = -1, int drId = -1);
 	
 	Python::Object GetPyModule()  const;
 	int GetID() const;

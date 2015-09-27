@@ -20,8 +20,8 @@ public:
 	int Draw();
 	int Update();
 
-	Drawable * GetDrByID(int id);
-	Circle * GetColByID(int id);
+	Drawable * GetDrByID(uint32_t id) const;
+	RigidBody_2D * GetColByID(uint32_t id) const;
     
 	// 
 private:

@@ -7,6 +7,10 @@
 #include "SpeculativeContacts.h"
 #include "Audible.h"
 
+// Collision Debug Functions
+Drawable ToDrawable(AABB box);
+Drawable ToDrawable(Circle circ);
+Drawable ToDrawable(Contact con);
 
 int Scene::Draw() {
 	auto sBind = m_Shader.ScopeBind();
@@ -19,21 +23,8 @@ int Scene::Draw() {
 		//m_PyObjCache.begin()->second.call_function("sayHello", &m_Camera);
 	}
 
-	auto AABBtoDrawable = [](const AABB& box) {
-		vec3 S(box.R, 0.f); // scale
-		vec3 T(box.left() + box.R.x, box.bottom() + box.R.y, 0.f);
-		mat4 MV = glm::translate(T)*glm::scale(S);
-		return Drawable("quad.iqm", vec4(1), MV);
-	};
-	auto CircletoDrawable = [](const Circle& circ) {
-		vec3 S(circ.r, circ.r, 0.f); // scale
-		vec3 T(circ.C, 0.f);
-		mat4 MV = glm::translate(T)*glm::scale(S);
-		return Drawable("circle.iqm", vec4(1), MV);
-	};
-
 	for (auto& wall : m_Walls) {
-		Drawable drWall(AABBtoDrawable(wall));
+		Drawable drWall(ToDrawable(wall));
 		mat4 PMV = m_Camera.GetMat() * drWall.GetMV();
 		vec4 c = drWall.GetColor();
 		glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
@@ -41,21 +32,20 @@ int Scene::Draw() {
 		drWall.Draw();
 	}
 
-	for (auto& contact : m_SpeculativeContacts) {
-		float nrm(-1);
-		for (auto& p : contact.pos) {
-			fquat rot = getQuatFromVec2(nrm*vec2(contact.normal.y, contact.normal.x));
-			mat4 MV = glm::translate(vec3(p, 0.f)) *  glm::mat4_cast(rot) * glm::scale(vec3(0.78f));
-			
-			Drawable drContact("pointer.iqm", vec4(contact.normal, 1.f, 1.f), MV);
-			mat4 PMV = m_Camera.GetMat() * drContact.GetMV();
-			vec4 c = drContact.GetColor();
-			glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
-			glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
-			drContact.Draw();
-			nrm = -nrm;
-		}
-	}
+	//for (auto& contact : m_SpeculativeContacts) {
+	//	float nrm(-1);
+	//	for (auto& p : contact.pos) {
+	//		fquat rot = getQuatFromVec2(nrm*vec2(contact.normal.y, contact.normal.x));
+	//		
+	//		Drawable drContact("pointer.iqm", vec4(contact.normal, 1.f, 1.f), vec3(p, 0.f), 0.78f, rot);
+	//		mat4 PMV = m_Camera.GetMat() * drContact.GetMV();
+	//		vec4 c = drContact.GetColor();
+	//		glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
+	//		glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
+	//		drContact.Draw();
+	//		nrm = -nrm;
+	//	}
+	//}
 
 	m_SpeculativeContacts.clear();
 
@@ -161,9 +151,9 @@ Scene::Scene(std::string& pyinitScript) :
 	check(pyinitModule.get_attr("r_Entities").convert(v_EntInfo), "Getting all Entity Info");
 
 	// Precreate all entities, which may be a bad idea
-	m_vEntities.resize(v_EntInfo.size());
-	m_vCircles.resize(v_EntInfo.size());
-	m_vDrawables.resize(v_EntInfo.size());
+	//m_vEntities.resize(v_EntInfo.size());
+	//m_vCircles.resize(v_EntInfo.size());
+	//m_vDrawables.resize(v_EntInfo.size());
 
 	// Once you have it, create individual entities and components
 	for (int i = 0; i < m_vEntities.size(); i++) {
@@ -180,9 +170,6 @@ Scene::Scene(std::string& pyinitScript) :
 		// Load the python module
 		auto pyEntModule = Python::Object::from_script(SCRIPT_DIR + pyEntModScript);
 
-		// MV Transform
-		mat4 MV = glm::translate(pos) * glm::mat4_cast(rot) * glm::scale(scale);
-
 		// IQM File
 		std::string iqmFile;
 		check(pyEntModule.get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module " + pyEntModScript);
@@ -194,26 +181,32 @@ Scene::Scene(std::string& pyinitScript) :
 			Audio::LoadSound(file);
 
 		// Make drawable
-		Drawable dr(iqmFile, color, MV, &m_vEntities[i]);
+		Drawable dr(iqmFile, color, pos, maxEl(scale), rot);
 
-		// Get collision info
-		float radius = scale[0]; // Assume uniform scale for now...
-		vec2 c(pos);
+		// Get collision info (assume uniform scale, used for mass and r)
+		Circle c(3.f*vec2(-pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale));
 
-		// Reinitialize vector objects
-		m_vDrawables[i] = dr;
-		m_vCircles[i] = Circle(5.f*vec2(-pos), vec2(pos), scale[0], 1.f, scale[0], &m_vEntities[i]);
-
-		// Get the pointers (this has to change)
-		Drawable * drPtr = &m_vDrawables[i];
-		Circle * cPtr = &m_vCircles[i];
+		// These three are a crew
+		m_vDrawables.push_back(dr);
+		m_vCircles.push_back(c);
 
 		// ID is len of the list in python
 		int uID; 
 		pyEntModule.call_function("AddEntity", &m_vEntities[i]).convert(uID);
 		
-		// Reinitialize entity
-		m_vEntities[i] = Entity(uID, cPtr, drPtr);
-		m_vEntities[i].m_PyModule = pyEntModule;
+		// Create Entity
+		m_vEntities.emplace_back(uID, this, pyEntModule, m_vCircles.size()-1, m_vDrawables.size()-1);
 	}
+}
+
+Drawable * Scene::GetDrByID(uint32_t id) const {
+	if (id < m_vDrawables.size())
+		return &m_vDrawables[id];
+	return nullptr;
+}
+
+RigidBody_2D * Scene::GetColByID(uint32_t id) const {
+	if (id < m_vCircles.size())
+		return &m_vCircles[id];
+	return nullptr;
 }
