@@ -1,11 +1,24 @@
+#ifdef _WIN32
+// For path stuff
+#include <Windows.h>
+
+// For algorithm
+#ifdef max
+#undef max
+#endif
+
+#ifdef min
+#undef min
+#endif
+
+#endif
+
 #include "Util.h"
 
 #include <glm.hpp>
 #include <gtc/quaternion.hpp>
 
-#ifdef _WIN32
-#include <Windows.h>
-#endif
+
 
 // Definitions of glm print functions
 std::ostream& operator<<(std::ostream& os, const vec2& vec) {
@@ -48,6 +61,27 @@ std::string FixBackslash(const std::string& in) {
 	std::string out(in);
 	std::replace(out.begin(), out.end(), '\\', '/');
 	return out;
+}
+
+float maxEl(vec2 v) {
+	float ret(0.f);
+	for (int i = 0; i < 2; i++)
+		ret = std::max(ret, v[i]);
+	return ret;
+}
+
+float maxEl(vec3 v) {
+	float ret(0.f);
+	for (int i = 0; i < 3; i++)
+		ret = std::max(ret, v[i]);
+	return ret;
+}
+
+float maxEl(vec4 v) {
+	float ret(0.f);
+	for (int i = 0; i < 4; i++)
+		ret = std::max(ret, v[i]);
+	return ret;
 }
 
 

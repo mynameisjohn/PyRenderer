@@ -29,5 +29,5 @@ class Solver {
 	uint32_t m_nIterations;
 public:
 	Solver(int nIt = 10) : m_nIterations(nIt) {}
-	operator()(std::list<Contact>& contacts);
+	void operator()(std::list<Contact>& contacts);
 };

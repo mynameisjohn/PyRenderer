@@ -12,19 +12,17 @@ Drawable::Drawable() :
 	m_VAO(0),
 	m_nIdx(0),
 	m_Color(1),
-	m_Scale(0),
-	m_EntID(0)
+	m_Scale(0)
 {}
 
 // This will probably have to be a bit more flexible
-Drawable::Drawable(std::string iqmFileName, vec4 color, vec3 pos, int ID, float scale, fquat rot) :
+Drawable::Drawable(std::string iqmFileName, vec4 color, vec3 pos, float scale, fquat rot) :
 	m_SrcFile(iqmFileName),
 	m_VAO(0),
 	m_nIdx(0),
 	m_Color(color),
 	m_QV(pos, rot),
-	m_Scale(scale),
-	m_EntID(ID)
+	m_Scale(scale)
 {
 	// Get rid of the .iqm extension (for no real reason) (and it better be there)
 	m_SrcFile = m_SrcFile.substr(0, m_SrcFile.find(".iqm"));

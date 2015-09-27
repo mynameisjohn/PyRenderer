@@ -82,17 +82,18 @@ int Scene::Update() {
 	solve(m_SpeculativeContacts);
 	for (auto& c : m_SpeculativeContacts) {
 		if (c.isColliding) {
-			int id1 = c.pair[0]->GetEntID();
-			int id2 = c.pair[1]->GetEntID();
-			m_vEntities[id1].GetPyModule().call_function("HandleCollision", id1, id2);
-			m_vEntities[id2].GetPyModule().call_function("HandleCollision", id1, id2);
+			Entity * e1 = c.pair[0]->GetEntity();
+			Entity * e2 = c.pair[1]->GetEntity();
+			if (e1 && e2) {
+				e1->GetPyModule().call_function("HandleCollision", e1->GetID(), e2->GetID());
+				e1->GetPyModule().call_function("HandleCollision", e2->GetID(), e1->GetID());
+			}
 		}
 	}
 
 	// Spec contacts will change all this
 	for (auto& c : m_vCircles) {
 		c.Integrate();
-		c.Update();
 	}
 
 	//for (auto& d : m_vDrawables) 
@@ -174,16 +175,21 @@ Scene::Scene(std::string& pyinitScript) {
 
 		// Make collision resource, (assume uniform scale, used for mass and r)
 		// TODO add mass, elasticity to init tuple
-		if (colPrim == "AABB")  // AABBs are assumed to be "walls" of high mass for now
-			m_vAABB.emplace_back(3.f*vec2(-pos), vec2(pos), 1e10f, 1.f, vec2(scale) / 2.f, m_vEntities.size());
-		else 
-			m_vCircles.emplace_back(3.f*vec2(-pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale), m_vEntities.size());
-		
-		// Make drawable
-		m_vDrawables.emplace_back(iqmFile, color, pos, maxEl(scale), rot);
+		if (colPrim == "AABB") {  // AABBs are assumed to be "walls" of high mass for now
+			AABB box(3.f*vec2(-pos), vec2(pos), 1e10f, 1.f, vec2(scale) / 2.f);
+			box.SetEntity(&m_vEntities[i]);
+			m_vAABB.push_back(box);
+		}
+		else {
+			Circle circ(3.f*vec2(-pos), vec2(pos), 1e10f, 1.f, maxEl(scale));
+			circ.SetEntity(&m_vEntities[i]);;
+			m_vCircles.push_back(circ);
+		}
 
-		// Get collision info (assume uniform scale, used for mass and r)
-		m_vCircles.emplace_back(3.f*vec2(-pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale), m_vEntities.size());
+		// Make drawable
+		Drawable dr(iqmFile, color, pos, maxEl(scale), rot);
+		dr.SetEntity(&m_vEntities[i]);
+		m_vDrawables.push_back(dr);
 
 		// Create Entity
 		Entity ent(m_vEntities.size(), this, pyEntModule);

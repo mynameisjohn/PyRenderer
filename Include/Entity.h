@@ -4,15 +4,22 @@
 #include "Util.h"
 #include <vec4.hpp>
 
+class Entity;
+
 class OwnedByEnt {
 protected:
 	Entity * m_pEntity;
 public:
 	OwnedByEnt();
 	OwnedByEnt(Entity * pEnt);
-	Entity * GetEntity();
+	Entity * GetEntity() const;
 	uint32_t GetEntID() const;
+	void SetEntity(Entity * const pEnt);
 };
+
+class Drawable;
+class RigidBody_2D;
+class Scene;
 
 class Entity {
 public:

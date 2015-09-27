@@ -16,10 +16,9 @@ class Drawable : public OwnedByEnt {
 	vec4 m_Color;
 	quatvec m_QV;
 	float m_Scale; // Could be a part of quatvec...
-	int m_EntID;
 public:
 	Drawable();
-	Drawable(std::string iqmSrc, vec4 clr, vec3 pos, int ID, float scale = 1.f, fquat rot = fquat(0, 0, 0, 0));
+	Drawable(std::string iqmSrc, vec4 clr, vec3 pos, float scale = 1.f, fquat rot = fquat(0, 0, 0, 0));
 
 	mat4 GetMV() const;
 	vec4 GetColor() const;
@@ -33,10 +32,6 @@ public:
 	void Rotate(fquat Q);
 
 	void SetColor(vec4 C);
-
-	uint32_t GetEntID() const;
-
-	void IntroduceToEnt() override;
 
 	friend class Scene;
 protected:

@@ -1,4 +1,5 @@
 #include "Entity.h"
+
 #include "Drawable.h"
 #include "RigidBody.h"
 #include "Scene.h"
@@ -86,3 +87,23 @@ OwnedByEnt::OwnedByEnt() :
 OwnedByEnt::OwnedByEnt(Entity * pEnt) :
 	m_pEntity(pEnt)
 {}
+
+Entity * OwnedByEnt::GetEntity() const {
+	return m_pEntity;
+}
+
+uint32_t OwnedByEnt::GetEntID() const {
+	return 0;
+}
+
+void OwnedByEnt::SetEntity(Entity * const pEnt) {
+	m_pEntity = pEnt;
+}
+
+void Entity::SetColCmp(RigidBody_2D * colPtr) {
+	m_ColCmp = colPtr;
+}
+
+void Entity::SetDrCmp(Drawable * drPtr) {
+	m_DrCmp = drPtr;
+}

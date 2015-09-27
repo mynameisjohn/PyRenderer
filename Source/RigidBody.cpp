@@ -3,6 +3,14 @@
 #include "RigidBody.h"
 #include "SpeculativeContacts.h"
 
+RigidBody_2D::RigidBody_2D():
+	V(0),
+	C(0),
+	m(1),
+	e(1)
+{}
+
+
 RigidBody_2D::RigidBody_2D(vec2 V, vec2 C, float m, float e) :
 	V(V),
 	C(C),
@@ -38,9 +46,24 @@ bool Circle::IsOverlapping(const AABB& other) const {
 	return x && y;
 }
 
+Circle::Circle() :
+	r(1),
+	RigidBody_2D()
+{}
+
 Circle::Circle(vec2 V, vec2 C, float m, float e, float radius) :
 	r(radius),
 	RigidBody_2D(V, C, m, e)
+{}
+
+AABB::AABB() :
+	R(1),
+	RigidBody_2D()
+{}
+
+AABB::AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r):
+	R(r),
+	RigidBody_2D(vel, c, mass, elasticity)
 {}
 
 AABB::AABB(vec2 v, float mass, float el, float x, float y, float w, float h):

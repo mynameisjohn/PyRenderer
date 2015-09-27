@@ -53,9 +53,6 @@ void Solver::operator()(std::list<Contact>& contacts) {
 				c.pair[0]->V = glm::reflect(v1f, c.normal);
 				c.pair[1]->V = glm::reflect(v2f, c.normal);
 
-				if (Entity * ent = c.pair[1]->GetEntity())
-					ent->GetPyModule().call_function("HandleCollision", c.pair[0]->GetEntity()->GetID(), c.pair[1]->GetEntity() ? c.pair[1]->GetEntity()->GetID() : 0);
-
 				// I don't like doing this
 				c.isColliding = true;
 			}

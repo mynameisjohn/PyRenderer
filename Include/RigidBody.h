@@ -39,11 +39,6 @@ struct RigidBody_2D : public OwnedByEnt {
 
 	// Integrate velocity over time
 	void Integrate();
-
-	// Update
-	void Update();
-
-	uint32_t GetEntID() const;
 };
 
 struct Circle : public RigidBody_2D {
