@@ -19,6 +19,9 @@ public:
     // Render function
 	int Draw();
 	int Update();
+
+	Drawable * GetDrByID(int id);
+	Circle * GetColByID(int id);
     
 	// 
 private:

@@ -12,17 +12,17 @@ Drawable::Drawable() :
 	m_VAO(0),
 	m_nIdx(0),
 	m_Color(1),
-	m_MV(1)
+	m_Scale(0)
 {}
 
 // This will probably have to be a bit more flexible
-Drawable::Drawable(std::string iqmFileName, vec4 color, mat4 MV, Entity * pEnt) :
-	PyComponent(pEnt),
+Drawable::Drawable(std::string iqmFileName, vec4 color, vec3 pos, float scale, fquat rot) :
 	m_SrcFile(iqmFileName),
 	m_VAO(0),
 	m_nIdx(0),
 	m_Color(color),
-	m_MV(MV)
+	m_QV(pos, rot),
+	m_Scale(scale)
 {
 	// Get rid of the .iqm extension (for no real reason) (and it better be there)
 	m_SrcFile = m_SrcFile.substr(0, m_SrcFile.find(".iqm"));
@@ -70,23 +70,28 @@ Drawable::Drawable(std::string iqmFileName, vec4 color, mat4 MV, Entity * pEnt) 
 }
 
 mat4 Drawable::GetMV() const {
-	return m_MV;
+	return m_QV.ToMat4() * glm::scale(vec3(m_Scale));
 }
 
 vec4 Drawable::GetColor() const {
 	return m_Color;
 }
 
-void Drawable::LeftMultMV(mat4 M) {
-	m_MV = M * m_MV;
+// Todo correct these by type
+void Drawable::Translate(vec3 T) {
+	m_QV.V += T;
 }
 
-void Drawable::Translate(vec3 T) {
-	LeftMultMV(glm::translate(T));
+void Drawable::SetPos(vec3 T) {
+	m_QV.V = T;
 }
 
 void Drawable::Rotate(fquat Q) {
-	LeftMultMV(glm::mat4_cast(Q));
+	m_QV.Q = Q * m_QV.Q;
+}
+
+void Drawable::SetRot(fquat Q) {
+	m_QV.Q = Q;
 }
 
 void Drawable::SetColor(vec4 C) {
@@ -102,16 +107,4 @@ void Drawable::Draw() {
 
 /*static*/ void Drawable::SetPosHandle(GLint pH) {
 	s_PosHandle = pH;
-}
-
-// Python overrides
-bool Drawable::PyExpose(const std::string& name, PyObject * module) {
-	Python::Expose_Object(this, name, module);
-	return true;
-}
-
-// TODO
-bool Drawable::PyUpdate() {
-
-	return true;
 }

@@ -3,35 +3,34 @@
 #include "GL_Includes.h"
 #include "Util.h"
 #include "Entity.h"
+#include "quatvec.h"
 
 #include <vec4.hpp>
 #include <mat4x4.hpp>
 #include <gtc/quaternion.hpp>
 
-class Drawable : public PyComponent {
+class Drawable {
 	std::string m_SrcFile;
 	GLuint m_VAO;
 	GLuint m_nIdx;
 	vec4 m_Color;
-	mat4 m_MV;
-
+	quatvec m_QV;
+	float m_Scale; // Could be a part of quatvec...
 public:
 	Drawable();
 	mat4 GetMV() const;
 	vec4 GetColor() const;
 
-	Drawable(std::string, vec4, mat4, Entity * pEnt = nullptr);
+	Drawable(std::string iqmSrc, vec4 clr, vec3 pos = vec3(0), float scale = 1.f, fquat rot = fquat(0,0,0,0));
 	void Draw();
 
-	void LeftMultMV(mat4 M);
+	void SetPos(vec3 T);
 	void Translate(vec3 T);
+
+	void SetRot(fquat Q);
 	void Rotate(fquat Q);
 
 	void SetColor(vec4 C);
-
-	// Python overrides
-	bool PyExpose(const std::string& name, PyObject * module) override;
-	bool PyUpdate() override;
 
 	friend class Scene;
 protected:

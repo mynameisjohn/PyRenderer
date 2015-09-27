@@ -4,10 +4,6 @@
 #include "Util.h"
 #include <vec4.hpp>
 
-// Forwards
-class Circle;
-class Drawable;
-
 // Generic pythone exposed object (should this be in PyLiaison?)
 class PyExposed {
 public:
@@ -31,12 +27,14 @@ public:
 	friend class Scene;
 protected:
 	int m_UniqueID;
-	Circle * m_ColCmp;
-	Drawable * m_DrCmp;
+	int m_ColID;
+	int m_DrID;
+	Scene * m_Scene;
 	MessageQueue m_MessageQ;
 	Python::Object m_PyModule;
 public:
-	Entity(int id = -1, Circle * cCmp = nullptr, Drawable * drCmp = nullptr);
+	Entity();
+	Entity(int id, Scene * scnPtr, int cId = -1, int drId = -1);
 	
 	Python::Object GetPyModule()  const;
 	int GetID() const;
@@ -48,19 +46,11 @@ public:
 	// Void (no data) case
 	bool PostMessage(int C, int M);
 
+	// Who knows what it'll be?
+	//bool PostMessage(int C, int M, Python::Object data);
+
 	void Update();
 
 	// Python expose override
 	bool PyExpose(const std::string& name, PyObject * module) override;
-};
-
-// Python exposed component (Why is this here?)
-class PyComponent : public PyExposed {
-	friend class Scene;
-protected:
-	Entity * m_pEntity;
-public:
-	PyComponent(Entity * ePtr = nullptr);
-	Entity * GetEntity() const;
-	virtual bool PyUpdate() = 0;
 };
