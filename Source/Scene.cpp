@@ -84,21 +84,21 @@ int Scene::Update() {
 	solve(m_SpeculativeContacts);
 	for (auto& c : m_SpeculativeContacts) {
 		if (c.isColliding) {
-			Entity * e1 = c.pair[0]->GetEntity();
-			Entity * e2 = c.pair[1]->GetEntity();
-			if (e1 && e2)
-				e1->GetPyModule().call_function("HandleCollision", e1->GetID(), e2->GetID());
+			int id1 = c.pair[0]->entID;
+			int id2 = c.pair[1]->entID;
+			m_vEntities[id1].GetPyModule().call_function("HandleCollision", id1, id2);
+			m_vEntities[id2].GetPyModule().call_function("HandleCollision", id1, id2);
 		}
 	}
 
 	// Spec contacts will change all this
 	for (auto& c : m_vCircles) {
 		c.Integrate();
-		c.PyUpdate();
+		c.Update();
 	}
 
-	for (auto& d : m_vDrawables) 
-		d.PyUpdate();
+	//for (auto& d : m_vDrawables) 
+	//	d.PyUpdate();
 
 	for (auto& e : m_vEntities)
 		e.Update();
@@ -204,13 +204,13 @@ Scene::Scene(std::string& pyinitScript) :
 }
 
 Drawable * Scene::GetDrByID(uint32_t id) const {
-	if (id < m_vEntities.size())
-		return &m_vDrawables[m_vEntities[id].m_DrID];
+	if (id < m_vDrawables.size())
+		return (Drawable *)&m_vDrawables[id];
 	return nullptr;
 }
 
 RigidBody_2D * Scene::GetColByID(uint32_t id) const {
-	if (id < m_vEntities.size())
-		return &m_vCircles[m_vEntities[id].m_ColID];
+	if (id < m_vCircles.size())
+		return (RigidBody_2D *)&m_vCircles[id];
 	return nullptr;
 }
