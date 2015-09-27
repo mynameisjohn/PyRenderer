@@ -23,6 +23,10 @@ void RigidBody_2D::Integrate() {
 	const float dT = 0.005f; // TODO better integration methods?
 	vec2 delta = dT * V;
 	C += delta;
+
+	// I used to have python do this, but what's the point?
+	m_pEntity->PostMessage(int(Entity::CompID::DRAWABLE),
+		int(Entity::MsgID::DR_TRANSLATE));
 }
 
 vec2 RigidBody_2D::GetMomentum() const {

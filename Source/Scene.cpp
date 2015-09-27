@@ -92,9 +92,8 @@ int Scene::Update() {
 	}
 
 	// Spec contacts will change all this
-	for (auto& c : m_vCircles) {
+	for (auto& c : m_vCircles) 
 		c.Integrate();
-	}
 
 	//for (auto& d : m_vDrawables) 
 	//	d.PyUpdate();
