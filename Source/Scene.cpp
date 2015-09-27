@@ -57,20 +57,30 @@ int Scene::Update() {
 	// I think there's the same # of these every time...
 	Solver solve; 
 
+	// For every circle
 	for (auto it1 = m_vCircles.begin(); it1 != m_vCircles.end(); ++it1) {
+		// For every unique circle pair
 		for (auto it2 = it1 + 1; it2 != m_vCircles.end(); ++it2) {
 			// Get circle collisions
 			auto circleContacts = it1->GetClosestPoints(*it2);
 			m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), circleContacts.begin(), circleContacts.end());
 		}
 
-		// Get collisions with wall
-		for (auto& wall : m_Walls) {
-			auto wallContacts = wall.GetClosestPoints(*it1);
+		// For every unique circle box pair
+		for (auto& box : m_vAABB) {
+			auto wallContacts = box.GetClosestPoints(*it1);
 			m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), wallContacts.begin(), wallContacts.end());
 		}
 
 		totalEnergy += it1->GetKineticEnergy();
+	}
+
+	// For every unique box pair
+	for (auto it1 = m_vAABB.begin(); it1 != m_vAABB.end(); ++it1) {
+		for (auto it2 = it1 + 1; it2 != m_vAABB.end(); ++it2) {
+			auto boxContacts = it1->GetClosestPoints(*it2);
+			m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), boxContacts.begin(), boxContacts.end());
+		}
 	}
 
 	std::cout << m_SpeculativeContacts.size() << std::endl;
@@ -86,7 +96,7 @@ int Scene::Update() {
 			Entity * e2 = c.pair[1]->GetEntity();
 			if (e1 && e2) {
 				e1->GetPyModule().call_function("HandleCollision", e1->GetID(), e2->GetID());
-				e1->GetPyModule().call_function("HandleCollision", e2->GetID(), e1->GetID());
+				e2->GetPyModule().call_function("HandleCollision", e2->GetID(), e1->GetID());
 			}
 		}
 	}
@@ -206,19 +216,4 @@ Scene::Scene(std::string& pyinitScript) {
 	// Expose in python, mapping ent ID to Exposed Entity
 	for (auto& ent : m_vEntities)
 		ent.GetPyModule().call_function("AddEntity", ent.GetID(), &ent);
-}
-
-Drawable * Scene::GetDrByID(uint32_t id) const {
-	if (id < m_vDrawables.size())
-		return (Drawable *)&m_vDrawables[id];
-	return nullptr;
-}
-
-// This could be in another container, so linear search
-RigidBody_2D * Scene::GetColByID(uint32_t id) const {
-	if (id < m_Walls.size())
-		return (RigidBody_2D *)&m_Walls[id];
-	else if (id < m_vCircles.size())
-		return (RigidBody_2D *)&m_vCircles[id];
-	return nullptr;
 }

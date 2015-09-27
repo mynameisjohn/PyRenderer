@@ -28,6 +28,15 @@ def GetWalls():
 r_Entities = []
 Entity = namedtuple('Entity', ('pos', 'scale', 'rot', 'color', 'module'))
 
+# walls
+r_Entities.append(Entity(
+		pos = [-18.,0.],
+		scale = [9.,9.],
+		rot = makeQuat(0.,0.,1.,0.),
+		color = randColor(),
+		module = 'box.py'
+	))
+
 r_Entities.append(Entity(
 		pos = [6.,-3.],
 		scale = [1.,1.],

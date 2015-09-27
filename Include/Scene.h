@@ -19,18 +19,10 @@ public:
     // Render function
 	int Draw();
 	int Update();
-
-	Drawable * GetDrByID(uint32_t id) const;
-	RigidBody_2D * GetColByID(uint32_t id) const;
-    
 	// 
 private:
 	Shader m_Shader; // May be a container soon
 	Camera m_Camera;
-	
-	// Ideally these would be planes
-	std::array<AABB, 4> m_Walls;
-
 
 	std::vector<Entity> m_vEntities;
 	std::vector<Drawable> m_vDrawables;
