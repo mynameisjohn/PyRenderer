@@ -181,32 +181,36 @@ Scene::Scene(std::string& pyinitScript) :
 			Audio::LoadSound(file);
 
 		// Make drawable
-		Drawable dr(iqmFile, color, pos, maxEl(scale), rot);
+		m_vDrawables.emplace_back(iqmFile, color, pos, maxEl(scale), rot);
 
 		// Get collision info (assume uniform scale, used for mass and r)
-		Circle c(3.f*vec2(-pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale));
-
-		// These three are a crew
-		m_vDrawables.push_back(dr);
-		m_vCircles.push_back(c);
+		m_vCircles.emplace_back(3.f*vec2(-pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale));
 
 		// ID is len of the list in python
-		int uID; 
+		int uID = m_vEntities.size();
+		int colID = m_vCircles.size();
+		int drID = m_vDrawables.size();
+		m_vEntities.emplace_back(uID, this, pyEntModule, colID, drID);
 		pyEntModule.call_function("AddEntity", &m_vEntities[i]).convert(uID);
 		
 		// Create Entity
-		m_vEntities.emplace_back(uID, this, pyEntModule, m_vCircles.size()-1, m_vDrawables.size()-1);
+		Entity ent(m_vEntities.size(), this, pyEntModule, m_vCircles.size() - 1, m_vDrawables.size() - 1);
+		m_vEntities.push_back(ent);
 	}
+
+	// Expose in python, mapping vector idx to a python dict (is this bad?)
+	for (auto& ent : m_vEntities)
+		ent.GetPyModule().call_function("AddEntity", ent.GetID(), &ent);
 }
 
 Drawable * Scene::GetDrByID(uint32_t id) const {
-	if (id < m_vDrawables.size())
-		return &m_vDrawables[id];
+	if (id < m_vEntities.size())
+		return &m_vDrawables[m_vEntities[id].m_DrID];
 	return nullptr;
 }
 
 RigidBody_2D * Scene::GetColByID(uint32_t id) const {
-	if (id < m_vCircles.size())
-		return &m_vCircles[id];
+	if (id < m_vEntities.size())
+		return &m_vCircles[m_vEntities[id].m_ColID];
 	return nullptr;
 }

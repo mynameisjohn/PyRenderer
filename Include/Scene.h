@@ -31,6 +31,7 @@ private:
 	// Ideally these would be planes
 	std::array<AABB, 4> m_Walls;
 
+
 	std::vector<Entity> m_vEntities;
 	std::vector<Drawable> m_vDrawables;
 	std::vector<Circle> m_vCircles;
