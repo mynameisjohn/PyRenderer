@@ -100,7 +100,7 @@ std::list<Contact> Circle::GetClosestPoints(const Circle& other) const {
 	vec2 b_pos = other.C - n*other.r;
 	// distance between circumferences
 	float dist = glm::length(a_pos - b_pos);
-	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, 0.f, dist);
+	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, dist);
 	return{ c };
 }
 
@@ -117,7 +117,7 @@ std::list<Contact> Circle::GetClosestPoints(const AABB& other) const {
 
 	vec2 a_pos = C + r*n;
 	float dist = glm::length(a_pos - b_pos);
-	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, 0.f, dist);
+	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, dist);
 	return{ c };
 }
 
@@ -132,7 +132,7 @@ std::list<Contact> AABB::GetClosestPoints(const AABB& other) const {
 	vec2 a_pos = clamp(d);
 	vec2 b_pos = other.clamp(d);
 	float dist = glm::length(a_pos-b_pos);
-	Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, a_pos, b_pos, n, 0.f, dist);
+	Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, a_pos, b_pos, n, dist);
 	return{ c };
 }
 

@@ -5,7 +5,7 @@
 
 #include "Scene.h"
 #include "SpeculativeContacts.h"
-
+#include "Audible.h"
 
 
 int Scene::Draw() {
@@ -85,10 +85,21 @@ int Scene::Update() {
 		totalEnergy += it1->GetKineticEnergy();
 	}
 
+	std::cout << m_SpeculativeContacts.size() << std::endl;
+
 	// Conservation of energy
 	//std::cout << totalEnergy << "\n" << std::endl;
 
+	// I don't like using the bool here, so figure something else out
 	solve(m_SpeculativeContacts);
+	for (auto& c : m_SpeculativeContacts) {
+		if (c.isColliding) {
+			Entity * e1 = c.pair[0]->GetEntity();
+			Entity * e2 = c.pair[1]->GetEntity();
+			if (e1 && e2)
+				e1->GetPyModule().call_function("HandleCollision", e1->GetID(), e2->GetID());
+		}
+	}
 
 	// Spec contacts will change all this
 	for (auto& c : m_vCircles) {
@@ -176,6 +187,12 @@ Scene::Scene(std::string& pyinitScript) :
 		std::string iqmFile;
 		check(pyEntModule.get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module " + pyEntModScript);
 
+		// Sounds
+		std::list<std::string> sndFiles;
+		check(pyEntModule.get_attr("r_Sounds").convert(sndFiles), "Getting all sounds from module " + pyEntModScript);
+		for (auto& file : sndFiles) 
+			Audio::LoadSound(file);
+
 		// Make drawable
 		Drawable dr(iqmFile, color, MV, &m_vEntities[i]);
 
@@ -185,7 +202,7 @@ Scene::Scene(std::string& pyinitScript) :
 
 		// Reinitialize vector objects
 		m_vDrawables[i] = dr;
-		m_vCircles[i] = Circle(2.f*vec2(-pos), vec2(pos), scale[0], 1.f, scale[0], &m_vEntities[i]);
+		m_vCircles[i] = Circle(5.f*vec2(-pos), vec2(pos), scale[0], 1.f, scale[0], &m_vEntities[i]);
 
 		// Get the pointers (this has to change)
 		Drawable * drPtr = &m_vDrawables[i];

@@ -92,7 +92,7 @@ bool InitSound() {
 
 	return true;
 }
-
+#include "Audible.h"
 bool InitPython() {
 	// Expose camera
 	Python::Register_Class<Camera>("Camera");
@@ -107,6 +107,9 @@ bool InitPython() {
 	std::function<bool(Entity *, int, int, vec4)> ent_PostMessage_v4(&Entity::PostMessage<vec4>);
 	Python::Register_Mem_Function<Entity, __LINE__>("PostMessage_v4", ent_PostMessage_v4, "Post a message to the Entity's queue");
 
+	std::function<int(std::string)> playFn(Audio::PlaySound);
+	Python::Register_Function<__LINE__>("PlaySound", playFn);
+	//Py_Add_Func("PlaySound", Audio::PlaySound, "Play a sound file");
 
 	// Expose Drawable
 	Python::Register_Class<Drawable>("Drawable");

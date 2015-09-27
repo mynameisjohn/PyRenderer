@@ -7,6 +7,7 @@ def randColor():
 	return [random.random() for i in range (0,3)]+[1.]
 
 r_IqmFile = b'circle.iqm'
+r_Sounds = ['C.wav', 'F.wav', 'A.wav', 'B.wav']
 
 g_Entities = []
 
@@ -19,6 +20,7 @@ def HandleCollision(id1, id2):
 	e2 = g_Entities[id2]
 	e1.PostMessage_v4(0,1,randColor())
 	e2.PostMessage_v4(0,1,randColor())
+	PlaySound(random.choice(r_Sounds))
 	#print(str(e1)+' is colliding with '+str(e2))
 	
 def AddEntity(ePtr):

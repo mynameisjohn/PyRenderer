@@ -2,13 +2,13 @@
 
 #include "SpeculativeContacts.h"
 #include "RigidBody.h"
-
-Contact::Contact(RigidBody_2D * a, RigidBody_2D * b, const vec2 p_a, const vec2 p_b, const vec2 nrm, const float i, const float d) :
+#include "Audible.h"
+Contact::Contact(RigidBody_2D * a, RigidBody_2D * b, const vec2 p_a, const vec2 p_b, const vec2 nrm, const float d) :
 	pair{ a, b },
 	pos{ p_a,p_b },
 	normal(nrm),
-	impulse(i),
-	dist(d)
+	dist(d),
+	isColliding(false)
 {}
 
 void Contact::ApplyImpulse(float mag) {
@@ -40,7 +40,6 @@ void Solver::operator()(std::list<Contact>& contacts) {
 				// 1/(m1+m2),  coef of restitution, epsilon
 				const float Msum_1 = 1.f / (c.pair[0]->m + c.pair[1]->m);
 				const float Cr = 0.5f * (c.pair[0]->e + c.pair[1]->e);
-				const float EPS = 0.001f;
 
 				// 2D momentum transfer solution (https://en.wikipedia.org/wiki/Inelastic_collision)
 				vec2 pA = c.pair[0]->GetMomentum();
@@ -53,6 +52,12 @@ void Solver::operator()(std::list<Contact>& contacts) {
 				// Apply new velocity along reflection direction
 				c.pair[0]->V = glm::reflect(v1f, c.normal);
 				c.pair[1]->V = glm::reflect(v2f, c.normal);
+
+				if (Entity * ent = c.pair[1]->GetEntity())
+					ent->GetPyModule().call_function("HandleCollision", c.pair[0]->GetEntity()->GetID(), c.pair[1]->GetEntity() ? c.pair[1]->GetEntity()->GetID() : 0);
+
+				// I don't like doing this
+				c.isColliding = true;
 			}
 		}
 	}

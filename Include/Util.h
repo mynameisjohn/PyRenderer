@@ -42,6 +42,7 @@ std::ostream& operator<<(std::ostream& os, const fquat& quat);
 const std::string SHADER_DIR = "../Resources/Shaders/";
 const std::string SCRIPT_DIR = "../Resources/Scripts/";
 const std::string MODEL_DIR = "../Resources/Models/";
+const std::string SOUND_DIR = "../Resources/Sounds/";
 
 // RelPathToAbs returns the absolute path of a file, given its relative path
 std::string RelPathToAbs(const std::string relPath);
