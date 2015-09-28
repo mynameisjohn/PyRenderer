@@ -70,7 +70,7 @@ Drawable::Drawable(std::string iqmFileName, vec4 color, vec3 pos, float scale, f
 }
 
 mat4 Drawable::GetMV() const {
-	return m_QV.ToMat4() * glm::scale(vec3(m_Scale));
+	return glm::translate(m_QV.V) * glm::scale(vec3(m_Scale));
 }
 
 vec4 Drawable::GetColor() const {

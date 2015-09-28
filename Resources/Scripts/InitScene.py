@@ -36,9 +36,30 @@ r_Entities.append(Entity(
 		color = randColor(),
 		module = 'box.py'
 	))
+r_Entities.append(Entity(
+		pos = [18.,0.],
+		scale = [9.,9.],
+		rot = makeQuat(0.,0.,1.,0.),
+		color = randColor(),
+		module = 'box.py'
+	))
+r_Entities.append(Entity(
+		pos = [0.,18.],
+		scale = [9.,9.],
+		rot = makeQuat(0.,0.,1.,0.),
+		color = randColor(),
+		module = 'box.py'
+	))
+r_Entities.append(Entity(
+		pos = [0.,-18.],
+		scale = [9.,9.],
+		rot = makeQuat(0.,0.,1.,0.),
+		color = randColor(),
+		module = 'box.py'
+	))
 
 r_Entities.append(Entity(
-		pos = [6.,-3.],
+		pos = [6.,3.],
 		scale = [1.,1.],
 		rot = makeQuat(0.,0.,1.,0.),
 		color = randColor(),
@@ -51,34 +72,34 @@ r_Entities.append(Entity(
 		color = randColor(),
 		module = b'circle.py'
 	))
-r_Entities.append(Entity(
-		pos = [2.,-2.],
-		scale = [3.,3.],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = b'circle.py'
-	))	
+#r_Entities.append(Entity(
+#		pos = [2.,-2.],
+#		scale = [3.,3.],
+#		rot = makeQuat(0.,0.,1.,0.),
+#		color = randColor(),
+#		module = b'circle.py'
+#	))	
 
-r_Entities.append(Entity(
-		pos = [-3.,-3.],
-		scale = [1.,1.],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = b'circle.py'
-	))	
+#r_Entities.append(Entity(
+#		pos = [-3.,-3.],
+#		scale = [1.,1.],
+#		rot = makeQuat(0.,0.,1.,0.),
+#		color = randColor(),
+#		module = b'circle.py'
+#	))	
 
-r_Entities.append(Entity(
-		pos = [-1.,4.],
-		scale = [2.,2.],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = b'circle.py'
-	))	
+#r_Entities.append(Entity(
+#		pos = [-1.,4.],
+#		scale = [2.,2.],
+#		rot = makeQuat(0.,0.,1.,0.),
+#		color = randColor(),
+#		module = b'circle.py'
+#	))	
 
-r_Entities.append(Entity(
-		pos = [-1.,0.],
-		scale = [0.5,0.5],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = b'circle.py'
-	))	
+#r_Entities.append(Entity(
+#		pos = [-1.,0.],
+#		scale = [0.5,0.5],
+#		rot = makeQuat(0.,0.,1.,0.),
+#		color = randColor(),
+#		module = b'circle.py'
+#	))	

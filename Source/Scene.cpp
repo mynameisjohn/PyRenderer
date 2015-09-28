@@ -31,20 +31,20 @@ int Scene::Draw() {
 	//	drWall.Draw();
 	//}
 
-	//for (auto& contact : m_SpeculativeContacts) {
-	//	float nrm(-1);
-	//	for (auto& p : contact.pos) {
-	//		fquat rot = getQuatFromVec2(nrm*vec2(contact.normal.y, contact.normal.x));
-	//		
-	//		Drawable drContact("pointer.iqm", vec4(contact.normal, 1.f, 1.f), vec3(p, 0.f), 0.78f, rot);
-	//		mat4 PMV = m_Camera.GetMat() * drContact.GetMV();
-	//		vec4 c = drContact.GetColor();
-	//		glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
-	//		glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
-	//		drContact.Draw();
-	//		nrm = -nrm;
-	//	}
-	//}
+	for (auto& contact : m_SpeculativeContacts) {
+		float nrm(-1);
+		for (auto& p : contact.pos) {
+			fquat rot(0, 0, 0, 0);// = getQuatFromVec2(nrm*vec2(contact.normal.y, contact.normal.x));
+			
+			Drawable drContact("circle.iqm", vec4(contact.normal, 1.f, 1.f), vec3(p, 0.f), 0.2f, rot);
+			mat4 PMV = m_Camera.GetMat() * drContact.GetMV();
+			vec4 c = drContact.GetColor();
+			glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
+			glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
+			drContact.Draw();
+			nrm = -nrm;
+		}
+	}
 
 	return int(m_vDrawables.size());
 }
@@ -53,6 +53,10 @@ int Scene::Update() {
 	int nCols(0);
 	float totalEnergy(0.f);
 	m_SpeculativeContacts.clear();
+
+	// Spec contacts will change all this
+	for (auto& c : m_vCircles)
+		c.Integrate();
 
 	// I think there's the same # of these every time...
 	Solver solve; 
@@ -101,9 +105,7 @@ int Scene::Update() {
 		}
 	}
 
-	// Spec contacts will change all this
-	for (auto& c : m_vCircles) 
-		c.Integrate();
+
 
 	//for (auto& d : m_vDrawables) 
 	//	d.PyUpdate();
@@ -189,12 +191,12 @@ Scene::Scene(std::string& pyinitScript) {
 		// Make collision resource, (assume uniform scale, used for mass and r)
 		// TODO add mass, elasticity to init tuple
 		if (colPrim == "AABB") {  // AABBs are assumed to be "walls" of high mass for now
-			AABB box(3.f*vec2(-pos), vec2(pos), 1e10f, 1.f, vec2(scale) / 2.f);
+			AABB box(vec2(0.f), vec2(pos), 1e10f, 1.f, vec2(scale));
 			box.SetEntity(&m_vEntities[i]);
 			m_vAABB.push_back(box);
 		}
 		else {
-			Circle circ(3.f*vec2(-pos), vec2(pos), 1e10f, 1.f, maxEl(scale));
+			Circle circ(5.f*vec2(pos), vec2(pos), 1e10f, 1.f, maxEl(scale));
 			circ.SetEntity(&m_vEntities[i]);;
 			m_vCircles.push_back(circ);
 		}
