@@ -34,9 +34,9 @@ int Scene::Draw() {
 	for (auto& contact : m_SpeculativeContacts) {
 		float nrm(-1);
 		for (auto& p : contact.pos) {
-			fquat rot(0, 0, 0, 0);// = getQuatFromVec2(nrm*vec2(contact.normal.y, contact.normal.x));
+			fquat rot(1, 0, 0, 0);// = getQuatFromVec2(nrm*vec2(contact.normal.y, contact.normal.x));
 			
-			Drawable drContact("circle.iqm", vec4(contact.normal, 1.f, 1.f), vec3(p, 0.f), 0.2f, rot);
+			Drawable drContact("circle.iqm", vec4(contact.normal, 1.f, 1.f),quatvec(vec3(p, -1.f), rot), 0.2f);
 			mat4 PMV = m_Camera.GetMat() * drContact.GetMV();
 			vec4 c = drContact.GetColor();
 			glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
@@ -86,8 +86,6 @@ int Scene::Update() {
 			m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), boxContacts.begin(), boxContacts.end());
 		}
 	}
-
-	std::cout << m_SpeculativeContacts.size() << std::endl;
 
 	// Conservation of energy
 	//std::cout << totalEnergy << "\n" << std::endl;
@@ -202,7 +200,7 @@ Scene::Scene(std::string& pyinitScript) {
 		}
 
 		// Make drawable
-		Drawable dr(iqmFile, color, pos, maxEl(scale), rot);
+		Drawable dr(iqmFile, color, quatvec(pos, rot), maxEl(scale));
 		dr.SetEntity(&m_vEntities[i]);
 		m_vDrawables.push_back(dr);
 	}

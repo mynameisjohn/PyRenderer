@@ -44,5 +44,6 @@ int main(int argc, char ** argv) {
 		sPtr->Draw();
 		SDL_GL_SwapWindow(g_Window);
 	}
+
 	return EXIT_SUCCESS;
 }

@@ -18,7 +18,7 @@ class Drawable : public OwnedByEnt {
 	float m_Scale; // Could be a part of quatvec...
 public:
 	Drawable();
-	Drawable(std::string iqmSrc, vec4 clr, vec3 pos, float scale = 1.f, fquat rot = fquat(0, 0, 0, 0));
+	Drawable(std::string iqmSrc, vec4 clr, quatvec qv, float scale);
 
 	mat4 GetMV() const;
 	vec4 GetColor() const;

@@ -16,12 +16,12 @@ Drawable::Drawable() :
 {}
 
 // This will probably have to be a bit more flexible
-Drawable::Drawable(std::string iqmFileName, vec4 color, vec3 pos, float scale, fquat rot) :
+Drawable::Drawable(std::string iqmFileName, vec4 color, quatvec qv, float scale) :
 	m_SrcFile(iqmFileName),
 	m_VAO(0),
 	m_nIdx(0),
 	m_Color(color),
-	m_QV(pos, rot),
+	m_QV(qv),
 	m_Scale(scale)
 {
 	// Get rid of the .iqm extension (for no real reason) (and it better be there)
@@ -70,7 +70,7 @@ Drawable::Drawable(std::string iqmFileName, vec4 color, vec3 pos, float scale, f
 }
 
 mat4 Drawable::GetMV() const {
-	return glm::translate(m_QV.V) * glm::scale(vec3(m_Scale));
+	return m_QV.ToMat4() * glm::scale(vec3(m_Scale));
 }
 
 vec4 Drawable::GetColor() const {

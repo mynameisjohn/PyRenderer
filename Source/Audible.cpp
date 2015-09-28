@@ -9,6 +9,7 @@ namespace Audio {
 			if (!LoadSound(soundFile))
 				return -1;
 		}
+		std::cout << "Playing sound " << soundFile << std::endl;
 		Mix_PlayChannel(-1, s_ChunkMap[soundFile].get(), 0);
 		return 0;
 	}
