@@ -9,16 +9,7 @@ SDL_GLContext g_Context;
 SDL_Window * g_Window = nullptr;
 
 int main(int argc, char ** argv) {
-	if (!InitGL(g_Context, g_Window))
-		return EXIT_FAILURE;
-
-	if (!InitPython())
-		return EXIT_FAILURE;
-
-	if (!InitScene(sPtr))
-		return EXIT_FAILURE;
-
-	if (sPtr == nullptr)
+	if (!InitEverything(g_Context, g_Window, sPtr))
 		return EXIT_FAILURE;
 
 	bool quit(false);

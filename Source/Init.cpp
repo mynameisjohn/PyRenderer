@@ -11,26 +11,28 @@
 #include "GL_Includes.h"
 
 #include <SDL_mixer.h>
+#include "Audible.h"
 
-// Screen dims
-const int WIDTH = 600;
-const int HEIGHT = 600;
 
-// GL version
-const int glMajor(3), glMinor(0);
+bool InitEverything(SDL_GLContext& g_Context, SDL_Window*& g_Window, std::unique_ptr<Scene>& pScene) {
+	if (!InitSDL())
+		return false;
+	if (!InitGL(g_Context, g_Window))
+		return false;
+	if (!InitSound())
+		return false;
+	if (!InitPython())
+		return false;
+	if (!InitScene(pScene))
+		return false;
+	return true;
+}
+
+bool InitSDL() {
+	return (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0);
+}
 
 bool InitGL(SDL_GLContext& g_Context, SDL_Window*& g_Window) {
-	//Init SDL Video
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
-		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
-		return false;
-	}
-
-	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-		std::cout << "Error initializing SDL_Mixer!" << SDL_GetError() << std::endl;
-		return false;
-	}
-
 	//Init SDL+OpenGL Context
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, glMajor);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glMinor);
@@ -89,10 +91,12 @@ bool InitGL(SDL_GLContext& g_Context, SDL_Window*& g_Window) {
 }
 
 bool InitSound() {
-
-	return true;
+	return (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0);
 }
-#include "Audible.h"
+
+// TODO 
+// make this not look like shit
+// Add global entity sequence PyLiaison module
 bool InitPython() {
 	// Expose camera
 	Python::Register_Class<Camera>("Camera");
@@ -132,6 +136,9 @@ bool InitPython() {
 	return true;
 }
 
+// This is really backward. The Scene constructor is long and gross.
+// Python is what should be driving everything. There should be an AddEntity
+// function exposed that does this stuff. I don't know... it all seems bad. 
 bool InitScene(std::unique_ptr<Scene>& pScene) {
 	// Get the python init module
 	std::string pyinitScript = "InitScene.py";

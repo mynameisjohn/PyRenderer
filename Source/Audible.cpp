@@ -1,5 +1,12 @@
 #include "Audible.h"
 
+#include <SDL_mixer.h>
+
+void ChunkDeleter::operator()(Mix_Chunk * chunk) {
+	Mix_FreeChunk(chunk);
+	chunk = nullptr;
+}
+
 namespace Audio {
 	std::map<std::string, ChunkPtr> s_ChunkMap;
 
@@ -9,8 +16,8 @@ namespace Audio {
 			if (!LoadSound(soundFile))
 				return -1;
 		}
-		std::cout << "Playing sound " << soundFile << std::endl;
-		Mix_PlayChannel(-1, s_ChunkMap[soundFile].get(), 0);
+		//std::cout << "Playing sound " << soundFile << std::endl;
+		std::cout << Mix_PlayChannel(-1, s_ChunkMap[soundFile].get(), 0) << std::endl;
 		return 0;
 	}
 

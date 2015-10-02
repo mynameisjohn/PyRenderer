@@ -150,10 +150,10 @@ Scene::Scene(std::string& pyinitScript) {
 	std::vector<EntInfo> v_EntInfo;
 	check(pyinitModule.get_attr("r_Entities").convert(v_EntInfo), "Getting all Entity Info");
 
-	// Preallocate all entities
+	// Preallocate all entities, since we'll need their pointers
 	m_vEntities.resize(v_EntInfo.size());
 
-	// Once you have it, create individual entities and components
+	// Create individual entities and components
 	for (int i = 0; i < m_vEntities.size(); i++) {
 		// Get the tuple
 		auto ei = v_EntInfo[i];
@@ -194,7 +194,7 @@ Scene::Scene(std::string& pyinitScript) {
 			m_vAABB.push_back(box);
 		}
 		else {
-			Circle circ(5.f*vec2(pos), vec2(pos), 1e10f, 1.f, maxEl(scale));
+			Circle circ(5.f*vec2(pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale));
 			circ.SetEntity(&m_vEntities[i]);;
 			m_vCircles.push_back(circ);
 		}
@@ -212,8 +212,11 @@ Scene::Scene(std::string& pyinitScript) {
 		box.GetEntity()->SetColCmp(&box);
 	for (auto& drawable : m_vDrawables)
 		drawable.GetEntity()->SetDrCmp(&drawable);
-
+	
 	// Expose in python, mapping ent ID to Exposed Entity
+	// TODO Entities should be globally accessible via the PyLiaison module,
+	// so find a way fo adding a container to it
+	// PyDict_New...
 	for (auto& ent : m_vEntities)
 		ent.GetPyModule().call_function("AddEntity", ent.GetID(), &ent);
 }

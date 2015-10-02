@@ -6,6 +6,8 @@
 
 #include <memory>
 
+bool InitEverything(SDL_GLContext&, SDL_Window*&, std::unique_ptr<Scene>&);
+bool InitSDL();
 bool InitGL(SDL_GLContext&, SDL_Window*&);
 bool InitSound();
 bool InitPython();

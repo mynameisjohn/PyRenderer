@@ -1,14 +1,15 @@
 #pragma once
 
-#include <SDL_mixer.h>
-
 #include "Util.h"
 
+// TODO
+// Create Audio Entity
+// Come up with a channel manager
+// and prioritize incoming sound requests
+
+struct Mix_Chunk;
 struct ChunkDeleter {
-	void operator()(Mix_Chunk * chunk) {
-		if (chunk)
-			Mix_FreeChunk(chunk);
-	}
+	void operator()(Mix_Chunk * chunk);
 };
 using ChunkPtr = std::unique_ptr<Mix_Chunk, ChunkDeleter>;
 

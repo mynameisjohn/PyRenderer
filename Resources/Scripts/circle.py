@@ -3,11 +3,15 @@
 import random
 random.seed()
 
+import os
+
 def randColor():
 	return [random.random() for i in range (0,3)]+[1.]
 
+# TODO add resource paths to PyLiaison module
 r_IqmFile = b'circle.iqm'
-r_Sounds = ['C.wav', 'F.wav', 'A.wav', 'B.wav']
+p = os.path.relpath(os.path.join(os.getcwd()+'/../Resources/Sounds'))
+r_Sounds = [x for x in os.listdir(p) if os.path.isfile(p+os.sep+x)]
 r_ColPrim = 'Circle'
 
 g_Entities = {}

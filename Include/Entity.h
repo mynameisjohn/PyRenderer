@@ -6,6 +6,11 @@
 
 class Entity;
 
+// I'm conflicted by this
+// On one hand it's cumbersome to add inheritance
+// to things and feels like a house of cards
+// on the other hand using a class like this means I only have to
+// write the code once, and I don't need any overrides in other files
 class OwnedByEnt {
 protected:
 	Entity * m_pEntity;
