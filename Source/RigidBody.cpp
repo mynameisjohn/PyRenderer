@@ -25,8 +25,8 @@ RigidBody_2D::RigidBody_2D(vec2 V, vec2 C, float m, float e) :
 // I guess this just advances the object?
 void RigidBody_2D::Integrate() {
 	const float dT = 0.005f; // TODO better integration methods?
-	C += dT * V;
-	th += dT * w;
+	vec2 delta = dT * V;
+	C += delta;
 
 	// I used to have python do this, but what's the point?
 	m_pEntity->PostMessage(int(Entity::CompID::DRAWABLE),
@@ -41,14 +41,15 @@ float RigidBody_2D::GetKineticEnergy() const {
 	return 0.5f * m * glm::dot(V, V);
 }
 
-void RigidBody_2D::ApplyImpulse(vec2 delV, vec2 rad) {
-	V += delV;
+void RigidBody_2D::ChangeVel(vec2 newV, vec2 rad) {
+	vec2 delV = newV - V;
+	V = newV;
 	vec2 perp(-rad.y, rad.x);
 	th += glm::dot(delV, perp);
 }
 
-void AABB::ApplyImpulse(vec2 delV, vec2 rad) {
-	V += delV;
+void AABB::ChangeVel(vec2 newV, vec2 rad) {
+	V = newV;
 }
 
 bool Circle::IsOverlapping(const Circle& other) const {
@@ -174,6 +175,42 @@ std::list<Contact> AABB::GetClosestPoints(const AABB& other) const {
 	Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, a_pos, b_pos, n, dist);
 	return{ c };
 }
+
+// // Impuse application methods
+//static void ApplyCollisionImpulse_Generic(RigidBody_2D * a, RigidBody_2D * b, vec2 N) {
+//	// Solve 1-D collision along normal between objects
+//	glm::vec2 n = glm::normalize(a->C - b->C);
+//	float v1i = glm::dot(n, a->V);
+//	float v2i = glm::dot(n, b->V);
+//
+//	// 1/(m1+m2),  coef of restitution
+//	const float Msum_1 = 1.f / (a->m + b->m);
+//	const float Cr = 0.5f * (a->e + b->e);
+//
+//	// find momentum, solve for final velocity
+//	float pa = a->m * v1i, pb = b->m * v2i;
+//	float Cr_diff = Cr*(v2i - v1i);
+//	float psum = pa + pb;
+//
+//	float v1f = Msum_1*(b->m*Cr_diff + psum);
+//	float v2f = Msum_1*(-a->m*Cr_diff + psum);
+//
+//	// do this more cute (needed for "conservation of momentum")
+//	if (fabs(v1f) < 0.001f) v1f = 0.f;
+//	if (fabs(v2f) < 0.001f) v2f = 0.f;
+//
+//	std::cout << "p0: " << pa + pb << ", p1: " << v1f*a->m + v2f*b->m << std::endl;
+//
+//	// apply velocity along normal direction
+//	a->V = v1f*n;
+//	b->V = v2f*n;
+//}
+//
+//void RigidBody_2D::ApplyCollisionImpulse(RigidBody_2D * const other, vec2 n) {
+//	ApplyCollisionImpulse_Generic(this, other, n);
+//}
+
+
 
 OBB::OBB():
 	AABB()

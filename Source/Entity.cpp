@@ -27,10 +27,10 @@ bool Entity::PostMessage(int C, int M) {
 		switch (M) {
 		case int(MsgID::DR_TRANSLATE) : {
 			Drawable * const drPtr = m_DrCmp;
-			const vec2 pos = m_ColCmp->C;
+			const quatvec qv = m_ColCmp->GetQuatVec();
 			// Get last translation, apply, reset
-			m_MessageQ.emplace_back([drPtr, pos]() {
-				drPtr->SetPos(vec3(pos, 0.f));
+			m_MessageQ.emplace_back([drPtr, qv]() {
+				drPtr->SetTransform(qv);
 				return true;
 			});
 			handled = 0;

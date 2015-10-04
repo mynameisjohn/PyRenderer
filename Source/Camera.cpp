@@ -27,11 +27,13 @@ Camera::Camera(float fovy, float aspect, glm::vec2 nf) :
 {}
 
 void Camera::InitOrtho(vec2 X, vec2 Y, vec2 Z) {
-	*this = Camera(X, Y, Z);
+	m_m4Proj = glm::ortho(X[0], X[1], Y[0], Y[1], Z[0], Z[1]);
+	m_Type = Type::ORTHO;
 }
 
 void Camera::InitPersp(float fovy, float aspect, float n, float f) {
-	*this = Camera(fovy, aspect, { n,f });
+	m_m4Proj = glm::perspective(fovy, aspect, n, f);
+	m_Type = Type::PERSP;
 }
 
 vec3 Camera::GetPos() {

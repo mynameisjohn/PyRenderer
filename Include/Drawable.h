@@ -31,6 +31,9 @@ public:
 	void SetRot(fquat Q);
 	void Rotate(fquat Q);
 
+	void SetTransform(quatvec QV);
+	void Transform(quatvec QV);
+
 	void SetColor(vec4 C);
 
 	friend class Scene;

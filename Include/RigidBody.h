@@ -53,7 +53,7 @@ struct RigidBody_2D : public OwnedByEnt {
 	//void ApplyCollisionImpulse(RigidBody_2D * const other, vec2 n);
 
 	// Might phase out above
-	virtual void ApplyImpulse(vec2 delV, vec2 rad);
+	virtual void ChangeVel(vec2 newV, vec2 rad);
 
 	// Integrate velocity over time
 	void Integrate();
@@ -109,7 +109,7 @@ struct AABB : public RigidBody_2D {
 	virtual std::list<Contact> GetClosestPoints(const OBB& other) const override;
 
 	// No rotation applied
-	void ApplyImpulse(vec2 delV, vec2 rad) override;
+	void ChangeVel(vec2 newV, vec2 rad) override;
 };
 
 // 2D Oriented Bounding Box (should this inherit from AABB?)

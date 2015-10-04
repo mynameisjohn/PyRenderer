@@ -94,6 +94,16 @@ void Drawable::SetRot(fquat Q) {
 	m_QV.Q = Q;
 }
 
+void Drawable::SetTransform(quatvec QV) {
+	m_QV = QV;
+}
+
+void Drawable::Transform(quatvec QV) {
+	// TODO
+	m_QV.V += QV.V;
+	m_QV.Q = QV.Q*m_QV.Q;
+}
+
 void Drawable::SetColor(vec4 C) {
 	m_Color = glm::clamp(C, vec4(0), vec4(1));
 }

@@ -49,9 +49,12 @@ void Solver::operator()(std::list<Contact>& contacts) {
 				vec2 v1f = Msum_1*(c.pair[1]->m*Cr_diff + pSum);
 				vec2 v2f = Msum_1*(-c.pair[0]->m*Cr_diff + pSum);
 
+				vec2 r0 = c.pos[0] - c.pair[0]->C;
+				vec2 r1 = c.pos[1] - c.pair[1]->C;
+
 				// Apply new velocity along reflection direction
-				c.pair[0]->ApplyImpulse(glm::reflect(v1f, c.normal), vec2());
-				c.pair[1]->ApplyImpulse(glm::reflect(v2f, c.normal), vec2());
+				c.pair[0]->ChangeVel(glm::reflect(v1f, c.normal), r0);
+				c.pair[1]->ChangeVel(glm::reflect(v2f, c.normal), r1);
 
 				// I don't like doing this
 				c.isColliding = true;
