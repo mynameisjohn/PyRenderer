@@ -9,6 +9,7 @@ SDL_GLContext g_Context;
 SDL_Window * g_Window = nullptr;
 
 int main(int argc, char ** argv) {
+	
 	if (!InitEverything(g_Context, g_Window, sPtr))
 		return EXIT_FAILURE;
 

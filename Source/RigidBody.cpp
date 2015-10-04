@@ -7,7 +7,9 @@ RigidBody_2D::RigidBody_2D() :
 	V(0),
 	C(0),
 	m(1),
-	e(1)
+	e(1),
+	th(0),
+	w(0)
 {}
 
 
@@ -15,14 +17,16 @@ RigidBody_2D::RigidBody_2D(vec2 V, vec2 C, float m, float e) :
 	V(V),
 	C(C),
 	m(m),
-	e(e)
+	e(e),
+	th(0),
+	w(0)
 {}
 
 // I guess this just advances the object?
 void RigidBody_2D::Integrate() {
 	const float dT = 0.005f; // TODO better integration methods?
-	vec2 delta = dT * V;
-	C += delta;
+	C += dT * V;
+	th += dT * w;
 
 	// I used to have python do this, but what's the point?
 	m_pEntity->PostMessage(int(Entity::CompID::DRAWABLE),
@@ -35,6 +39,16 @@ vec2 RigidBody_2D::GetMomentum() const {
 
 float RigidBody_2D::GetKineticEnergy() const {
 	return 0.5f * m * glm::dot(V, V);
+}
+
+void RigidBody_2D::ApplyImpulse(vec2 delV, vec2 rad) {
+	V += delV;
+	vec2 perp(-rad.y, rad.x);
+	th += glm::dot(delV, perp);
+}
+
+void AABB::ApplyImpulse(vec2 delV, vec2 rad) {
+	V += delV;
 }
 
 bool Circle::IsOverlapping(const Circle& other) const {
@@ -76,6 +90,8 @@ AABB::AABB(vec2 v, float mass, float el, float x, float y, float w, float h) :
 {
 	R = vec2(w, h) / 2.f;
 }
+
+
 
 float AABB::width()const { return 2.f*R.x; }
 float AABB::height()const { return 2.f*R.y; }
@@ -159,63 +175,25 @@ std::list<Contact> AABB::GetClosestPoints(const AABB& other) const {
 	return{ c };
 }
 
-// Impuse application methods
-static void ApplyCollisionImpulse_Generic(RigidBody_2D * a, RigidBody_2D * b, vec2 N) {
-	// Solve 1-D collision along normal between objects
-	glm::vec2 n = glm::normalize(a->C - b->C);
-	float v1i = glm::dot(n, a->V);
-	float v2i = glm::dot(n, b->V);
-
-	// 1/(m1+m2),  coef of restitution
-	const float Msum_1 = 1.f / (a->m + b->m);
-	const float Cr = 0.5f * (a->e + b->e);
-
-	// find momentum, solve for final velocity
-	float pa = a->m * v1i, pb = b->m * v2i;
-	float Cr_diff = Cr*(v2i - v1i);
-	float psum = pa + pb;
-
-	float v1f = Msum_1*(b->m*Cr_diff + psum);
-	float v2f = Msum_1*(-a->m*Cr_diff + psum);
-
-	// do this more cute (needed for "conservation of momentum")
-	if (fabs(v1f) < 0.001f) v1f = 0.f;
-	if (fabs(v2f) < 0.001f) v2f = 0.f;
-
-	std::cout << "p0: " << pa + pb << ", p1: " << v1f*a->m + v2f*b->m << std::endl;
-
-	// apply velocity along normal direction
-	a->V = v1f*n;
-	b->V = v2f*n;
-}
-
-void RigidBody_2D::ApplyCollisionImpulse(RigidBody_2D * const other, vec2 n) {
-	ApplyCollisionImpulse_Generic(this, other, n);
-}
-
 OBB::OBB():
-	AABB(),
-	theta(0)
+	AABB()
 {}
 
 OBB::OBB(const AABB& ab) :
-	AABB(ab),
-	theta(0)
+	AABB(ab)
 {}
 
 OBB::OBB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r, float th) :
-	AABB(vel, c, mass, elasticity, r),
-	theta(th)
+	AABB(vel, c, mass, elasticity, r)
 {}
 
 OBB::OBB(vec2 vel, float m, float e, float x, float y, float w, float h, float th) :
-	AABB(vel, m, e, x,y,w, h),
-	theta(th)
+	AABB(vel, m, e, x,y,w, h)
 {}
 
 glm::mat2 OBB::getRotMat() const {
-	float c = cos(theta);
-	float s = sin(theta);
+	float c = cos(th);
+	float s = sin(th);
 	return glm::mat2(vec2(-c, s), vec2(s, c));
 }
 
@@ -463,6 +441,6 @@ bool OBB::IsOverlapping(const AABB& other) const {
 	return false;
 }
 
-quatvec OBB::GetQuatVec() const {
-	return quatvec(vec3(C, 0.f), fquat(cos(theta / 2), sin(theta / 2)*vec3(0, 0, 1)));
+quatvec RigidBody_2D::GetQuatVec() const {
+	return quatvec(vec3(C, 0.f), fquat(cos(th / 2), sin(th / 2)*vec3(0, 0, 1)));
 }

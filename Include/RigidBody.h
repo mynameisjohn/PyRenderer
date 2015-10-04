@@ -29,6 +29,8 @@ struct RigidBody_2D : public OwnedByEnt {
 	vec2 C; // Center point
 	float m; // Mass
 	float e; // elasticity
+	float th; // rotation
+	float w; // angular velocity
 
 	RigidBody_2D();
 	RigidBody_2D(vec2 vel, vec2 c, float mass, float elasticity);
@@ -48,10 +50,16 @@ struct RigidBody_2D : public OwnedByEnt {
 	virtual std::list<Contact> GetClosestPoints(const OBB& other) const = 0;
 
 	// Applying collision between objects
-	void ApplyCollisionImpulse(RigidBody_2D * const other, vec2 n);
+	//void ApplyCollisionImpulse(RigidBody_2D * const other, vec2 n);
+
+	// Might phase out above
+	virtual void ApplyImpulse(vec2 delV, vec2 rad);
 
 	// Integrate velocity over time
 	void Integrate();
+
+	// Get rotation/translation
+	quatvec GetQuatVec() const;
 };
 
 
@@ -99,12 +107,13 @@ struct AABB : public RigidBody_2D {
 	virtual std::list<Contact> GetClosestPoints(const Circle& other) const override;
 	virtual std::list<Contact> GetClosestPoints(const AABB& other) const override;
 	virtual std::list<Contact> GetClosestPoints(const OBB& other) const override;
+
+	// No rotation applied
+	void ApplyImpulse(vec2 delV, vec2 rad) override;
 };
 
 // 2D Oriented Bounding Box (should this inherit from AABB?)
 struct OBB : public AABB {
-	float theta; // rotation about z axis
-	
 	// Constructors like AABB, with rotation
 	OBB();
 	OBB(const AABB& ab);
@@ -140,5 +149,5 @@ struct OBB : public AABB {
 
 
 	// This is gonna bubble up
-	quatvec GetQuatVec() const;
+	
 };

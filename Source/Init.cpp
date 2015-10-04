@@ -29,7 +29,10 @@ bool InitEverything(SDL_GLContext& g_Context, SDL_Window*& g_Window, std::unique
 }
 
 bool InitSDL() {
-	return (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0);
+	bool success = (SDL_Init(SDL_INIT_VIDEO) >= 0);
+	if (success == false)
+		std::cout << SDL_GetError() << std::endl;
+	return success;
 }
 
 bool InitGL(SDL_GLContext& g_Context, SDL_Window*& g_Window) {
@@ -91,7 +94,7 @@ bool InitGL(SDL_GLContext& g_Context, SDL_Window*& g_Window) {
 }
 
 bool InitSound() {
-	return (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0);
+	return (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) >= 0);
 }
 
 // TODO 
@@ -109,11 +112,11 @@ bool InitPython() {
 	Python::Register_Mem_Function<Entity, __LINE__>("PostMessage", ent_PostMessage, "Post a message to the Entity's queue");
 	
 	std::function<bool(Entity *, int, int, vec4)> ent_PostMessage_v4(&Entity::PostMessage<vec4>);
-	//Python::Register_Mem_Function<Entity, __LINE__>("PostMessage_v4", ent_PostMessage_v4, "Post a message to the Entity's queue");
+	Python::Register_Mem_Function<Entity, __LINE__>("PostMessage_v4", ent_PostMessage_v4, "Post a message to the Entity's queue");
 
 	std::function<int(std::string)> playFn(Audio::PlaySound);
 	//Python::Register_Function<__LINE__>("PlaySound", playFn);
-	//Py_Add_Func("PlaySound", Audio::PlaySound, "Play a sound file");
+	Py_Add_Func("PlaySound", Audio::PlaySound, "Play a sound file");
 
 	// Expose Drawable
 	Python::Register_Class<Drawable>("Drawable");
