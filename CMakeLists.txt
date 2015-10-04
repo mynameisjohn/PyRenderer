@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8)
 project(PyRenderer)
 
 # The c++11 cmake thing never works
-set(CMAKE_CXX_FLAGS "-std=c++11")
+set(CMAKE_CXX_FLAGS "-std=c++14")
 
 # Find these libraries
 find_package(SDL2)

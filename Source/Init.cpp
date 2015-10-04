@@ -100,7 +100,7 @@ bool InitSound() {
 bool InitPython() {
 	// Expose camera
 	Python::Register_Class<Camera>("Camera");
-	std::function<int(Camera *, vec2, vec2, vec2)> cam_InitOrtho(&Camera::InitOrtho);
+	std::function<void(Camera *, vec2, vec2, vec2)> cam_InitOrtho(&Camera::InitOrtho);
 	Python::Register_Mem_Function<Camera, __LINE__>("InitOrtho", cam_InitOrtho, "Initialize Ortho Camera with lr/tb/nf");
 
 	// Register Entity
@@ -109,10 +109,10 @@ bool InitPython() {
 	Python::Register_Mem_Function<Entity, __LINE__>("PostMessage", ent_PostMessage, "Post a message to the Entity's queue");
 	
 	std::function<bool(Entity *, int, int, vec4)> ent_PostMessage_v4(&Entity::PostMessage<vec4>);
-	Python::Register_Mem_Function<Entity, __LINE__>("PostMessage_v4", ent_PostMessage_v4, "Post a message to the Entity's queue");
+	//Python::Register_Mem_Function<Entity, __LINE__>("PostMessage_v4", ent_PostMessage_v4, "Post a message to the Entity's queue");
 
 	std::function<int(std::string)> playFn(Audio::PlaySound);
-	Python::Register_Function<__LINE__>("PlaySound", playFn);
+	//Python::Register_Function<__LINE__>("PlaySound", playFn);
 	//Py_Add_Func("PlaySound", Audio::PlaySound, "Play a sound file");
 
 	// Expose Drawable

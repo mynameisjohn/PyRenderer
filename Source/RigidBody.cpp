@@ -116,15 +116,9 @@ std::list<Contact> Circle::GetClosestPoints(const Circle& other) const {
 }
 
 std::list<Contact> Circle::GetClosestPoints(const AABB& other) const {
-	// watch for low values here
-	//vec2 d = other.C - C;
-	//vec2 n = glm::normalize(d);
-	//vec2 a_pos = C + n*r;
-
 	// d points from the circle to the box, so negate and clamp
 	vec2 b_pos = other.clamp(C);
 	vec2 n = glm::normalize(b_pos - C);
-
 
 	vec2 a_pos = C + r*n;
 	float dist = glm::length(a_pos - b_pos);
@@ -132,9 +126,27 @@ std::list<Contact> Circle::GetClosestPoints(const AABB& other) const {
 	return{ c };
 }
 
+
+bool Circle::IsOverlapping(const OBB& other) const {
+	return other.IsOverlapping(*this);
+}
+
+std::list<Contact> Circle::GetClosestPoints(const OBB& other) const {
+	return other.GetClosestPoints(*this);
+}
+
+bool AABB::IsOverlapping(const OBB& other) const {
+	return other.IsOverlapping(*this);
+}
+
 std::list<Contact> AABB::GetClosestPoints(const Circle& other) const {
 	return other.GetClosestPoints(*this);
 }
+
+std::list<Contact> AABB::GetClosestPoints(const OBB& other) const {
+	return other.GetClosestPoints(*this);
+}
+
 
 std::list<Contact> AABB::GetClosestPoints(const AABB& other) const {
 	// watch for low values here
@@ -181,116 +193,276 @@ void RigidBody_2D::ApplyCollisionImpulse(RigidBody_2D * const other, vec2 n) {
 	ApplyCollisionImpulse_Generic(this, other, n);
 }
 
+OBB::OBB():
+	AABB(),
+	theta(0)
+{}
+
+OBB::OBB(const AABB& ab) :
+	AABB(ab),
+	theta(0)
+{}
+
+OBB::OBB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r, float th) :
+	AABB(vel, c, mass, elasticity, r),
+	theta(th)
+{}
+
+OBB::OBB(vec2 vel, float m, float e, float x, float y, float w, float h, float th) :
+	AABB(vel, m, e, x,y,w, h),
+	theta(th)
+{}
+
+glm::mat2 OBB::getRotMat() const {
+	float c = cos(theta);
+	float s = sin(theta);
+	return glm::mat2(vec2(-c, s), vec2(s, c));
+}
+
+int OBB::GetSupportVerts(vec2 n, std::array<vec2, 2> sV) const {
+	// This isn't necessary
+	int found(-1);
+	int num(0);
+	vec2 l_n = glm::inverse(getRotMat()) * n;
+
+findMin:
+	float dMin(-FLT_MAX);
+	vec2 vMin(-FLT_MAX);
+
+	for (int i = 0; i < 4; i++) {
+		vec2 v = GetVert(i);
+		float d = glm::dot(l_n, v);
+		if (d < dMin) {
+			if (found != i) {
+				vMin = v;
+				found = i;
+			}
+		}
+	}
+
+	sV[num++] = vMin;
+	if (num == 1)
+		goto findMin;
+
+	return num;
+}
+
+int OBB::GetSupportVertIndices(vec2 n, std::array<int, 2> sV) const {
+	// This isn't necessary
+	int iMin(-1);
+	int num(0);
+	vec2 l_n = glm::inverse(getRotMat()) * n;
+
+findMin:
+	float dMin(-FLT_MAX);
+
+	for (int i = 0; i < 4; i++) {
+		vec2 v = GetVert(i);
+		float d = glm::dot(l_n, v);
+		if (d < dMin) {
+			if (i != iMin)
+				i = iMin;
+		}
+	}
+
+	sV[num++] = iMin;
+	if (num == 1)
+		goto findMin;
+
+	return num;
+}
+
+std::array<vec2, 2> OBB::GetSupportPair(vec2 n) const {
+	std::array<vec2, 2> ret;
+
+	vec2 va, vb, vc;
+	vec2 nab = glm::normalize(vb - va);
+	vec2 nbc = glm::normalize(vc - vb);
+	if (glm::dot(nab, n) < glm::dot(nbc, n)) {
+		ret[0] = va;
+		ret[1] = vb;
+	}
+	else {
+		ret[0] = vb;
+		ret[1] = vc;
+	}
+
+	return ret;
+}
+
+vec2 OBB::GetVert(uint32_t idx) const {
+	vec2 ret(0);
+	switch (idx % 4) {
+	case 0:
+		return C + getRotMat() *  R;
+	case 1:
+		return C + getRotMat() * vec2(R.x, -R.y);
+	case 2:
+		return C - getRotMat() * R;
+	case 3:
+	default:
+		return C + getRotMat() * vec2(-R.x, R.y);
+	}
+}
+
+vec2 OBB::GetNormal(uint32_t idx) const {
+	switch (idx % 4) {
+	case 0:
+		return getRotMat() * vec2(1, 0);
+	case 1:
+		return getRotMat() * vec2(0, -1);
+	case 2:
+		return getRotMat() * vec2(-1, 0);
+	case 3:
+	default:
+		return getRotMat() * vec2(0, 1);
+	}
+}
+
+static vec2 projectOnEdge(vec2 p, vec2 e0, vec2 e1) {
+	// u and v form a little triangle
+	vec2 u = p - e0;
+	vec2 v = e1 - e0;
+
+	// find the projection of u onto v, parameterize it
+	float t = glm::dot(u, v) / glm::length(v);
+
+	// Clamp between two edge points
+	return glm::clamp(e0 + e1 * t, e0, e1);
+}
+
+
 std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
+	// Move this elsewhere once triangles come into play
 	struct FeaturePair {
 		enum Type {
 			F_V,
 			V_F,
-			V_V,
-			F_F
+			N
 		};
-		float dist;
-		vec2 pos;
-		Type m_Type;
+		float dist{ -FLT_MAX };
+		float c_dist{ -FLT_MAX };
+		int fIdx{ -1 };
+		int vIdx{ -1 };
+		Type T{ Type::N };
 	};
 
 	std::list<Contact> ret;
-	FeaturePair mostSeparated, mostPenetrating;
+	FeaturePair mostSeparated;
+	FeaturePair mostPenetrating;
 
-	// For all of my normals
-	for (int i = 0; i < 4; i++) {
-		vec2 n(0);
-		vec2 p1(0), p2(0);
-		glm::mat2 rot = getRotMat();
+	auto faceVert = [&mostSeparated, &mostPenetrating](OBB * A, OBB * B, FeaturePair::Type type) {
+		// Smol
+		const float kEPS = 0.001f;
 
-		switch (i) {
-		case 0: // p1 = top right
-			n = rot * vec2(1, 0);
-			p1 = rot * R;
-			p2 = rot * vec2(R.x, -R.y);
-			break;
-		case 1: // p1 = bottom right
-			n = getRotMat() * vec2(0, -1);
-			p1 = rot * vec2(R.x, -R.y);
-			p2 = rot * -R;
-			break;
-		case 2: // p1 = bottom left
-			n = getRotMat() * vec2(-1, 0);
-			p1 = rot * -R;
-			p2 = rot * vec2(-R.x, R.y);
-			break;
-		case 3: // p1 = top left
-			n = getRotMat() * vec2(0, 1);
-			p1 = rot * vec2(-R.x, R.y);
-			p2 = rot * R;
-			break;
-		}
+		// For all A's normals
+		for (int i = 0; i < 4; i++) {
+			vec2 n = A->GetNormal(i);
+			vec2 p1 = A->GetVert(i);
+			vec2 p2 = A->GetVert((i + 1) % 4);
 
-		// For their two support verts relative to the normal
-		std::array<vec2, 2> supportVerts;
-		int nVerts = other.GetSupportVerts(n, supportVerts);
-		for (int i = 0; i < nVerts; i++) {
-			vec2 sV = supportVerts[i];
+			// For B's support verts relative to the normal
+			std::array<int, 2> supportVerts;
+			int nVerts = B->GetSupportVertIndices(n, supportVerts);
+			for (int s = 0; s < nVerts; s++) {
+				vec2 sV = B->GetVert(supportVerts[s]);
 
-			// minkowski face points
-			vec2 mfp0 = sV - p1;
-			vec2 mfp1 = sV - p2;
+				// minkowski face points
+				vec2 mfp0 = sV - p1;
+				vec2 mfp1 = sV - p2;
 
-			// are objects penetrating?
-			// i.e is first mf point behind face normal?
-			// Why first point? Arbitrary, I assume we get to all eventually
-			// Why support verts? They're the best candidates for being 'in front'
-			// of the normal, so if they're behind then so is everyone else
-			// So penetration implies support vert behind normal
-			bool isPenetrating = glm::dot(mfp0, n) < 0.f;
-			if (isPenetrating) {
-				// Project origin onto minkowski face/edge/thing
-				vec2 v = -mfp0; // vec2(0) - mfp0, imagine a triangle
-				vec2 E = mfp1 - mfp0;
+				// Find point on minkowski face
+				vec2 p = projectOnEdge(vec2(), mfp0, mfp1);
 
-				// parametrize along edge, clamp
-				float t = glm::dot(E, v) / glm::dot(E, E);
-				vec2 p = glm::clamp(mfp0 + E*t, mfp0, mfp1);
-				float dist = glm::length(p);
-				if (dist < mostSeparated.dist)
-					mostSeparated = FeaturePair(); // fill in correct values
-				// add another check to see if it's equal-ish
-			}
-			else {
-				// Do the same thing with mostPenetrating
+				// are objects penetrating?
+				// i.e is first mf point behind face normal
+				// penetration implies support vert behind normal
+				float dist = glm::dot(mfp0, n);
+				bool isPenetrating = dist < 0.f;
+				FeaturePair * fp = isPenetrating ? &mostPenetrating : &mostSeparated;
+				// Pick the closest one
+				if (isPenetrating == false)
+					dist = glm::length(p);
+				float c_dist = glm::length(sV - A->C);
+				float del = fabs(dist - fp->dist);
+				bool overwrite = (del < kEPS &&  fp->T == type && c_dist < fp->c_dist) || (dist < fp->dist);
+				if (overwrite) {
+					fp->dist = dist;
+					fp->c_dist = c_dist;
+					fp->fIdx = i;
+					fp->vIdx = supportVerts[s];
+					fp->T = type;
+				}
 			}
 		}
-	}
+	};
 
-	// Then do same for reverse (my verts, their normals)
-	// ...
+	// Check our faces with their verts, then vice versa
+	faceVert((OBB *)this, (OBB *)&other, FeaturePair::Type::F_V);
+	faceVert((OBB *)&other, (OBB *)this, FeaturePair::Type::V_F);
 
-	// See which was better
-	FeaturePair featureToUse;
-	if (mostSeparated.dist > 0)
-		featureToUse = mostSeparated;
+	// Pick the correct feature pair
+	bool pen = (mostSeparated.dist > 0);
+	FeaturePair * fp = pen ? &mostPenetrating : &mostSeparated;
+	
+	auto makePoints = [fp, &ret](OBB * A, OBB * B){
+		std::array<vec2, 4> contactPoints;
+
+		vec2 wN = A->GetNormal(fp->fIdx);
+		vec2 wE0 = A->GetVert(fp->fIdx);
+		vec2 wE1 = A->GetVert(fp->fIdx + 1);
+
+		vec2 wV0 = B->GetVert(fp->vIdx);
+		vec2 wV1 = B->GetVert(fp->vIdx + 1);
+
+		vec2 p1 = projectOnEdge(wE0, wV0, wV1);
+		vec2 p2 = projectOnEdge(wE1, wV0, wV1);
+
+		vec2 p3 = projectOnEdge(wV0, wE0, wE1);
+		vec2 p4 = projectOnEdge(wV1, wE0, wE1);
+
+		ret.emplace_back(A, B, p1, p3, wN, glm::length(p3 - p1));
+		ret.emplace_back(A, B, p2, p4, wN, glm::length(p4 - p2));
+	};
+
+	if (fp->T == FeaturePair::Type::F_V)
+		makePoints((OBB *)this, (OBB *)&other);
 	else
-		featureToUse = mostPenetrating;
+		makePoints((OBB *)&other, (OBB *)this);
 
-	// Now that we know what feature pair we care about
-	// get normal of face feature
-	vec2 faceN;
+	return ret;
+}
 
-	// get vertex pair of vert feature and it's closest neighbor
-	// closest neighbor is determined by picking the vertex pair
-	// whose edge normal is most opposed to the face feature box's normal
-	std::array<vec2, 2> supportPair;
-	vec2 va, vb, vc;
-	vec2 nab = glm::normalize(vb - va);
-	vec2 nbc = glm::normalize(vc - vb);
-	if (glm::dot(nab, faceN) < glm::dot(nbc, faceN)) {
-		supportPair[0] = va;
-		supportPair[1] = vb;
-	}
-	else {
-		supportPair[0] = vb;
-		supportPair[1] = vc;
-	}
+// Not sure about this
+std::list<Contact> OBB::GetClosestPoints(const Circle& other) const {
+	vec2 a_pos = ws_clamp(other.C);
+	vec2 n = glm::normalize(a_pos - other.C);
+	vec2 b_pos = other.C + n*other.r;
+	float dist = glm::length(a_pos - b_pos);
+	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, dist);
+	return{ c };
+}
 
-	// now find the actual closest points and make the contacts (two)
+vec2 OBB::ws_clamp(vec2 p) const {
+	vec2 l_p = glm::inverse(getRotMat()) * p;
+	return AABB::clamp(l_p);
+}
+
+std::list<Contact> OBB::GetClosestPoints(const AABB& other) const {
+	// This is lazy
+	OBB ob(other);
+	return GetClosestPoints(ob);
+}
+
+// NYI
+bool OBB::IsOverlapping(const Circle& other) const {
+	return false;
+}
+
+bool OBB::IsOverlapping(const AABB& other) const {
+	return false;
+}
+
+quatvec OBB::GetQuatVec() const {
+	return quatvec(vec3(C, 0.f), fquat(cos(theta / 2), sin(theta / 2)*vec3(0, 0, 1)));
 }

@@ -4,6 +4,7 @@
 
 #include "Util.h"
 #include "Entity.h"
+#include "quatvec.h"
 
 // This file has colliison primitives that inherit from
 // RigidBody_2D. I think this is going to screw me over sooner
@@ -64,10 +65,12 @@ struct Circle : public RigidBody_2D {
 	// Collision Overrides
 	bool IsOverlapping(const Circle& other) const override;
 	bool IsOverlapping(const AABB& other) const override;
+	virtual bool IsOverlapping(const OBB& other) const override;
 
 	// Contacts
 	std::list<Contact> GetClosestPoints(const Circle& other) const override;
 	std::list<Contact> GetClosestPoints(const AABB& other) const override;
+	virtual std::list<Contact> GetClosestPoints(const OBB& other) const override;
 };
 
 // 2D Axis Aligned Bounding Box
@@ -104,20 +107,23 @@ struct OBB : public AABB {
 	
 	// Constructors like AABB, with rotation
 	OBB();
+	OBB(const AABB& ab);
 	OBB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r, float th);
 	OBB(vec2 vel, float m, float e, float x, float y, float w, float h, float th);
-	OBB(const AABB&);
 
 	// Rather than override these, keep the originals and
 	// then make new versions for world space
-	float ws_width() const;
-	float ws_height() const;
-	float ws_left() const;
-	float ws_right() const;
-	float ws_top() const;
-	float ws_bottom() const;
+	//float ws_width() const;
+	//float ws_height() const;
+	//float ws_left() const;
+	//float ws_right() const;
+	//float ws_top() const;
+	//float ws_bottom() const;
 	vec2 ws_clamp(vec2 p) const;
 	glm::mat2 getRotMat() const;
+
+	vec2 GetVert(uint32_t idx) const;
+	vec2 GetNormal(uint32_t idx) const;
 
 	// Collision Overrides
 	bool IsOverlapping(const Circle& other) const override;
@@ -129,4 +135,10 @@ struct OBB : public AABB {
 	std::list<Contact> GetClosestPoints(const OBB& other) const override;
 
 	int GetSupportVerts(vec2 n, std::array<vec2, 2>) const;
+	int GetSupportVertIndices(vec2 n, std::array<int, 2>) const;
+	std::array<vec2, 2> GetSupportPair(vec2 n) const;
+
+
+	// This is gonna bubble up
+	quatvec GetQuatVec() const;
 };
