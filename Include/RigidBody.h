@@ -148,6 +148,6 @@ struct OBB : public AABB {
 	std::array<vec2, 2> GetSupportPair(vec2 n) const;
 
 
-	// This is gonna bubble up
-	
+	// AABB fucks it up
+	void ChangeVel(vec2 newV, vec2 rad) override;
 };

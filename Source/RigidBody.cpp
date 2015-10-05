@@ -141,7 +141,6 @@ std::list<Contact> Circle::GetClosestPoints(const AABB& other) const {
 	return{ c };
 }
 
-
 bool Circle::IsOverlapping(const OBB& other) const {
 	return other.IsOverlapping(*this);
 }
@@ -162,7 +161,6 @@ std::list<Contact> AABB::GetClosestPoints(const OBB& other) const {
 	return other.GetClosestPoints(*this);
 }
 
-
 std::list<Contact> AABB::GetClosestPoints(const AABB& other) const {
 	// watch for low values here
 	vec2 d = C - other.C;
@@ -173,42 +171,6 @@ std::list<Contact> AABB::GetClosestPoints(const AABB& other) const {
 	Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, a_pos, b_pos, n, dist);
 	return{ c };
 }
-
-// // Impuse application methods
-//static void ApplyCollisionImpulse_Generic(RigidBody_2D * a, RigidBody_2D * b, vec2 N) {
-//	// Solve 1-D collision along normal between objects
-//	glm::vec2 n = glm::normalize(a->C - b->C);
-//	float v1i = glm::dot(n, a->V);
-//	float v2i = glm::dot(n, b->V);
-//
-//	// 1/(m1+m2),  coef of restitution
-//	const float Msum_1 = 1.f / (a->m + b->m);
-//	const float Cr = 0.5f * (a->e + b->e);
-//
-//	// find momentum, solve for final velocity
-//	float pa = a->m * v1i, pb = b->m * v2i;
-//	float Cr_diff = Cr*(v2i - v1i);
-//	float psum = pa + pb;
-//
-//	float v1f = Msum_1*(b->m*Cr_diff + psum);
-//	float v2f = Msum_1*(-a->m*Cr_diff + psum);
-//
-//	// do this more cute (needed for "conservation of momentum")
-//	if (fabs(v1f) < 0.001f) v1f = 0.f;
-//	if (fabs(v2f) < 0.001f) v2f = 0.f;
-//
-//	std::cout << "p0: " << pa + pb << ", p1: " << v1f*a->m + v2f*b->m << std::endl;
-//
-//	// apply velocity along normal direction
-//	a->V = v1f*n;
-//	b->V = v2f*n;
-//}
-//
-//void RigidBody_2D::ApplyCollisionImpulse(RigidBody_2D * const other, vec2 n) {
-//	ApplyCollisionImpulse_Generic(this, other, n);
-//}
-
-
 
 OBB::OBB():
 	AABB()
@@ -228,7 +190,7 @@ OBB::OBB(vec2 vel, float m, float e, float x, float y, float w, float h, float t
 
 glm::mat2 OBB::getRotMat() const {
 	float c = cos(th);
-	float s = sin(th);
+	float s = sin(th); // glm wants transpose
 	return glm::mat2(vec2(c, s), vec2(-s, c));
 }
 
@@ -458,9 +420,11 @@ std::list<Contact> OBB::GetClosestPoints(const Circle& other) const {
 	return{ c };
 }
 
+// Definitely not the cheapest way of doing this
 vec2 OBB::ws_clamp(vec2 p) const {
-	vec2 l_p = glm::inverse(getRotMat()) * p;
-	return AABB::clamp(l_p);
+	vec2 p1 = glm::inverse(getRotMat()) * (p - C);
+	p1 = glm::clamp(p1, -R, R);
+	return C + getRotMat() * p1;
 }
 
 std::list<Contact> OBB::GetClosestPoints(const AABB& other) const {
@@ -479,5 +443,9 @@ bool OBB::IsOverlapping(const AABB& other) const {
 }
 
 quatvec RigidBody_2D::GetQuatVec() const {
-	return quatvec(vec3(C, 0.f), fquat(cos(th / 2), sin(-th / 2)*vec3(0, 0, 1)));
+	return quatvec(vec3(C, 0.f), fquat(cos(th / 2), sin(th / 2)*vec3(0, 0, 1)));
+}
+
+void OBB::ChangeVel(vec2 newV, vec2 rad) {
+	return AABB::ChangeVel(newV, rad);
 }

@@ -220,12 +220,12 @@ Scene::Scene(std::string& pyinitScript) {
 			m_vAABB.push_back(box);
 		}
 		else if (colPrim == "OBB") {
-			OBB box(vec2(0.f), vec2(pos), 1e10f, 1.f, vec2(scale), 0.5f);
+			OBB box(-2.f*vec2(pos), vec2(pos), maxEl(scale), 1.f, vec2(scale), M_PI/3.f);
 			box.SetEntity(&m_vEntities[i]);
 			m_vOBB.push_back(box);
 		}
 		else {
-			Circle circ(-1.f*vec2(pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale));
+			Circle circ(-2.f*vec2(pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale));
 			circ.SetEntity(&m_vEntities[i]);;
 			m_vCircles.push_back(circ);
 		}

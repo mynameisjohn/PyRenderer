@@ -28,35 +28,6 @@ def GetWalls():
 r_Entities = []
 Entity = namedtuple('Entity', ('pos', 'scale', 'rot', 'color', 'module'))
 
-
-r_Entities.append(Entity(
-		pos = [7.,0.],
-		scale = [1.,1.],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = 'Circle.py'
-	))
-r_Entities.append(Entity(
-		pos = [-7.,0.],
-		scale = [1.,1.],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = 'Circle.py'
-	))
-r_Entities.append(Entity(
-		pos = [0.,7.],
-		scale = [1.,1.],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = 'Circle.py'
-	))
-r_Entities.append(Entity(
-		pos = [0.,-7.],
-		scale = [1.,1.],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = 'Circle.py'
-	))
 r_Entities.append(Entity(
 		pos = [0.,0.],
 		scale = [1.,1.],
@@ -65,7 +36,22 @@ r_Entities.append(Entity(
 		module = 'OBB.py'
 	))
 
-# # walls
+r_Entities.append(Entity(
+		pos = [7.,7.],
+		scale = [1.,1.],
+		rot = makeQuat(0.,0.,1.,0.),
+		color = randColor(),
+		module = 'Circle.py'
+	))
+	
+# r_Entities.append(Entity(
+		# pos = [3.5,3.5],
+		# scale = [1.,1.],
+		# rot = makeQuat(0.,0.,1.,0.),
+		# color = randColor(),
+		# module = 'Circle.py'
+	# ))
+
 # r_Entities.append(Entity(
 		# pos = [-18.,0.],
 		# scale = [9.,9.],

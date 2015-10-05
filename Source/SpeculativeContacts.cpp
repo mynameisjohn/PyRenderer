@@ -37,24 +37,31 @@ void Solver::operator()(std::list<Contact>& contacts) {
 			float dV = relNv + c.dist / dT;
 
 			if (dV < 0) {
+				RigidBody_2D * A = c.pair[0], *B = c.pair[1];
+
 				// 1/(m1+m2),  coef of restitution, epsilon
-				const float Msum_1 = 1.f / (c.pair[0]->m + c.pair[1]->m);
-				const float Cr = 0.5f * (c.pair[0]->e + c.pair[1]->e);
+				const float Msum_1 = 1.f / (A->m + B->m);
+				const float Cr = 0.5f * (A->e + B->e);
 
 				// 2D momentum transfer solution (https://en.wikipedia.org/wiki/Inelastic_collision)
-				vec2 pA = c.pair[0]->GetMomentum();
-				vec2 pB = c.pair[1]->GetMomentum();
+				vec2 pA = A->GetMomentum();
+				vec2 pB = B->GetMomentum();
 				vec2 pSum = pA + pB;
-				vec2 Cr_diff = Cr*(c.pair[0]->V - c.pair[1]->V);
-				vec2 v1f = Msum_1*(c.pair[1]->m*Cr_diff + pSum);
-				vec2 v2f = Msum_1*(-c.pair[0]->m*Cr_diff + pSum);
+				vec2 Cr_diff = Cr*(B->V - A->V);
+				vec2 v1f = Msum_1*(B->m*Cr_diff + pSum);
+				vec2 v2f = Msum_1*(-A->m*Cr_diff + pSum);
 
-				vec2 r0 = c.pos[0] - c.pair[0]->C;
-				vec2 r1 = c.pos[1] - c.pair[1]->C;
+				// rotation radius arms
+				vec2 r0 = c.pos[0] - A->C;
+				vec2 r1 = c.pos[1] - B->C;
+
+				// one of these has to be negated
+				v1f = glm::reflect(v1f, -c.normal);
+				v2f = glm::reflect(v2f, c.normal);
 
 				// Apply new velocity along reflection direction
-				c.pair[0]->ChangeVel(glm::reflect(v1f, c.normal), r0);
-				c.pair[1]->ChangeVel(glm::reflect(v2f, c.normal), r1);
+				A->ChangeVel(-v1f, r0);
+				B->ChangeVel(v2f, r1);
 
 				// I don't like doing this
 				c.isColliding = true;
