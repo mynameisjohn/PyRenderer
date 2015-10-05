@@ -58,6 +58,12 @@ int Scene::Update() {
 	for (auto& c : m_vCircles)
 		c.Integrate();
 
+	for (auto& b : m_vAABB)
+		b.Integrate();
+
+	for (auto& b : m_vOBB)
+		b.Integrate();
+
 	// I think there's the same # of these every time...
 	Solver solve; 
 
@@ -76,6 +82,12 @@ int Scene::Update() {
 			m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), wallContacts.begin(), wallContacts.end());
 		}
 
+		// for every unique circle OBB pair
+		for (auto& obb : m_vOBB) {
+			auto bContacts = obb.GetClosestPoints(*it1);
+			m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), bContacts.begin(), bContacts.end());
+		}
+
 		totalEnergy += it1->GetKineticEnergy();
 	}
 
@@ -85,7 +97,26 @@ int Scene::Update() {
 			auto boxContacts = it1->GetClosestPoints(*it2);
 			m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), boxContacts.begin(), boxContacts.end());
 		}
+
+		// for every AABB - OBB pair
+		for (auto& obb : m_vOBB) {
+			auto bContacts = obb.GetClosestPoints(*it1);
+			m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), bContacts.begin(), bContacts.end());
+		}
+
+		totalEnergy += it1->GetKineticEnergy();
 	}
+
+	// For every unique OBB pair
+	for (auto it1 = m_vOBB.begin(); it1 != m_vOBB.end(); ++it1) {
+		for (auto it2 = it1 + 1; it2 != m_vOBB.end(); ++it2) {
+			auto boxContacts = it1->GetClosestPoints(*it2);
+			m_SpeculativeContacts.insert(m_SpeculativeContacts.end(), boxContacts.begin(), boxContacts.end());
+		}
+
+		totalEnergy += it1->GetKineticEnergy();
+	}
+
 
 	// Conservation of energy
 	//std::cout << totalEnergy << "\n" << std::endl;
@@ -102,11 +133,6 @@ int Scene::Update() {
 			}
 		}
 	}
-
-
-
-	//for (auto& d : m_vDrawables) 
-	//	d.PyUpdate();
 
 	for (auto& e : m_vEntities)
 		e.Update();
@@ -193,8 +219,13 @@ Scene::Scene(std::string& pyinitScript) {
 			box.SetEntity(&m_vEntities[i]);
 			m_vAABB.push_back(box);
 		}
+		else if (colPrim == "OBB") {
+			OBB box(vec2(0.f), vec2(pos), 1e10f, 1.f, vec2(scale), 0.5f);
+			box.SetEntity(&m_vEntities[i]);
+			m_vOBB.push_back(box);
+		}
 		else {
-			Circle circ(5.f*vec2(pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale));
+			Circle circ(-1.f*vec2(pos), vec2(pos), maxEl(scale), 1.f, maxEl(scale));
 			circ.SetEntity(&m_vEntities[i]);;
 			m_vCircles.push_back(circ);
 		}
@@ -209,6 +240,8 @@ Scene::Scene(std::string& pyinitScript) {
 	for (auto& circle : m_vCircles)
 		circle.GetEntity()->SetColCmp(&circle);
 	for (auto& box : m_vAABB)
+		box.GetEntity()->SetColCmp(&box);
+	for (auto& box : m_vOBB)
 		box.GetEntity()->SetColCmp(&box);
 	for (auto& drawable : m_vDrawables)
 		drawable.GetEntity()->SetDrCmp(&drawable);

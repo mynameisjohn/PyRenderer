@@ -13,12 +13,12 @@ RigidBody_2D::RigidBody_2D() :
 {}
 
 
-RigidBody_2D::RigidBody_2D(vec2 V, vec2 C, float m, float e) :
+RigidBody_2D::RigidBody_2D(vec2 V, vec2 C, float m, float e, float th) :
 	V(V),
 	C(C),
 	m(m),
 	e(e),
-	th(0),
+	th(th),
 	w(0)
 {}
 
@@ -70,9 +70,9 @@ Circle::Circle() :
 	RigidBody_2D()
 {}
 
-Circle::Circle(vec2 V, vec2 C, float m, float e, float radius) :
+Circle::Circle(vec2 V, vec2 C, float m, float e, float radius, float th) :
 	r(radius),
-	RigidBody_2D(V, C, m, e)
+	RigidBody_2D(V, C, m, e, th)
 {}
 
 AABB::AABB() :
@@ -80,19 +80,17 @@ AABB::AABB() :
 	RigidBody_2D()
 {}
 
-AABB::AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r) :
-	R(r),
-	RigidBody_2D(vel, c, mass, elasticity)
+AABB::AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r, float th) :
+	RigidBody_2D(vel, c, mass, elasticity, th),
+	R(r)
 {}
 
-AABB::AABB(vec2 v, float mass, float el, float x, float y, float w, float h) :
+AABB::AABB(vec2 v, float mass, float el, float x, float y, float w, float h, float th) :
 	R(vec2(w, h) / 2.f),
-	RigidBody_2D(v, vec2(x, y) + vec2(w, h) / 2.f, mass, el)
+	RigidBody_2D(v, vec2(x, y) + vec2(w, h) / 2.f, mass, el, th)
 {
 	R = vec2(w, h) / 2.f;
 }
-
-
 
 float AABB::width()const { return 2.f*R.x; }
 float AABB::height()const { return 2.f*R.y; }
@@ -221,17 +219,17 @@ OBB::OBB(const AABB& ab) :
 {}
 
 OBB::OBB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r, float th) :
-	AABB(vel, c, mass, elasticity, r)
+	AABB(vel, c, mass, elasticity, r, th)
 {}
 
 OBB::OBB(vec2 vel, float m, float e, float x, float y, float w, float h, float th) :
-	AABB(vel, m, e, x,y,w, h)
+	AABB(vel, m, e, x,y,w, h, th)
 {}
 
 glm::mat2 OBB::getRotMat() const {
 	float c = cos(th);
 	float s = sin(th);
-	return glm::mat2(vec2(-c, s), vec2(s, c));
+	return glm::mat2(vec2(c, s), vec2(-s, c));
 }
 
 int OBB::GetSupportVerts(vec2 n, std::array<vec2, 2> sV) const {
@@ -247,7 +245,8 @@ findMin:
 	for (int i = 0; i < 4; i++) {
 		vec2 v = GetVert(i);
 		float d = glm::dot(l_n, v);
-		if (d < dMin) {
+		if (d > dMin) {
+			dMin = d;
 			if (found != i) {
 				vMin = v;
 				found = i;
@@ -274,9 +273,10 @@ findMin:
 	for (int i = 0; i < 4; i++) {
 		vec2 v = GetVert(i);
 		float d = glm::dot(l_n, v);
-		if (d < dMin) {
+		if (d > dMin) {
+			dMin = d;
 			if (i != iMin)
-				i = iMin;
+				iMin = i;
 		}
 	}
 
@@ -377,7 +377,7 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 			vec2 p2 = A->GetVert((i + 1) % 4);
 
 			// For B's support verts relative to the normal
-			std::array<int, 2> supportVerts;
+			std::array<int, 2> supportVerts = { 0 };
 			int nVerts = B->GetSupportVertIndices(n, supportVerts);
 			for (int s = 0; s < nVerts; s++) {
 				vec2 sV = B->GetVert(supportVerts[s]);
@@ -451,9 +451,9 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 // Not sure about this
 std::list<Contact> OBB::GetClosestPoints(const Circle& other) const {
 	vec2 a_pos = ws_clamp(other.C);
-	vec2 n = glm::normalize(a_pos - other.C);
-	vec2 b_pos = other.C + n*other.r;
-	float dist = glm::length(a_pos - b_pos);
+	vec2 n = -glm::normalize(a_pos - other.C);
+	vec2 b_pos = other.C - n*other.r;
+	float dist = glm::length(a_pos - b_pos); 
 	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, dist);
 	return{ c };
 }
@@ -479,5 +479,5 @@ bool OBB::IsOverlapping(const AABB& other) const {
 }
 
 quatvec RigidBody_2D::GetQuatVec() const {
-	return quatvec(vec3(C, 0.f), fquat(cos(th / 2), sin(th / 2)*vec3(0, 0, 1)));
+	return quatvec(vec3(C, 0.f), fquat(cos(th / 2), sin(-th / 2)*vec3(0, 0, 1)));
 }

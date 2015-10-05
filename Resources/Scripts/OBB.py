@@ -8,7 +8,7 @@ def randColor():
 
 r_IqmFile = b'quad.iqm'
 r_Sounds = ['C.wav', 'F.wav', 'A.wav', 'B.wav']
-r_ColPrim = 'AABB'
+r_ColPrim = 'OBB'
 
 g_Entities = {}
 

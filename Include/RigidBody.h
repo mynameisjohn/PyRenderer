@@ -33,7 +33,7 @@ struct RigidBody_2D : public OwnedByEnt {
 	float w; // angular velocity
 
 	RigidBody_2D();
-	RigidBody_2D(vec2 vel, vec2 c, float mass, float elasticity);
+	RigidBody_2D(vec2 vel, vec2 c, float mass, float elasticity, float th=0.f);
 
 	// Get Physical Quantities
 	vec2 GetMomentum() const;
@@ -68,7 +68,7 @@ struct Circle : public RigidBody_2D {
 	float r; // Radius
 
 	Circle();
-	Circle(vec2 vel, vec2 c, float mass, float elasticity, float radius);
+	Circle(vec2 vel, vec2 c, float mass, float elasticity, float radius, float th=0.f);
 
 	// Collision Overrides
 	bool IsOverlapping(const Circle& other) const override;
@@ -86,8 +86,8 @@ struct AABB : public RigidBody_2D {
 	vec2 R; // half widths along x, y
 
 	AABB();
-	AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r);
-	AABB(vec2 vel, float m, float e, float x, float y, float w, float h);
+	AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r, float th = 0.f);
+	AABB(vec2 vel, float m, float e, float x, float y, float w, float h, float th = 0.f);
 
 	// useful things
 	float width() const;
@@ -117,8 +117,8 @@ struct OBB : public AABB {
 	// Constructors like AABB, with rotation
 	OBB();
 	OBB(const AABB& ab);
-	OBB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r, float th);
-	OBB(vec2 vel, float m, float e, float x, float y, float w, float h, float th);
+	OBB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r, float th = 0.f);
+	OBB(vec2 vel, float m, float e, float x, float y, float w, float h, float th = 0.f);
 
 	// Rather than override these, keep the originals and
 	// then make new versions for world space

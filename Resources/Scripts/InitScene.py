@@ -28,78 +28,115 @@ def GetWalls():
 r_Entities = []
 Entity = namedtuple('Entity', ('pos', 'scale', 'rot', 'color', 'module'))
 
-# walls
-r_Entities.append(Entity(
-		pos = [-18.,0.],
-		scale = [9.,9.],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = 'AABB.py'
-	))
-r_Entities.append(Entity(
-		pos = [18.,0.],
-		scale = [9.,9.],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = 'AABB.py'
-	))
-r_Entities.append(Entity(
-		pos = [0.,18.],
-		scale = [9.,9.],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = 'AABB.py'
-	))
-r_Entities.append(Entity(
-		pos = [0.,-18.],
-		scale = [9.,9.],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = 'AABB.py'
-	))
 
 r_Entities.append(Entity(
-		pos = [6.,3.],
+		pos = [7.,0.],
 		scale = [1.,1.],
 		rot = makeQuat(0.,0.,1.,0.),
 		color = randColor(),
-		module = b'Circle.py'
+		module = 'Circle.py'
 	))
 r_Entities.append(Entity(
-		pos = [-6.,-3.],
+		pos = [-7.,0.],
 		scale = [1.,1.],
 		rot = makeQuat(0.,0.,1.,0.),
 		color = randColor(),
-		module = b'Circle.py'
+		module = 'Circle.py'
 	))
 r_Entities.append(Entity(
-		pos = [2.,-2.],
-		scale = [3.,3.],
-		rot = makeQuat(0.,0.,1.,0.),
-		color = randColor(),
-		module = b'Circle.py'
-	))	
-
-r_Entities.append(Entity(
-		pos = [-3.,-3.],
+		pos = [0.,7.],
 		scale = [1.,1.],
 		rot = makeQuat(0.,0.,1.,0.),
 		color = randColor(),
-		module = b'Circle.py'
-	))	
-
+		module = 'Circle.py'
+	))
 r_Entities.append(Entity(
-		pos = [-1.,4.],
-		scale = [2.,2.],
+		pos = [0.,-7.],
+		scale = [1.,1.],
 		rot = makeQuat(0.,0.,1.,0.),
 		color = randColor(),
-		module = b'Circle.py'
-	))	
-
+		module = 'Circle.py'
+	))
 r_Entities.append(Entity(
-		pos = [-1.,0.],
-		scale = [0.5,0.5],
+		pos = [0.,0.],
+		scale = [1.,1.],
 		rot = makeQuat(0.,0.,1.,0.),
 		color = randColor(),
-		module = b'Circle.py'
-	))	
+		module = 'OBB.py'
+	))
+
+# # walls
+# r_Entities.append(Entity(
+		# pos = [-18.,0.],
+		# scale = [9.,9.],
+		# rot = makeQuat(0.,0.,1.,0.),
+		# color = randColor(),
+		# module = 'AABB.py'
+	# ))
+# r_Entities.append(Entity(
+		# pos = [18.,0.],
+		# scale = [9.,9.],
+		# rot = makeQuat(0.,0.,1.,0.),
+		# color = randColor(),
+		# module = 'AABB.py'
+	# ))
+# r_Entities.append(Entity(
+		# pos = [0.,18.],
+		# scale = [9.,9.],
+		# rot = makeQuat(0.,0.,1.,0.),
+		# color = randColor(),
+		# module = 'AABB.py'
+	# ))
+# r_Entities.append(Entity(
+		# pos = [0.,-18.],
+		# scale = [9.,9.],
+		# rot = makeQuat(0.,0.,1.,0.),
+		# color = randColor(),
+		# module = 'AABB.py'
+	# ))
+
+# r_Entities.append(Entity(
+		# pos = [6.,3.],
+		# scale = [1.,1.],
+		# rot = makeQuat(0.,0.,1.,0.),
+		# color = randColor(),
+		# module = b'Circle.py'
+	# ))
+# r_Entities.append(Entity(
+		# pos = [-6.,-3.],
+		# scale = [1.,1.],
+		# rot = makeQuat(0.,0.,1.,0.),
+		# color = randColor(),
+		# module = b'Circle.py'
+	# ))
+# r_Entities.append(Entity(
+		# pos = [2.,-2.],
+		# scale = [3.,3.],
+		# rot = makeQuat(0.,0.,1.,0.),
+		# color = randColor(),
+		# module = b'Circle.py'
+	# ))	
+
+# r_Entities.append(Entity(
+		# pos = [-3.,-3.],
+		# scale = [1.,1.],
+		# rot = makeQuat(0.,0.,1.,0.),
+		# color = randColor(),
+		# module = b'Circle.py'
+	# ))	
+
+# r_Entities.append(Entity(
+		# pos = [-1.,4.],
+		# scale = [2.,2.],
+		# rot = makeQuat(0.,0.,1.,0.),
+		# color = randColor(),
+		# module = b'Circle.py'
+	# ))	
+
+# r_Entities.append(Entity(
+		# pos = [-1.,0.],
+		# scale = [0.5,0.5],
+		# rot = makeQuat(0.,0.,1.,0.),
+		# color = randColor(),
+		# module = b'OBB.py'
+	# ))	

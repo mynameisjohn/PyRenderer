@@ -28,6 +28,7 @@ private:
 	std::vector<Drawable> m_vDrawables;
 	std::vector<Circle> m_vCircles;
 	std::vector<AABB> m_vAABB;
+	std::vector<OBB> m_vOBB;
 	std::list<Contact> m_SpeculativeContacts; // no need to be a list, will be (n^2+n)/2
 };
 
