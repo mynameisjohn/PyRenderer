@@ -35,17 +35,17 @@ r_Entities.append(Entity(
 		color = randColor(),
 		module = 'OBB.py'
 	))
-
+	
 r_Entities.append(Entity(
-		pos = [7.,7.],
+		pos = [5.,0.],
 		scale = [1.,1.],
 		rot = makeQuat(0.,0.,1.,0.),
 		color = randColor(),
 		module = 'Circle.py'
 	))
-	
+
 # r_Entities.append(Entity(
-		# pos = [3.5,3.5],
+		# pos = [-7.,-7.],
 		# scale = [1.,1.],
 		# rot = makeQuat(0.,0.,1.,0.),
 		# color = randColor(),

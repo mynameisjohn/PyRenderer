@@ -27,6 +27,7 @@ void RigidBody_2D::Integrate() {
 	const float dT = 0.005f; // TODO better integration methods?
 	vec2 delta = dT * V;
 	C += delta;
+	th += w*dT;
 
 	// I used to have python do this, but what's the point?
 	m_pEntity->PostMessage(int(Entity::CompID::DRAWABLE),
@@ -41,11 +42,13 @@ float RigidBody_2D::GetKineticEnergy() const {
 	return 0.5f * m * glm::dot(V, V);
 }
 
+// I don't think this is physically accurate,
+// doesn't really deal with angular momentum
 void RigidBody_2D::ChangeVel(vec2 newV, vec2 rad) {
 	vec2 delV = newV - V;
 	V = newV;
 	vec2 perp(-rad.y, rad.x);
-	th += glm::dot(delV, perp);
+	w += glm::dot(delV, perp);
 }
 
 void AABB::ChangeVel(vec2 newV, vec2 rad) {
@@ -447,5 +450,5 @@ quatvec RigidBody_2D::GetQuatVec() const {
 }
 
 void OBB::ChangeVel(vec2 newV, vec2 rad) {
-	return AABB::ChangeVel(newV, rad);
+	return RigidBody_2D::ChangeVel(newV, rad);
 }

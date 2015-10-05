@@ -220,7 +220,7 @@ Scene::Scene(std::string& pyinitScript) {
 			m_vAABB.push_back(box);
 		}
 		else if (colPrim == "OBB") {
-			OBB box(-2.f*vec2(pos), vec2(pos), maxEl(scale), 1.f, vec2(scale), M_PI/3.f);
+			OBB box(-2.f*vec2(pos), vec2(pos), maxEl(scale), 1.f, vec2(scale), M_PI/7.f);
 			box.SetEntity(&m_vEntities[i]);
 			m_vOBB.push_back(box);
 		}
