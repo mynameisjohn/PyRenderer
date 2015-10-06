@@ -86,8 +86,8 @@ struct AABB : public RigidBody_2D {
 	vec2 R; // half widths along x, y
 
 	AABB();
-	AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r, float th = 0.f);
-	AABB(vec2 vel, float m, float e, float x, float y, float w, float h, float th = 0.f);
+	AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r);
+	AABB(vec2 vel, float m, float e, float x, float y, float w, float h);
 
 	// useful things
 	float width() const;
@@ -143,8 +143,8 @@ struct OBB : public AABB {
 	std::list<Contact> GetClosestPoints(const AABB& other) const override;
 	std::list<Contact> GetClosestPoints(const OBB& other) const override;
 
-	int GetSupportVerts(vec2 n, std::array<vec2, 2>) const;
-	int GetSupportVertIndices(vec2 n, std::array<int, 2>) const;
+	int GetSupportVerts(vec2 n, std::array<vec2, 2>&) const;
+	int GetSupportVertIndices(vec2 n, std::array<int, 2>&) const;
 	std::array<vec2, 2> GetSupportPair(vec2 n) const;
 
 

@@ -26,22 +26,24 @@ def GetWalls():
     return [-9.,-9.,18.,18.]
 
 r_Entities = []
-Entity = namedtuple('Entity', ('pos', 'scale', 'rot', 'color', 'module'))
+Entity = namedtuple('Entity', ('vel', 'pos', 'scale', 'rot', 'color', 'module'))
 
 r_Entities.append(Entity(
+		vel = [0.,0.],
 		pos = [0.,0.],
 		scale = [1.,1.],
-		rot = makeQuat(0.,0.,1.,0.),
+		rot = 0.,
 		color = randColor(),
 		module = 'OBB.py'
 	))
 	
 r_Entities.append(Entity(
-		pos = [5.,0.],
+		vel=[-5.,0.],
+		pos = [5.,1.],
 		scale = [1.,1.],
-		rot = makeQuat(0.,0.,1.,0.),
+		rot = math.pi / 4.,
 		color = randColor(),
-		module = 'Circle.py'
+		module = 'OBB.py'
 	))
 
 # r_Entities.append(Entity(

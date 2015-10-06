@@ -3,6 +3,9 @@
 #include "RigidBody.h"
 #include "SpeculativeContacts.h"
 
+// Smol
+const float kEPS = 0.001f;
+
 RigidBody_2D::RigidBody_2D() :
 	V(0),
 	C(0),
@@ -83,14 +86,14 @@ AABB::AABB() :
 	RigidBody_2D()
 {}
 
-AABB::AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r, float th) :
-	RigidBody_2D(vel, c, mass, elasticity, th),
+AABB::AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r) :
+	RigidBody_2D(vel, c, mass, elasticity, 0.f),
 	R(r)
 {}
 
-AABB::AABB(vec2 v, float mass, float el, float x, float y, float w, float h, float th) :
+AABB::AABB(vec2 v, float mass, float el, float x, float y, float w, float h) :
 	R(vec2(w, h) / 2.f),
-	RigidBody_2D(v, vec2(x, y) + vec2(w, h) / 2.f, mass, el, th)
+	RigidBody_2D(v, vec2(x, y) + vec2(w, h) / 2.f, mass, el, 0.f)
 {
 	R = vec2(w, h) / 2.f;
 }
@@ -175,7 +178,7 @@ std::list<Contact> AABB::GetClosestPoints(const AABB& other) const {
 	return{ c };
 }
 
-OBB::OBB():
+OBB::OBB() :
 	AABB()
 {}
 
@@ -184,12 +187,16 @@ OBB::OBB(const AABB& ab) :
 {}
 
 OBB::OBB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r, float th) :
-	AABB(vel, c, mass, elasticity, r, th)
-{}
+	AABB(vel, c, mass, elasticity, r)
+{
+	this->th = th;
+}
 
 OBB::OBB(vec2 vel, float m, float e, float x, float y, float w, float h, float th) :
-	AABB(vel, m, e, x,y,w, h, th)
-{}
+	AABB(vel, m, e, x, y, w, h)
+{
+	this->th = th;
+}
 
 glm::mat2 OBB::getRotMat() const {
 	float c = cos(th);
@@ -197,7 +204,7 @@ glm::mat2 OBB::getRotMat() const {
 	return glm::mat2(vec2(c, s), vec2(-s, c));
 }
 
-int OBB::GetSupportVerts(vec2 n, std::array<vec2, 2> sV) const {
+int OBB::GetSupportVerts(vec2 n, std::array<vec2, 2>& sV) const {
 	// This isn't necessary
 	int found(-1);
 	int num(0);
@@ -226,28 +233,35 @@ findMin:
 	return num;
 }
 
-int OBB::GetSupportVertIndices(vec2 n, std::array<int, 2> sV) const {
-	// This isn't necessary
-	int iMin(-1);
-	int num(0);
-	vec2 l_n = glm::inverse(getRotMat()) * n;
 
-findMin:
-	float dMin(-FLT_MAX);
-
+int OBB::GetSupportVertIndices(vec2 n, std::array<int, 2>& sV) const {
+	// Find the furthest vertex
+	float dMin = -FLT_MAX;
 	for (int i = 0; i < 4; i++) {
 		vec2 v = GetVert(i);
-		float d = glm::dot(l_n, v);
+		float d = glm::dot(n, v);
 		if (d > dMin) {
 			dMin = d;
-			if (i != iMin)
-				iMin = i;
+			sV[0] = i;
 		}
 	}
 
-	sV[num++] = iMin;
-	if (num == 1)
-		goto findMin;
+	int num(1);
+
+	// If there's a different vertex
+	for (int i = 0; i < 4; i++) {
+		if (i == sV[0])
+			continue;
+		vec2 v = GetVert(i);
+		float d = glm::dot(n, v);
+		// That's pretty close...
+		if (fabs(d - dMin) < kEPS) {
+			// Take it too
+			dMin = d;
+			sV[num++] = i;
+		}
+	}
+
 
 	return num;
 }
@@ -320,8 +334,8 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 			V_F,
 			N
 		};
-		float dist{ -FLT_MAX };
-		float c_dist{ -FLT_MAX };
+		float dist{ FLT_MAX };
+		float c_dist{ FLT_MAX };
 		int fIdx{ -1 };
 		int vIdx{ -1 };
 		Type T{ Type::N };
@@ -332,9 +346,6 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 	FeaturePair mostPenetrating;
 
 	auto faceVert = [&mostSeparated, &mostPenetrating](OBB * A, OBB * B, FeaturePair::Type type) {
-		// Smol
-		const float kEPS = 0.001f;
-
 		// For all A's normals
 		for (int i = 0; i < 4; i++) {
 			vec2 n = A->GetNormal(i);
@@ -343,7 +354,7 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 
 			// For B's support verts relative to the normal
 			std::array<int, 2> supportVerts = { 0 };
-			int nVerts = B->GetSupportVertIndices(n, supportVerts);
+			int nVerts = B->GetSupportVertIndices(-n, supportVerts);
 			for (int s = 0; s < nVerts; s++) {
 				vec2 sV = B->GetVert(supportVerts[s]);
 
@@ -365,7 +376,7 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 					dist = glm::length(p);
 				float c_dist = glm::length(sV - A->C);
 				float del = fabs(dist - fp->dist);
-				bool overwrite = (del < kEPS &&  fp->T == type && c_dist < fp->c_dist) || (dist < fp->dist);
+				bool overwrite = (/*del < kEPS &&  fp->T == type && c_dist < fp->c_dist) ||(*/dist < fp->dist);
 				if (overwrite) {
 					fp->dist = dist;
 					fp->c_dist = c_dist;
@@ -384,8 +395,8 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 	// Pick the correct feature pair
 	bool pen = (mostSeparated.dist > 0);
 	FeaturePair * fp = pen ? &mostPenetrating : &mostSeparated;
-	
-	auto makePoints = [fp, &ret](OBB * A, OBB * B){
+
+	auto makePoints = [fp, &ret](OBB * A, OBB * B) {
 		std::array<vec2, 4> contactPoints;
 
 		vec2 wN = A->GetNormal(fp->fIdx);
@@ -418,7 +429,7 @@ std::list<Contact> OBB::GetClosestPoints(const Circle& other) const {
 	vec2 a_pos = ws_clamp(other.C);
 	vec2 n = -glm::normalize(a_pos - other.C);
 	vec2 b_pos = other.C - n*other.r;
-	float dist = glm::length(a_pos - b_pos); 
+	float dist = glm::length(a_pos - b_pos);
 	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, dist);
 	return{ c };
 }
