@@ -313,6 +313,7 @@ vec2 OBB::GetNormal(uint32_t idx) const {
 	}
 }
 
+// YOU HAVE A BUG HERE! See that shitty graph paper on your desk man
 static vec2 projectOnEdge(vec2 p, vec2 e0, vec2 e1) {
 	// u and v form a little triangle
 	vec2 u = p - e0;
@@ -322,7 +323,9 @@ static vec2 projectOnEdge(vec2 p, vec2 e0, vec2 e1) {
 	float t = glm::dot(u, v) / glm::length(v);
 
 	// Clamp between two edge points
-	return glm::clamp(e0 + e1 * t, e0, e1);
+	auto clamp = [](float x, float m, float M) {return std::min(std::max(x, m), M); };
+	
+	return e0 + (e1 - e0)*clamp(t, 0, 1);
 }
 
 
@@ -334,29 +337,37 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 			V_F,
 			N
 		};
-		float dist{ FLT_MAX };
-		float c_dist{ FLT_MAX };
-		int fIdx{ -1 };
-		int vIdx{ -1 };
-		Type T{ Type::N };
+		float dist;
+		float c_dist;
+		int fIdx;
+		int vIdx;
+		Type T;
+		FeaturePair(float d, float cd = -1, int f = -1, int v = -1, Type t = N) :
+			dist(d),
+			c_dist(cd),
+			fIdx(f),
+			vIdx(v),
+			T(t)
+		{}
 	};
 
 	std::list<Contact> ret;
-	FeaturePair mostSeparated;
-	FeaturePair mostPenetrating;
+	FeaturePair mostSeparated(FLT_MAX);
+	FeaturePair mostPenetrating(-FLT_MAX);
 
 	auto faceVert = [&mostSeparated, &mostPenetrating](OBB * A, OBB * B, FeaturePair::Type type) {
 		// For all A's normals
-		for (int i = 0; i < 4; i++) {
-			vec2 n = A->GetNormal(i);
-			vec2 p1 = A->GetVert(i);
-			vec2 p2 = A->GetVert((i + 1) % 4);
+		for (int fIdx = 0; fIdx < 4; fIdx++) {
+			vec2 n = A->GetNormal(fIdx);
+			vec2 p1 = A->GetVert(fIdx);
+			vec2 p2 = A->GetVert((fIdx + 1) % 4);
 
 			// For B's support verts relative to the normal
 			std::array<int, 2> supportVerts = { 0 };
 			int nVerts = B->GetSupportVertIndices(-n, supportVerts);
 			for (int s = 0; s < nVerts; s++) {
-				vec2 sV = B->GetVert(supportVerts[s]);
+				int sIdx = supportVerts[s];
+				vec2 sV = B->GetVert(sIdx);
 
 				// minkowski face points
 				vec2 mfp0 = sV - p1;
@@ -369,21 +380,44 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 				// i.e is first mf point behind face normal
 				// penetration implies support vert behind normal
 				float dist = glm::dot(mfp0, n);
-				bool isPenetrating = dist < 0.f;
-				FeaturePair * fp = isPenetrating ? &mostPenetrating : &mostSeparated;
-				// Pick the closest one
-				if (isPenetrating == false)
-					dist = glm::length(p);
 				float c_dist = glm::length(sV - A->C);
-				float del = fabs(dist - fp->dist);
-				bool overwrite = (/*del < kEPS &&  fp->T == type && c_dist < fp->c_dist) ||(*/dist < fp->dist);
-				if (overwrite) {
-					fp->dist = dist;
-					fp->c_dist = c_dist;
-					fp->fIdx = i;
-					fp->vIdx = supportVerts[s];
-					fp->T = type;
+				bool isPenetrating = dist < 0.f;
+				if (isPenetrating) {
+					// We're interested in the furthest penetrating distance (why?)
+					if (dist > mostPenetrating.dist) 
+						mostPenetrating = FeaturePair(dist, c_dist, fIdx, sIdx, type);
 				}
+				else {
+					// Reassign dist
+					dist = glm::length(p);
+					
+					// We're interested in the closest separated distance
+					if (dist < mostSeparated.dist)
+						mostSeparated = FeaturePair(dist, c_dist, fIdx, sIdx, type);
+					else {
+						float del = fabs(dist - mostSeparated.dist);
+						// If they're very close, pick the one whose vertex
+						// is closest to the face object's center
+						if (del < kEPS) {
+							if (c_dist < mostPenetrating.c_dist)
+								mostSeparated = FeaturePair(dist, c_dist, fIdx, sIdx, type);
+						}
+					}
+				}
+				//FeaturePair * fp = isPenetrating ? &mostPenetrating : &mostSeparated;
+				//// Pick the closest one
+				//if (isPenetrating == false)
+				//	dist = glm::length(p);
+				//
+				//float del = fabs(dist - fp->dist);
+				//bool overwrite = (/*del < kEPS &&  fp->T == type && c_dist < fp->c_dist) ||(*/dist < fp->dist);
+				//if (overwrite) {
+				//	fp->dist = dist;
+				//	fp->c_dist = c_dist;
+				//	fp->fIdx = i;
+				//	fp->vIdx = supportVerts[s];
+				//	fp->T = type;
+				//}
 			}
 		}
 	};
@@ -393,7 +427,7 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 	faceVert((OBB *)&other, (OBB *)this, FeaturePair::Type::V_F);
 
 	// Pick the correct feature pair
-	bool pen = (mostSeparated.dist > 0);
+	bool pen = (mostSeparated.dist < 0);
 	FeaturePair * fp = pen ? &mostPenetrating : &mostSeparated;
 
 	auto makePoints = [fp, &ret](OBB * A, OBB * B) {
