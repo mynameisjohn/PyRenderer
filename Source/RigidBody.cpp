@@ -1,4 +1,4 @@
-#include <glm.hpp>
+#include <glm/glm.hpp>
 
 #include "RigidBody.h"
 #include "SpeculativeContacts.h"
@@ -33,7 +33,7 @@ void RigidBody_2D::Integrate() {
 	th += w*dT;
 
 	// I used to have python do this, but what's the point?
-	m_pEntity->PostMessage(int(Entity::CompID::DRAWABLE),
+	m_pEntity->HandleMessage(int(Entity::CompID::DRAWABLE),
 		int(Entity::MsgID::DR_TRANSLATE));
 }
 

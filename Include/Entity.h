@@ -2,7 +2,7 @@
 
 #include <pyliason.h>
 #include "Util.h"
-#include <vec4.hpp>
+#include <glm/vec4.hpp>
 
 class Entity;
 
@@ -61,14 +61,14 @@ public:
 	int GetID() const;
 	
 	// Message handling stuff
-	template <typename D>
-	bool PostMessage(int C, int M, D data);
+	//template <typename D>
+	//bool PostMessage(int C, int M, D data);
 
 	// Void (no data) case
-	bool PostMessage(int C, int M);
+	bool HandleMessage(int C, int M);
 
 	// Who knows what it'll be?
-	//bool PostMessage(int C, int M, Python::Object data);
+	bool HandleRequest(int C, int M, Python::Object data);
 
 	void Update();
 };

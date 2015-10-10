@@ -1,5 +1,5 @@
 #include "Camera.h"
-#include <gtx/transform.hpp>
+#include <glm/gtx/transform.hpp>
 
 GLint Camera::s_ProjHandle(-1);
 GLint Camera::s_PosHandle(-1);

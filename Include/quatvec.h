@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Util.h"
-#include <vec3.hpp>
-#include <gtc/quaternion.hpp>
+#include <glm/vec3.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 struct quatvec {
 	// This object is designed to represent some translation/rotation combo

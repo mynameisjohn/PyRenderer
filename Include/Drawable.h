@@ -5,9 +5,9 @@
 #include "Entity.h"
 #include "quatvec.h"
 
-#include <vec4.hpp>
-#include <mat4x4.hpp>
-#include <gtc/quaternion.hpp>
+#include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 class Drawable : public OwnedByEnt {
 	std::string m_SrcFile;

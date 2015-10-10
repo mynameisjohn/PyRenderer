@@ -1,6 +1,6 @@
 
 #include <fstream>
-#include <gtx/transform.hpp>
+#include <glm/gtx/transform.hpp>
 
 #include <pyliason.h>
 #include <SDL.h>
@@ -104,26 +104,24 @@ bool InitPython() {
 	// Expose camera
 	Python::Register_Class<Camera>("Camera");
 	std::function<void(Camera *, vec2, vec2, vec2)> cam_InitOrtho(&Camera::InitOrtho);
-	Python::Register_Mem_Function<Camera, __LINE__>("InitOrtho", cam_InitOrtho, "Initialize Ortho Camera with lr/tb/nf");
+	Python::Register_Mem_Function<Camera, struct CamInitOrtho_t>("InitOrtho", cam_InitOrtho, "Initialize Ortho Camera with lr/tb/nf");
 
-	// Register Entity
+	//// Register Entity
 	Python::Register_Class<Entity>("Entity");
-	std::function<bool(Entity *, int, int)> ent_PostMessage(&Entity::PostMessage);
-	Python::Register_Mem_Function<Entity, __LINE__>("PostMessage", ent_PostMessage, "Post a message to the Entity's queue");
+	std::function<bool(Entity *, int, int)> ent_HandleMsg(&Entity::HandleMessage);
+	Python::Register_Mem_Function<Entity, struct EntHandleVoidMsg_t>("PostMessage", ent_HandleMsg, "Post a message to the Entity's queue");
 	
-	std::function<bool(Entity *, int, int, vec4)> ent_PostMessage_v4(&Entity::PostMessage<vec4>);
-	Python::Register_Mem_Function<Entity, __LINE__>("PostMessage_v4", ent_PostMessage_v4, "Post a message to the Entity's queue");
+	std::function<bool(Entity *, int, int, Python::Object)> ent_HandleRequest(&Entity::HandleRequest);
+	Python::Register_Mem_Function<Entity, struct EntHandleMsg_t>("PostMessage_v4", ent_HandleRequest, "Post a message to the Entity's queue");
 
-	std::function<int(std::string)> playFn(Audio::PlaySound);
-	//Python::Register_Function<__LINE__>("PlaySound", playFn);
-	Py_Add_Func("PlaySound", Audio::PlaySound, "Play a sound file");
+	Python::Register_Function<struct AudPlaySnd_t>("PlaySound", Python::make_function(Audio::PlaySound), "Play a sound file");
 
 	// Expose Drawable
 	Python::Register_Class<Drawable>("Drawable");
-	//std::function<void(Drawable *, vec3)> dr_Translate(&Drawable::Translate);
-	//Python::Register_Mem_Function<Drawable, __LINE__>("Translate", dr_Translate, "Translate a drawable");
-	//std::function<void(Drawable *, vec4)> dr_SetColor(&Drawable::SetColor);
-	//Python::Register_Mem_Function<Drawable, __LINE__>("Translate", dr_SetColor, "Translate a drawable");
+	std::function<void(Drawable *, vec3)> dr_Translate(&Drawable::Translate);
+	Python::Register_Mem_Function<Drawable, struct DrTrans_t>("Translate", dr_Translate, "Translate a drawable");
+	std::function<void(Drawable *, vec4)> dr_SetColor(&Drawable::SetColor);
+	Python::Register_Mem_Function<Drawable, struct DrSetColor_t>("SetColor", dr_SetColor, "Translate a drawable");
 
 
 	// Register Circle class (nothing to expose, really)

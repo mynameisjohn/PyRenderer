@@ -3,10 +3,10 @@
 #include "GL_Includes.h"
 #include "Util.h"
 
-#include <fwd.hpp>
-#include <mat4x4.hpp>
-#include <vec3.hpp>
-#include <gtx/quaternion.hpp>
+#include <glm/fwd.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/vec3.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 // Transformable (pos, rot) camera class
 // Owns a projection matrix and generates a

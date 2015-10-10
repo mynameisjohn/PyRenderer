@@ -1,6 +1,6 @@
 #include "quatvec.h"
 
-#include <gtx/transform.hpp>
+#include <glm/gtx/transform.hpp>
 
 quatvec::quatvec() :
 	Q(cos(0), 0, 0, sin(0)),

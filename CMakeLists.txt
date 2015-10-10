@@ -12,20 +12,18 @@ find_package(SDL2)
 find_package(SDL2_mixer)
 find_package(OpenGL)
 find_package(GLEW)
+find_package(PythonLibs)
 
 # Some platform specifics
 if (WIN32)
 	add_definitions(-DGLEW_STATIC)
-	set(GLM_DIR $ENV{SDK}/glm)
-	set(PYTHON_LIBRARY C:/Python35/libs/python35_d.lib)
-	set(PYTHON_INCLUDE_DIR C:/Python35/include)
-else (WIN32)
-	set(GLM_DIR /usr/include/glm)
+	# set(PYTHON_LIBRARY C:/Python35/libs/python35_d.lib)
+	# set(PYTHON_INCLUDE_DIR C:/Python35/include)
 endif (WIN32)
 
 # Library variables
 set(GL_LIBS ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
-set(SDL2_LIBS ${SDL2_LIBRARY} ${SDLMIXER_LIBRARY})
+set(SDL2_LIBS ${SDL2_LIBRARY} ${SDLMAIN_LIBRARY} ${SDLMIXER_LIBRARY})
 
 set(GL_INC ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
 set(SDL2_INC ${SDL2_INCLUDE_DIR} ${SDLMIXER_INCLUDE_DIR})
@@ -38,7 +36,7 @@ file(GLOB_RECURSE RES Resources/*)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../PyLiaison ${CMAKE_CURRENT_SOURCE_DIR}/PyLiaison)
 
 # include dirs
-include_directories(${GLM_DIR} ${GL_INC} ${SDL2_INC}  ${PYTHON_INCLUDE_DIR} 
+include_directories(${GL_INC} ${SDL2_INC}  ${PYTHON_INCLUDE_DIR} 
 					${CMAKE_CURRENT_SOURCE_DIR}/../PyLiaison/include 
 					${CMAKE_CURRENT_SOURCE_DIR}/include)
 

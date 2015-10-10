@@ -1,7 +1,7 @@
 #include "Drawable.h"
 #include "IqmFile.h"
 
-#include <gtx/transform.hpp>
+#include <glm/gtx/transform.hpp>
 
 #include <array>
 

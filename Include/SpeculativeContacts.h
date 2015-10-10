@@ -3,7 +3,7 @@
 class RigidBody_2D;
 
 #include "Util.h"
-#include <vec2.hpp>
+#include <glm/vec2.hpp>
 #include <list>
 
 // Speculative contacts stuff

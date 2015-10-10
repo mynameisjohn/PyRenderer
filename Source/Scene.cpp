@@ -1,7 +1,7 @@
 #include "pyl_overloads.h"
 
-#include <gtx/transform.hpp>
-#include <gtc/type_ptr.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Scene.h"
 #include "SpeculativeContacts.h"

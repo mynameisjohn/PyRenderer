@@ -23,7 +23,7 @@
 #define str(s) #s
 
 // glm is important to me
-#include <fwd.hpp>
+#include <glm/fwd.hpp>
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;
