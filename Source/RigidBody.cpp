@@ -363,7 +363,7 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 			vec2 p2 = A->GetVert((fIdx + 1) % 4);
 
 			// For B's support verts relative to the normal
-			std::array<int, 2> supportVerts = { 0 };
+			std::array<int, 2> supportVerts = { -1, -1 };
 			int nVerts = B->GetSupportVertIndices(-n, supportVerts);
 			for (int s = 0; s < nVerts; s++) {
 				int sIdx = supportVerts[s];
@@ -491,7 +491,9 @@ bool OBB::IsOverlapping(const AABB& other) const {
 }
 
 quatvec RigidBody_2D::GetQuatVec() const {
-	return quatvec(vec3(C, 0.f), fquat(cos(th / 2), sin(th / 2)*vec3(0, 0, 1)));
+    vec3 T(C, 0.f);
+    fquat Q(cos(th/2.f), vec3(0.f, 0.f, sin(th/2.f)));
+	return quatvec(T, Q);
 }
 
 void OBB::ChangeVel(vec2 newV, vec2 rad) {

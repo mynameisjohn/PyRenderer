@@ -52,10 +52,10 @@ std::string RelPathToAbs(const std::string relPath);
 std::string FixBackslash(const std::string& in);
 
 // General purpose functions
-template <typename T>
-inline bool strAppnd(T& v, std::string s) {
-	return (bool)(std::stringstream(s) >> v);
-}
+//template <typename T>
+//inline bool strAppnd(T& v, std::string s) {
+//	return (bool)(std::stringstream(s) >> v);
+//}
 
 template <typename T>
 inline T remap(T v, T m1, T m2, T m3, T m4) {
