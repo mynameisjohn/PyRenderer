@@ -325,27 +325,6 @@ static vec2 projectOnEdge(vec2 p, vec2 e0, vec2 e1) {
 	return e0 + v*clamp(t, 0.f, 1.f);
 }
 
-// Move this elsewhere once triangles come into play
-struct FeaturePair {
-    enum Type {
-        F_V,
-        V_F,
-        N
-    };
-    float dist;
-    float c_dist;
-    int fIdx;
-    int vIdx;
-    Type T;
-    FeaturePair(float d, float cd = -1, int f = -1, int v = -1, Type t = N) :
-    dist(d),
-    c_dist(cd),
-    fIdx(f),
-    vIdx(v),
-    T(t)
-    {}
-};
-
 static void featurePairJudgement(FeaturePair& mS, FeaturePair mP, OBB * A, OBB * B, FeaturePair::Type type){
     // For all A's normals
     for (int fIdx = 0; fIdx < 4; fIdx++) {
@@ -484,3 +463,11 @@ quatvec RigidBody_2D::GetQuatVec() const {
 void OBB::ChangeVel(vec2 newV, vec2 rad) {
 	return RigidBody_2D::ChangeVel(newV, rad);
 }
+
+FeaturePair::FeaturePair(float d, float cd, int f, int v, Type t) :
+dist(d),
+c_dist(cd),
+fIdx(f),
+vIdx(v),
+T(t)
+{}

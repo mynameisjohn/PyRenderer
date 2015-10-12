@@ -151,3 +151,20 @@ struct OBB : public AABB {
 	// AABB fucks it up
 	void ChangeVel(vec2 newV, vec2 rad) override;
 };
+
+// Feature Pair definition; does this belong here?
+
+// Move this elsewhere once triangles come into play
+struct FeaturePair {
+    enum Type {
+        F_V,
+        V_F,
+        N
+    };
+    float dist;
+    float c_dist;
+    int fIdx;
+    int vIdx;
+    Type T;
+    FeaturePair(float d, float cd = -1, int f = -1, int v = -1, Type t = N);
+};
