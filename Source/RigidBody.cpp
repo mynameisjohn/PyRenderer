@@ -313,7 +313,6 @@ vec2 OBB::GetNormal(uint32_t idx) const {
 	}
 }
 
-// YOU HAVE A BUG HERE! See that shitty graph paper on your desk man
 static vec2 projectOnEdge(vec2 p, vec2 e0, vec2 e1) {
 	// u and v form a little triangle
 	vec2 u = p - e0;
@@ -322,109 +321,95 @@ static vec2 projectOnEdge(vec2 p, vec2 e0, vec2 e1) {
 	// find the projection of u onto v, parameterize it
 	float t = glm::dot(u, v) / glm::length(v);
 
-	// Clamp between two edge points
-	auto clamp = [](float x, float m, float M) {return std::min(std::max(x, m), M); };
-	
-	return e0 + (e1 - e0)*clamp(t, 0, 1);
+    // Clamp between two edge points
+	return e0 + v*clamp(t, 0.f, 1.f);
 }
 
+// Move this elsewhere once triangles come into play
+struct FeaturePair {
+    enum Type {
+        F_V,
+        V_F,
+        N
+    };
+    float dist;
+    float c_dist;
+    int fIdx;
+    int vIdx;
+    Type T;
+    FeaturePair(float d, float cd = -1, int f = -1, int v = -1, Type t = N) :
+    dist(d),
+    c_dist(cd),
+    fIdx(f),
+    vIdx(v),
+    T(t)
+    {}
+};
+
+static void featurePairJudgement(FeaturePair& mS, FeaturePair mP, OBB * A, OBB * B, FeaturePair::Type type){
+    // For all A's normals
+    for (int fIdx = 0; fIdx < 4; fIdx++) {
+        vec2 n = A->GetNormal(fIdx);
+        vec2 p1 = A->GetVert(fIdx);
+        vec2 p2 = A->GetVert((fIdx + 1) % 4);
+        
+        // For B's support verts relative to the normal
+        std::array<int, 2> supportVerts = { {-1, -1} };
+        int nVerts = B->GetSupportVertIndices(-n, supportVerts);
+        for (int s = 0; s < nVerts; s++) {
+            int sIdx = supportVerts[s];
+            vec2 sV = B->GetVert(sIdx);
+            
+            // minkowski face points
+            vec2 mfp0 = sV - p1;
+            vec2 mfp1 = sV - p2;
+            
+            // Find point on minkowski face
+            vec2 p = projectOnEdge(vec2(), mfp0, mfp1);
+            
+            // are objects penetrating?
+            // i.e is first mf point behind face normal
+            // penetration implies support vert behind normal
+            float dist = glm::dot(mfp0, n);
+            float c_dist = glm::length(sV - A->C);
+            bool isPenetrating = dist < 0.f;
+            if (isPenetrating) {
+                // For penetrating features, we're interested in the
+                // largest negative distance (meaning closest to 0)
+                if (dist > mP.dist)
+                    mP = FeaturePair(dist, c_dist, fIdx, sIdx, type);
+            }
+            else {
+                // Reassign dist
+                dist = glm::length(p);
+                
+                // We're interested in the closest separated distance
+                if (dist < mS.dist)
+                    mS = FeaturePair(dist, c_dist, fIdx, sIdx, type);
+                else {
+                    float del = fabs(dist - mS.dist);
+                    // If they're very close, pick the one whose vertex
+                    // is closest to the face object's center
+                    if (del < kEPS) {
+                        if (c_dist < mS.c_dist)
+                            mS = FeaturePair(dist, c_dist, fIdx, sIdx, type);
+                    }
+                }
+            }
+        }
+    }
+}
 
 std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
-	// Move this elsewhere once triangles come into play
-	struct FeaturePair {
-		enum Type {
-			F_V,
-			V_F,
-			N
-		};
-		float dist;
-		float c_dist;
-		int fIdx;
-		int vIdx;
-		Type T;
-		FeaturePair(float d, float cd = -1, int f = -1, int v = -1, Type t = N) :
-			dist(d),
-			c_dist(cd),
-			fIdx(f),
-			vIdx(v),
-			T(t)
-		{}
-	};
+	
 
 	std::list<Contact> ret;
 	FeaturePair mostSeparated(FLT_MAX);
 	FeaturePair mostPenetrating(-FLT_MAX);
 
-	auto faceVert = [&mostSeparated, &mostPenetrating](OBB * A, OBB * B, FeaturePair::Type type) {
-		// For all A's normals
-		for (int fIdx = 0; fIdx < 4; fIdx++) {
-			vec2 n = A->GetNormal(fIdx);
-			vec2 p1 = A->GetVert(fIdx);
-			vec2 p2 = A->GetVert((fIdx + 1) % 4);
-
-			// For B's support verts relative to the normal
-			std::array<int, 2> supportVerts = { -1, -1 };
-			int nVerts = B->GetSupportVertIndices(-n, supportVerts);
-			for (int s = 0; s < nVerts; s++) {
-				int sIdx = supportVerts[s];
-				vec2 sV = B->GetVert(sIdx);
-
-				// minkowski face points
-				vec2 mfp0 = sV - p1;
-				vec2 mfp1 = sV - p2;
-
-				// Find point on minkowski face
-				vec2 p = projectOnEdge(vec2(), mfp0, mfp1);
-
-				// are objects penetrating?
-				// i.e is first mf point behind face normal
-				// penetration implies support vert behind normal
-				float dist = glm::dot(mfp0, n);
-				float c_dist = glm::length(sV - A->C);
-				bool isPenetrating = dist < 0.f;
-				if (isPenetrating) {
-					// We're interested in the furthest penetrating distance (why?)
-					if (dist > mostPenetrating.dist) 
-						mostPenetrating = FeaturePair(dist, c_dist, fIdx, sIdx, type);
-				}
-				else {
-					// Reassign dist
-					dist = glm::length(p);
-					
-					// We're interested in the closest separated distance
-					if (dist < mostSeparated.dist)
-						mostSeparated = FeaturePair(dist, c_dist, fIdx, sIdx, type);
-					else {
-						float del = fabs(dist - mostSeparated.dist);
-						// If they're very close, pick the one whose vertex
-						// is closest to the face object's center
-						if (del < kEPS) {
-							if (c_dist < mostPenetrating.c_dist)
-								mostSeparated = FeaturePair(dist, c_dist, fIdx, sIdx, type);
-						}
-					}
-				}
-				//FeaturePair * fp = isPenetrating ? &mostPenetrating : &mostSeparated;
-				//// Pick the closest one
-				//if (isPenetrating == false)
-				//	dist = glm::length(p);
-				//
-				//float del = fabs(dist - fp->dist);
-				//bool overwrite = (/*del < kEPS &&  fp->T == type && c_dist < fp->c_dist) ||(*/dist < fp->dist);
-				//if (overwrite) {
-				//	fp->dist = dist;
-				//	fp->c_dist = c_dist;
-				//	fp->fIdx = i;
-				//	fp->vIdx = supportVerts[s];
-				//	fp->T = type;
-				//}
-			}
-		}
-	};
-
 	// Check our faces with their verts, then vice versa
-	faceVert((OBB *)this, (OBB *)&other, FeaturePair::Type::F_V);
-	faceVert((OBB *)&other, (OBB *)this, FeaturePair::Type::V_F);
+	featurePairJudgement(mostSeparated, mostPenetrating, (OBB *)this, (OBB *)&other, FeaturePair::Type::F_V);
+	featurePairJudgement(mostSeparated, mostPenetrating, (OBB *)&other, (OBB *)this, FeaturePair::Type::V_F);
 
 	// Pick the correct feature pair
 	bool pen = (mostSeparated.dist < 0);
