@@ -11,6 +11,10 @@
 #undef min
 #endif
 
+#else
+// Unix path stuff
+#include <stdlib.h>
+
 #endif
 
 #include "Util.h"
@@ -52,6 +56,8 @@ std::string RelPathToAbs(const std::string relPath) {
 
 #ifdef _WIN32
 	::GetFullPathName(relPath.c_str(), 1000, buf, 0);
+#else
+    realpath(relPath.c_str(), &buf[0]);
 #endif
 
 	return std::string(buf);

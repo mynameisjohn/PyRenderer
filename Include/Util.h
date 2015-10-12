@@ -40,10 +40,16 @@ std::ostream& operator<<(std::ostream& os, const mat4& mat);
 std::ostream& operator<<(std::ostream& os, const fquat& quat);
 
 // Useful dirs
-const std::string SHADER_DIR = "../Resources/Shaders/";
-const std::string SCRIPT_DIR = "../Resources/Scripts/";
-const std::string MODEL_DIR = "../Resources/Models/";
-const std::string SOUND_DIR = "../Resources/Sounds/";
+#ifdef __APPLE__
+const std::string srcDir = "../../";
+#else
+const std::string srcDir = "../";
+#endif
+
+const std::string SHADER_DIR = srcDir + "Resources/Shaders/";
+const std::string SCRIPT_DIR = srcDir + "Resources/Scripts/";
+const std::string MODEL_DIR = srcDir + "Resources/Models/";
+const std::string SOUND_DIR = srcDir + "Resources/Sounds/";
 
 // RelPathToAbs returns the absolute path of a file, given its relative path
 std::string RelPathToAbs(const std::string relPath);

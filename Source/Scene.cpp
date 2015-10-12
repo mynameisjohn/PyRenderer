@@ -148,7 +148,7 @@ Scene::Scene(std::string& pyinitScript) {
 	};
 
 	// Convert the relative python path to the absolute, load module
-	std::string initStrPath = FixBackslash(RelPathToAbs(SCRIPT_DIR + pyinitScript));
+	std::string initStrPath = FixBackslash(RelPathToAbs(SCRIPT_DIR ) + "/" + pyinitScript);
 	auto pyinitModule = Python::Object::from_script(initStrPath);
 
 	// Set up the shader

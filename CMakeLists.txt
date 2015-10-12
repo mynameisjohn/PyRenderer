@@ -12,18 +12,22 @@ find_package(SDL2)
 find_package(SDL2_mixer)
 find_package(OpenGL)
 find_package(GLEW)
-find_package(PythonLibs)
 
 # Some platform specifics
 if (WIN32)
 	add_definitions(-DGLEW_STATIC)
+	find_package(PythonLibs)
 	# set(PYTHON_LIBRARY C:/Python35/libs/python35_d.lib)
 	# set(PYTHON_INCLUDE_DIR C:/Python35/include)
+	set(SDL2_LIBS ${SDL2_LIBRARY} ${SDLMAIN_LIBRARY} ${SDLMIXER_LIBRARY})
+else(WIN32)
+	set(PYTHON_LIBRARY /usr/local/lib/libpython3.5m.a)
+	set(PYTHON_INCLUDE_DIR /usr/local/include/python3.5m)
+	set(SDL2_LIBS ${SDL2_LIBRARY} ${SDLMIXER_LIBRARY})
 endif (WIN32)
 
 # Library variables
 set(GL_LIBS ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
-set(SDL2_LIBS ${SDL2_LIBRARY} ${SDLMAIN_LIBRARY} ${SDLMIXER_LIBRARY})
 
 set(GL_INC ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
 set(SDL2_INC ${SDL2_INCLUDE_DIR} ${SDLMIXER_INCLUDE_DIR})
