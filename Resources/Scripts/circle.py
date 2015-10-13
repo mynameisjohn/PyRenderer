@@ -1,17 +1,17 @@
 ﻿from PyLiaison import *
 
 import random
-random.seed()
-
 import os
+
+random.seed()
 
 def randColor():
 	return [random.random() for i in range (0,3)]+[1.]
 
-# TODO add resource paths to PyLiaison module
 r_IqmFile = b'circle.iqm'
-p = os.path.relpath(os.path.join(os.getcwd()+'/../Resources/Sounds'))
+p = SND_DIR
 r_Sounds = [x for x in os.listdir(p) if os.path.isfile(p+os.sep+x)]
+
 r_ColPrim = 'Circle'
 
 g_Entities = {}
@@ -25,7 +25,7 @@ def HandleCollision(myID, theirID):
 	#e2 = g_Entities[myID]
 	e1.PostMessage_v4(0,1,randColor())
 	#e2.PostMessage_v4(0,1,randColor())
-	PlaySound(random.choice(r_Sounds))
+	#PlaySound(random.choice(r_Sounds))
 	#print(str(e1)+' is colliding with '+str(e2))
 	
 def AddEntity(eID, ePtr):

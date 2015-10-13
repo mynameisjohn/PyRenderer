@@ -51,13 +51,14 @@ r_Entities.append(Entity(
 		module = 'OBB.py'
 	))
 
-# r_Entities.append(Entity(
-		# pos = [-7.,-7.],
-		# scale = [1.,1.],
-		# rot = makeQuat(0.,0.,1.,0.),
-		# color = randColor(),
-		# module = 'Circle.py'
-	# ))
+r_Entities.append(Entity(
+		vel=[3.,5.],
+		pos = [-7.,-7.],
+		scale = [1.,1.],
+		rot = makeQuat(0.,0.,1.,0.),
+		color = randColor(),
+		module = 'circle.py'
+	))
 
 # r_Entities.append(Entity(
 		# pos = [-18.,0.],
