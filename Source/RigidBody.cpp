@@ -319,13 +319,13 @@ static vec2 projectOnEdge(vec2 p, vec2 e0, vec2 e1) {
 	vec2 v = e1 - e0;
 
 	// find the projection of u onto v, parameterize it
-	float t = glm::dot(u, v) / glm::length(v);
+    float t = glm::dot(u, v) / glm::dot(v,v);
 
     // Clamp between two edge points
-	return e0 + v*clamp(t, 0.f, 1.f);
+	return e0 + v * clamp(t, 0.f, 1.f);
 }
 
-static void featurePairJudgement(FeaturePair& mS, FeaturePair mP, OBB * A, OBB * B, FeaturePair::Type type){
+static void featurePairJudgement(FeaturePair& mS, FeaturePair& mP, OBB * A, OBB * B, FeaturePair::Type type){
     // For all A's normals
     for (int fIdx = 0; fIdx < 4; fIdx++) {
         vec2 n = A->GetNormal(fIdx);
