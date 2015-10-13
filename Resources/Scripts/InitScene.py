@@ -1,6 +1,7 @@
 ﻿from PyLiaison import *
 import math
 from collections import namedtuple
+from platform import system
 
 def makeQuat(x,y,z,theta):
 	r = math.radians(theta)/2.
@@ -14,9 +15,13 @@ random.seed()
 def randColor():
 	return [random.random() for i in range (0,3)]+[1.]
 
-r_ShaderSrc = { b'vert':b'simple.vert', 
-				b'frag':b'simple.frag',
-				b'Position':b'a_Pos'}
+r_ShaderSrc = { 'vert':'simple.vert', 
+				'frag':'simple.frag',
+				'Position':'a_Pos'}
+
+if (system() == 'Darwin'):
+	r_ShaderSrc['vert'] = 'mac_'+r_ShaderSrc['vert']
+	r_ShaderSrc['frag'] = 'mac_'+r_ShaderSrc['frag']
 
 def InitCamera(camPtr):
 	c_Camera = Camera(camPtr)
