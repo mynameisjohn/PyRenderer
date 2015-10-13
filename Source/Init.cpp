@@ -127,12 +127,14 @@ bool InitPython() {
 	// Register Circle class (nothing to expose, really)
 	Python::Register_Class<Circle>("Circle");
 
-	// Abstract interface to GetEntity, if you need it
-	//Python::Register_Class<PyComponent>("Component");
-	//std::function<Entity *(PyComponent *)> pyc_GetEntity(&PyComponent::GetEntity);
-	//Python::Register_Mem_Function<PyComponent, __LINE__>("GetEntity", pyc_GetEntity, "Get the entity pointer");
-
+    // Init python
 	Python::initialize();
+    
+    // Expose some useful constants to the PyLiaison module
+    Python::GetPyLiaisonModule().set_attr("RES_DIR", RES_DIR);
+    Python::GetPyLiaisonModule().set_attr("SND_DIR", SOUND_DIR);
+    Python::GetPyLiaisonModule().set_attr("SHD_DIR", SHADER_DIR);
+    Python::GetPyLiaisonModule().set_attr("MOD_DIR", MODEL_DIR);
 
 	return true;
 }
