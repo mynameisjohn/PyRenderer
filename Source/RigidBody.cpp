@@ -233,8 +233,7 @@ findMin:
 	return num;
 }
 
-
-int OBB::GetSupportVertIndices(vec2 n, std::array<int, 2>& sV) const {
+int OBB::GetSupportIndices(vec2 n, std::array<int, 2>& sV) const {
 	// Find the furthest vertex
 	float dMin = -FLT_MAX;
 	for (int i = 0; i < 4; i++) {
@@ -266,22 +265,18 @@ int OBB::GetSupportVertIndices(vec2 n, std::array<int, 2>& sV) const {
 	return num;
 }
 
-std::array<vec2, 2> OBB::GetSupportPair(vec2 n) const {
+vec2 OBB::GetSupportNeighbor(vec2 n, int idx) const {
 	std::array<vec2, 2> ret;
 
-	vec2 va, vb, vc;
-	vec2 nab = glm::normalize(vb - va);
+    vec2 vb = GetVert(idx);
+    vec2 va = GetVert(idx-1);
+    vec2 vc = GetVert(idx+1);
+    
+	vec2 nab = glm::normalize(va - vb);
 	vec2 nbc = glm::normalize(vc - vb);
-	if (glm::dot(nab, n) < glm::dot(nbc, n)) {
-		ret[0] = va;
-		ret[1] = vb;
-	}
-	else {
-		ret[0] = vb;
-		ret[1] = vc;
-	}
-
-	return ret;
+	if (glm::dot(nab, n) > glm::dot(nbc, n))
+        return va;
+    return vc;
 }
 
 vec2 OBB::GetVert(uint32_t idx) const {
@@ -334,7 +329,7 @@ static void featurePairJudgement(FeaturePair& mS, FeaturePair& mP, OBB * A, OBB 
         
         // For B's support verts relative to the normal
         std::array<int, 2> supportVerts = { {-1, -1} };
-        int nVerts = B->GetSupportVertIndices(-n, supportVerts);
+        int nVerts = B->GetSupportIndices(-n, supportVerts);
         for (int s = 0; s < nVerts; s++) {
             int sIdx = supportVerts[s];
             vec2 sV = B->GetVert(sIdx);
@@ -394,15 +389,21 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 	bool pen = (mostSeparated.dist < 0);
 	FeaturePair * fp = pen ? &mostPenetrating : &mostSeparated;
 
+    // Function that generates the actual contacts
 	auto makePoints = [fp, &ret](OBB * A, OBB * B) {
 		std::array<vec2, 4> contactPoints;
 
+        // Get the world space normal and edge points
+        // of the face feature
 		vec2 wN = A->GetNormal(fp->fIdx);
 		vec2 wE0 = A->GetVert(fp->fIdx);
 		vec2 wE1 = A->GetVert(fp->fIdx + 1);
-
-		vec2 wV0 = B->GetVert(fp->vIdx);
-		vec2 wV1 = B->GetVert(fp->vIdx + 1);
+        
+        // Get the world space vertex of the vertex feature,
+        // and then get "supporting neighbor" of that vertex
+        // along the direction of the face feature edge
+        vec2 wV0 = B->GetVert(fp->vIdx);
+        vec2 wV1 = B->GetSupportNeighbor(wE1-wE0, fp->vIdx);
 
 		vec2 p1 = projectOnEdge(wE0, wV0, wV1);
 		vec2 p2 = projectOnEdge(wE1, wV0, wV1);

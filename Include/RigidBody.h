@@ -144,9 +144,8 @@ struct OBB : public AABB {
 	std::list<Contact> GetClosestPoints(const OBB& other) const override;
 
 	int GetSupportVerts(vec2 n, std::array<vec2, 2>&) const;
-	int GetSupportVertIndices(vec2 n, std::array<int, 2>&) const;
-	std::array<vec2, 2> GetSupportPair(vec2 n) const;
-
+	int GetSupportIndices(vec2 n, std::array<int, 2>&) const;
+	vec2 GetSupportNeighbor(vec2 n, int idx) const;
 
 	// AABB fucks it up
 	void ChangeVel(vec2 newV, vec2 rad) override;
