@@ -34,7 +34,7 @@ void Solver::operator()(std::list<Contact>& contacts) {
 
 			// Find the amount of velocity (along n) needed such that
 			// adding dV * dT makes the objects touch
-			float dV = relNv + c.dist / dT;
+			float dV = relNv + c.dist / globalTimeStep;
 
 			if (dV < 0) {
 				RigidBody_2D * A = c.pair[0], *B = c.pair[1];

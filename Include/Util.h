@@ -22,6 +22,12 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
+// I'm moving the time step here
+// and making it non-const, so that
+// I can go back and forth in time
+const static float dT = 0.005f;
+extern float globalTimeStep;
+
 // glm is important to me
 #include <glm/fwd.hpp>
 using glm::vec2;

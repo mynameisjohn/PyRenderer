@@ -27,10 +27,10 @@ RigidBody_2D::RigidBody_2D(vec2 V, vec2 C, float m, float e, float th) :
 
 // I guess this just advances the object?
 void RigidBody_2D::Integrate() {
-	const float dT = 0.005f; // TODO better integration methods?
-	vec2 delta = dT * V;
+//	const float dT = 0.005f; // TODO better integration methods?
+	vec2 delta = globalTimeStep * V;
 	C += delta;
-	th += w*dT;
+	th += w * globalTimeStep;
 
 	// I used to have python do this, but what's the point?
 	m_pEntity->HandleMessage(int(Entity::CompID::DRAWABLE),

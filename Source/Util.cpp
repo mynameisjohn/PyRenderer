@@ -22,7 +22,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-
+// time step declaration
+float globalTimeStep = 0.005f;
 
 // Definitions of glm print functions
 std::ostream& operator<<(std::ostream& os, const vec2& vec) {
