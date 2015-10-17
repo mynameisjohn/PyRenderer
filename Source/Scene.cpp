@@ -217,7 +217,7 @@ Scene::Scene(std::string& pyinitScript) {
 		// Make collision resource, (assume uniform scale, used for mass and r)
 		// TODO add mass, elasticity to init tuple
 		if (colPrim == "AABB") {  // AABBs are assumed to be "walls" of high mass for now
-			AABB box(vec2(0.f), vec2(pos), maxEl(scale), 1.f, vec2(scale));
+			AABB box(vec2(0.f), vec2(pos), 1e6f, 1.f, vec2(scale));
 			box.SetEntity(&m_vEntities[i]);
 			m_vAABB.push_back(box);
 		}

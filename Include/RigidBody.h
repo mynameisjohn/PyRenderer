@@ -102,6 +102,8 @@ struct AABB : public RigidBody_2D {
 	float top() const;
 	float bottom() const;
 	vec2 clamp(vec2 p) const;
+    
+    vec2 GetFaceNormalFromPoint(vec2 p) const;
 
 	// Collision Overrides
 	virtual bool IsOverlapping(const Circle& other) const override;

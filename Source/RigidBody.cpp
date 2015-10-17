@@ -218,32 +218,37 @@ glm::mat2 OBB::getRotMat() const {
 }
 
 int OBB::GetSupportVerts(vec2 n, std::array<vec2, 2>& sV) const {
-	// This isn't necessary
-	int found(-1);
-	int num(0);
-	vec2 l_n = glm::inverse(getRotMat()) * n;
-
-findMin:
-	float dMin(-FLT_MAX);
-	vec2 vMin(-FLT_MAX);
-
-	for (int i = 0; i < 4; i++) {
-		vec2 v = GetVert(i);
-		float d = glm::dot(l_n, v);
-		if (d > dMin) {
-			dMin = d;
-			if (found != i) {
-				vMin = v;
-				found = i;
-			}
-		}
-	}
-
-	sV[num++] = vMin;
-	if (num == 1)
-		goto findMin;
-
-	return num;
+    int foundIdx(-1);
+    
+    // Find the furthest vertex
+    float dMin = -FLT_MAX;
+    for (int i = 0; i < 4; i++) {
+        vec2 v = GetVert(i);
+        float d = glm::dot(n, v);
+        if (d > dMin) {
+            dMin = d;
+            sV[0] = v;
+            foundIdx = i;
+        }
+    }
+    
+    int num(1);
+    
+    // If there's a different vertex
+    for (int i = 0; i < 4; i++) {
+        if (i == foundIdx)
+            continue;
+        vec2 v = GetVert(i);
+        float d = glm::dot(n, v);
+        // That's pretty close...
+        if (fabs(d - dMin) < kEPS) {
+            // Take it too
+            dMin = d;
+            sV[num++] = v;
+        }
+    }
+    
+    return num;
 }
 
 int OBB::GetSupportIndices(vec2 n, std::array<int, 2>& sV) const {
@@ -273,7 +278,6 @@ int OBB::GetSupportIndices(vec2 n, std::array<int, 2>& sV) const {
 			sV[num++] = i;
 		}
 	}
-
 
 	return num;
 }
@@ -442,7 +446,7 @@ std::list<Contact> OBB::GetClosestPoints(const Circle& other) const {
 	vec2 n = -glm::normalize(a_pos - other.C);
 	vec2 b_pos = other.C - n*other.r;
 	float dist = glm::length(a_pos - b_pos);
-	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, dist);
+	Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, a_pos, b_pos, n, dist);
 	return{ c };
 }
 
@@ -453,10 +457,51 @@ vec2 OBB::ws_clamp(vec2 p) const {
 	return C + getRotMat() * p1;
 }
 
+// Probably a cuter way of writing this
+vec2 AABB::GetFaceNormalFromPoint(vec2 p) const{
+    vec2 n;
+    
+    if (p.x < right() && p.x > left()){
+        if (p.y < bottom())
+            n = vec2(0,-1);
+        else
+            n - vec2(0,1);
+    }
+    else{
+        if (p.x < left())
+            n = vec2(-1,0);
+        else
+            n = vec2(1,0);
+    }
+    
+    return n;
+}
+
 std::list<Contact> OBB::GetClosestPoints(const AABB& other) const {
-	// This is lazy
-	OBB ob(other);
-	return GetClosestPoints(ob);
+    std::list<Contact> ret;
+    
+    // Find the vector from our center to theirs
+    vec2 centerVecN = glm::normalize(other.C - C);
+    
+    // Get supporting vertex / vertices along that direction
+    std::array<vec2, 2> supportVerts;
+    int nSupportVerts = GetSupportVerts(centerVecN, supportVerts);
+    if (nSupportVerts == 1){
+        vec2 pA = supportVerts[0];
+        vec2 pB = other.clamp(pA);
+        vec2 n = other.GetFaceNormalFromPoint(pA);
+        float d = glm::distance(pA, pB);
+        ret.emplace_back((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, d);
+    }
+    else{
+        vec2 pA = 0.5f * (supportVerts[0] + supportVerts[1]);
+        vec2 pB = other.clamp(pA);
+        vec2 n = other.GetFaceNormalFromPoint(pA);
+        float d = glm::distance(pA, pB);
+        ret.emplace_back((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, d);
+    }
+    
+    return ret;
 }
 
 // NYI
