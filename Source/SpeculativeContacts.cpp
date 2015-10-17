@@ -8,7 +8,7 @@ Contact::Contact(RigidBody_2D * a, RigidBody_2D * b, const vec2 p_a, const vec2 
 	pos{ p_a,p_b },
 	normal(nrm),
 	dist(d),
-    curDV(0),
+    curPenDist(0),
 	isColliding(false)
 {}
 
@@ -36,17 +36,12 @@ void Solver::operator()(std::list<Contact>& contacts) {
 			// adding dV * dT makes the objects touch (penetration dist)
 			float dV = relNv + c.dist / globalTimeStep;
             
-            // Add this penetration dist to the current penetration
-            // dist, discarding positive distances. This is the
-            // new penetration distance
-            float nDV = std::min(dV + c.curDV, 0.f);
+            // Add it to the current penetration distance
+            c.curPenDist += dV;
             
-            // Find the change between the old penDist and this one
-            float change = nDV - c.curDV;
-            
-            // Apply a impulse based on this change, slowly building
-            // up a multitude of small impulses over the iterations
-			if (change < 0.f) {
+            // If the penetration distance at this iteration is negative,
+            // apply an impulse and hope it resolves the pentration
+			if (c.curPenDist < 0.f) {
                 // Calculate collision
                 // A lot of this could be optimized, but right now
                 // I'm just interested in clarity
@@ -88,8 +83,10 @@ void Solver::operator()(std::list<Contact>& contacts) {
 				// I don't like doing this
 				c.isColliding = true;
 			}
+            // Otherwise just reassign the pen dist to 0
+            else
+                c.curPenDist = 0.f;
             
-            c.curDV = nDV;
 		}
 	}
 }
