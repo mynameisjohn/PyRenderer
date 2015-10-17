@@ -38,6 +38,7 @@ struct RigidBody_2D : public OwnedByEnt {
 	// Get Physical Quantities
 	vec2 GetMomentum() const;
 	float GetKineticEnergy() const;
+    virtual float GetInertia() const = 0;
 
 	// Overlap, everyone needs to be compatible
 	virtual bool IsOverlapping(const Circle& other) const = 0;
@@ -69,6 +70,8 @@ struct Circle : public RigidBody_2D {
 
 	Circle();
 	Circle(vec2 vel, vec2 c, float mass, float elasticity, float radius, float th=0.f);
+    
+    float GetInertia() const override;
 
 	// Collision Overrides
 	bool IsOverlapping(const Circle& other) const override;
@@ -88,6 +91,8 @@ struct AABB : public RigidBody_2D {
 	AABB();
 	AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r);
 	AABB(vec2 vel, float m, float e, float x, float y, float w, float h);
+    
+    float GetInertia() const override;
 
 	// useful things
 	float width() const;

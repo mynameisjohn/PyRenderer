@@ -1,13 +1,17 @@
 ﻿from PyLiaison import *
 
 import random
+import os
+
 random.seed()
 
 def randColor():
 	return [random.random() for i in range (0,3)]+[1.]
 
 r_IqmFile = b'quad.iqm'
-r_Sounds = ['C.wav', 'F.wav', 'A.wav', 'B.wav']
+p = SND_DIR
+r_Sounds = [x for x in os.listdir(p) if os.path.isfile(p+os.sep+x)]
+
 r_ColPrim = 'AABB'
 
 g_Entities = {}

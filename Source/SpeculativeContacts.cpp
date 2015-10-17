@@ -22,8 +22,6 @@ vec2 Contact::relVel() const {
 }
 
 void Solver::operator()(std::list<Contact>& contacts) {
-	const float dT(0.005f);
-	
 	for (int nIt = 0; nIt < m_nIterations; nIt++)
 	{
 		for (auto& c : contacts) {
@@ -37,31 +35,43 @@ void Solver::operator()(std::list<Contact>& contacts) {
 			float dV = relNv + c.dist / globalTimeStep;
 
 			if (dV < 0) {
+                // Calculate collision
+                // A lot of this could be optimized, but right now
+                // I'm just interested in clarity
 				RigidBody_2D * A = c.pair[0], *B = c.pair[1];
 
 				// 1/(m1+m2),  coef of restitution, epsilon
 				const float Msum_1 = 1.f / (A->m + B->m);
 				const float Cr = 0.5f * (A->e + B->e);
-
-				// 2D momentum transfer solution (https://en.wikipedia.org/wiki/Inelastic_collision)
-				vec2 pA = A->GetMomentum();
-				vec2 pB = B->GetMomentum();
-				vec2 pSum = pA + pB;
-				vec2 Cr_diff = Cr*(B->V - A->V);
-				vec2 v1f = Msum_1*(B->m*Cr_diff + pSum);
-				vec2 v2f = Msum_1*(-A->m*Cr_diff + pSum);
-
-				// rotation radius arms
-				vec2 r0 = c.pos[0] - A->C;
-				vec2 r1 = c.pos[1] - B->C;
-
-				// one of these has to be negated
-				v1f = glm::reflect(v1f, -c.normal);
-				v2f = glm::reflect(v2f, c.normal);
-
-				// Apply new velocity along reflection direction
-				A->ChangeVel(-v1f, r0);
-				B->ChangeVel(v2f, r1);
+                
+                // Find velocity components along collision normal
+                float vA = glm::dot(A->V, c.normal);
+                float vB = glm::dot(B->V, c.normal);
+                
+                // Calculate new velocities
+                float pSum = A->m * vA + B->m * vB;
+                float Cr_diff = Cr * (vB-vA);
+                float n_vA = Msum_1*(B->m*Cr_diff + pSum);
+                float n_vB = Msum_1*(-A->m*Cr_diff + pSum);
+                
+                // Velocity changes (could be done in terms of delP)
+                vec2 delV_A = (n_vA-vA) * c.normal;
+                vec2 delV_B = (n_vB-vB) * c.normal;
+                
+                // Radius arms
+                vec2 rA = c.pos[0] - A->C;
+                vec2 rB = c.pos[1] - B->C;
+                
+                // Change in angular velocity
+                float delW_A = A->m * (rA.x * delV_A.y - rA.y * delV_A.x) / A->GetInertia();
+                float delW_B = B->m * (rB.x * delV_B.y - rB.y * delV_B.x) / B->GetInertia();
+                
+                // modify quantities
+                A->V += delV_A;
+                B->V += delV_B;
+                
+                A->w += delW_A;
+                B->w += delW_B;
 
 				// I don't like doing this
 				c.isColliding = true;

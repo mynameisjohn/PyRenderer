@@ -54,8 +54,16 @@ void RigidBody_2D::ChangeVel(vec2 newV, vec2 rad) {
 	w += glm::dot(delV, perp);
 }
 
+//void RigidBody_2D::ApplyCollisionImpulse(vec2 imp){
+//    V += imp;
+//}
+
 void AABB::ChangeVel(vec2 newV, vec2 rad) {
 	V = newV;
+}
+
+float Circle::GetInertia() const{
+    return 0.5f * m * pow(r, 2);
 }
 
 bool Circle::IsOverlapping(const Circle& other) const {
@@ -96,6 +104,11 @@ AABB::AABB(vec2 v, float mass, float el, float x, float y, float w, float h) :
 	RigidBody_2D(v, vec2(x, y) + vec2(w, h) / 2.f, mass, el, 0.f)
 {
 	R = vec2(w, h) / 2.f;
+}
+
+// I = (m/3) * (R.x^2 + R.y^2)
+float AABB::GetInertia() const{
+    return (m/3.f) * (pow(R.x, 2) + pow(R.y, 2));
 }
 
 float AABB::width()const { return 2.f*R.x; }
