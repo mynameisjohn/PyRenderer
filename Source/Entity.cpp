@@ -43,8 +43,6 @@ bool Entity::HandleMessage(int C, int M) {
 }
 
 bool Entity::HandleRequest(int C, int M, Python::Object data) {
-	bool handled = false;
-
 	switch (C) {
 	case int(CompID::DRAWABLE) : // These casts are unfortunate
 		switch (M) {
@@ -59,13 +57,15 @@ bool Entity::HandleRequest(int C, int M, Python::Object data) {
 					drPtr->SetColor(v);
 					return true;
 				});
-				handled = 0;
+                return true;
 			}
 		}
 		}
 	}
+    
+    std::cout << "Error: Entity message " << C << ", " << M << " not handled!" << std::endl;
 
-	return handled;
+	return false;
 }
 
 // Just run all posted messages

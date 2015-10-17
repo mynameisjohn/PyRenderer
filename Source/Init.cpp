@@ -131,11 +131,19 @@ bool InitPython() {
 	Python::initialize();
     
     // Expose some useful constants to the PyLiaison module
+    
+    // Directories
     Python::GetPyLiaisonModule().set_attr("RES_DIR", RES_DIR);
     Python::GetPyLiaisonModule().set_attr("SND_DIR", SOUND_DIR);
     Python::GetPyLiaisonModule().set_attr("SHD_DIR", SHADER_DIR);
     Python::GetPyLiaisonModule().set_attr("MOD_DIR", MODEL_DIR);
-
+    
+    // Entity messages
+    Python::GetPyLiaisonModule().set_attr("E_COL", int(Entity::CompID::COLLISION));
+    Python::GetPyLiaisonModule().set_attr("E_DR", int(Entity::CompID::DRAWABLE));
+    Python::GetPyLiaisonModule().set_attr("E_DR_TR", int(Entity::MsgID::DR_TRANSLATE));
+    Python::GetPyLiaisonModule().set_attr("E_DR_CLR", int(Entity::MsgID::DR_COLOR));
+    
 	return true;
 }
 

@@ -18,15 +18,12 @@ g_Entities = {}
 
 #Updatecollision just posts the translate message
 def UpdateCollision(id):
-    g_Entities[id].PostMessage(0,0)
+    g_Entities[id].PostMessage(E_DR, E_DR_TR)
 
 def HandleCollision(myID, theirID):
 	e1 = g_Entities[myID]
-	#e2 = g_Entities[myID]
-	e1.PostMessage_v4(0,1,randColor())
-	#e2.PostMessage_v4(0,1,randColor())
+	e1.PostMessage_v4(E_DR, E_DR_CLR, (randColor(),))
 	#PlaySound(random.choice(r_Sounds))
-	#print(str(e1)+' is colliding with '+str(e2))
 	
 def AddEntity(eID, ePtr):
 	g_Entities[eID] = Entity(ePtr)
