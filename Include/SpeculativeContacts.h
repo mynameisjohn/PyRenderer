@@ -12,6 +12,7 @@ struct Contact {
 	vec2 pos[2];
 	vec2 normal;
 	float dist;
+    float curDV;
 	bool isColliding;
 	// He owns the objects themselves, which I could probably get away with too
 	Contact(RigidBody_2D * a,

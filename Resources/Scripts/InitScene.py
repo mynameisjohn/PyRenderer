@@ -35,31 +35,76 @@ Entity = namedtuple('Entity', ('vel', 'pos', 'scale', 'rot', 'color', 'module'))
 
 r_Entities.append(Entity(
 		vel = [0.,0.],
-		pos = [0.,0.],
+		pos = [-4.,0.],
 		scale = [1.,1.],
 		rot = 0.,
 		color = randColor(),
 		module = 'OBB.py'
 	))
-	
+
 r_Entities.append(Entity(
-		vel=[-5.,0.],
-		pos = [5.,1.],
+		vel=[0.,0.],
+		pos = [5.,0.],
 		scale = [1.,1.],
 		rot = math.pi / 4.,
 		color = randColor(),
 		module = 'OBB.py'
 	))
 
+
 r_Entities.append(Entity(
-		vel=[3.,5.],
-		pos = [-7.,-7.],
+		vel=[10.,0.],
+		pos = [-2.,0.],
 		scale = [1.,1.],
 		rot = makeQuat(0.,0.,1.,0.),
 		color = randColor(),
 		module = 'circle.py'
 	))
 
+r_Entities.append(Entity(
+		vel=[0.,10.],
+		pos = [0.,-8.],
+		scale = [1.,1.],
+		rot = makeQuat(0.,0.,1.,0.),
+		color = randColor(),
+		module = 'circle.py'
+	))
+
+r_Entities.append(Entity(
+		vel=[0.,-10.],
+		pos = [0.,8.],
+		scale = [1.,1.],
+		rot = makeQuat(0.,0.,1.,0.),
+		color = randColor(),
+		module = 'circle.py'
+	))
+
+r_Entities.append(Entity(
+		vel=[-2.,-10.],
+		pos = [3.,5.],
+		scale = [1.,1.],
+		rot = makeQuat(0.,0.,1.,0.),
+		color = randColor(),
+		module = 'circle.py'
+	))
+
+r_Entities.append(Entity(
+		vel=[5.,3.],
+		pos = [-3.,-5.],
+		scale = [1.,1.],
+		rot = makeQuat(0.,0.,1.,0.),
+		color = randColor(),
+		module = 'circle.py'
+	))
+
+r_Entities.append(Entity(
+		vel=[3.,-7.],
+		pos = [-4.,8.],
+		scale = [2.,2.],
+		rot = makeQuat(0.,0.,1.,0.),
+		color = randColor(),
+		module = 'circle.py'
+	))
 # r_Entities.append(Entity(
 		# pos = [-18.,0.],
 		# scale = [9.,9.],

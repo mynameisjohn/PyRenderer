@@ -8,6 +8,7 @@ Contact::Contact(RigidBody_2D * a, RigidBody_2D * b, const vec2 p_a, const vec2 
 	pos{ p_a,p_b },
 	normal(nrm),
 	dist(d),
+    curDV(0),
 	isColliding(false)
 {}
 
@@ -22,19 +23,30 @@ vec2 Contact::relVel() const {
 }
 
 void Solver::operator()(std::list<Contact>& contacts) {
+    // Each iteration modifies a contacts curDV member,
+    // which keeps track of the penetration distance between
+    // contact points along their normal
 	for (int nIt = 0; nIt < m_nIterations; nIt++)
 	{
 		for (auto& c : contacts) {
 			// Find the relative velocity of the system along the normal
 			float relNv = glm::dot(c.normal, c.relVel());
 
-			// Find the amount of velocity to remove, along the normal, such that the objects touch
-
 			// Find the amount of velocity (along n) needed such that
-			// adding dV * dT makes the objects touch
+			// adding dV * dT makes the objects touch (penetration dist)
 			float dV = relNv + c.dist / globalTimeStep;
-
-			if (dV < 0) {
+            
+            // Add this penetration dist to the current penetration
+            // dist, discarding positive distances. This is the
+            // new penetration distance
+            float nDV = std::min(dV + c.curDV, 0.f);
+            
+            // Find the change between the old penDist and this one
+            float change = nDV - c.curDV;
+            
+            // Apply a impulse based on this change, slowly building
+            // up a multitude of small impulses over the iterations
+			if (change < 0.f) {
                 // Calculate collision
                 // A lot of this could be optimized, but right now
                 // I'm just interested in clarity
@@ -76,6 +88,8 @@ void Solver::operator()(std::list<Contact>& contacts) {
 				// I don't like doing this
 				c.isColliding = true;
 			}
+            
+            c.curDV = nDV;
 		}
 	}
 }
