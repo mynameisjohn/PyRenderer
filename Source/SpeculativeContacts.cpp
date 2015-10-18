@@ -39,6 +39,8 @@ void Solver::operator()(std::list<Contact>& contacts) {
             // Add it to the current penetration distance
             c.curPenDist += dV;
             
+            //std::cout << relNv << ", " << dV << ", " << c.curPenDist << std::endl;
+            
             // If the penetration distance at this iteration is negative,
             // apply an impulse and hope it resolves the pentration
 			if (c.curPenDist < 0.f) {

@@ -156,6 +156,7 @@ std::list<Contact> Circle::GetClosestPoints(const AABB& other) const {
 
 	vec2 a_pos = C + r*n;
 	float dist = glm::length(a_pos - b_pos);
+    
 	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, dist);
 	return{ c };
 }
@@ -392,8 +393,6 @@ static void featurePairJudgement(FeaturePair& mS, FeaturePair& mP, OBB * A, OBB 
 }
 
 std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
-	
-
 	std::list<Contact> ret;
 	FeaturePair mostSeparated(FLT_MAX);
 	FeaturePair mostPenetrating(-FLT_MAX);
@@ -465,7 +464,7 @@ vec2 AABB::GetFaceNormalFromPoint(vec2 p) const{
         if (p.y < bottom())
             n = vec2(0,-1);
         else
-            n - vec2(0,1);
+            n = vec2(0,1);
     }
     else{
         if (p.x < left())
@@ -481,7 +480,12 @@ std::list<Contact> OBB::GetClosestPoints(const AABB& other) const {
     std::list<Contact> ret;
     
     // Find the vector from our center to theirs
-    vec2 centerVecN = glm::normalize(other.C - C);
+    vec2 centerVecN = other.C - C;
+    if (fabs(centerVecN.x) > fabs(centerVecN.y))
+        centerVecN = vec2(copysignf(1, centerVecN.x), 0.f);
+    else
+        centerVecN = vec2(0.f, copysignf(1, centerVecN.y));
+        
     
     // Get supporting vertex / vertices along that direction
     std::array<vec2, 2> supportVerts;
@@ -489,14 +493,14 @@ std::list<Contact> OBB::GetClosestPoints(const AABB& other) const {
     if (nSupportVerts == 1){
         vec2 pA = supportVerts[0];
         vec2 pB = other.clamp(pA);
-        vec2 n = other.GetFaceNormalFromPoint(pA);
+        vec2 n = centerVecN;
         float d = glm::distance(pA, pB);
         ret.emplace_back((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, d);
     }
     else{
         vec2 pA = 0.5f * (supportVerts[0] + supportVerts[1]);
         vec2 pB = other.clamp(pA);
-        vec2 n = other.GetFaceNormalFromPoint(pA);
+        vec2 n = centerVecN;
         float d = glm::distance(pA, pB);
         ret.emplace_back((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, d);
     }

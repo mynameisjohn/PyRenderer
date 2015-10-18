@@ -1,4 +1,4 @@
-﻿from PyLiaison import *
+from PyLiaison import *
 import math
 from collections import namedtuple
 from platform import system
@@ -42,12 +42,38 @@ r_Entities.append(Entity(
 		module = 'AABB.py'
 	))
 
+r_Entities.append(Entity(
+		vel = [0.,0.],
+		pos = [18.,0.],
+		scale = [9.,9.],
+		rot = 0.,
+		color = randColor(),
+		module = 'AABB.py'
+	))
 
 r_Entities.append(Entity(
-		vel = [-10.,0.],
-		pos = [-4.,0.],
-		scale = [1.,1.],
+		vel = [0.,0.],
+		pos = [0.,18.],
+		scale = [9.,9.],
 		rot = 0.,
+		color = randColor(),
+		module = 'AABB.py'
+	))
+
+r_Entities.append(Entity(
+		vel = [0.,0.],
+		pos = [0.,-18.],
+		scale = [9.,9.],
+		rot = 0.,
+		color = randColor(),
+		module = 'AABB.py'
+	))
+
+r_Entities.append(Entity(
+		vel = [-10.,-10.],
+		pos = [8.,0.],
+		scale = [1.,1.],
+		rot = 5.,
 		color = randColor(),
 		module = 'OBB.py'
 	))
