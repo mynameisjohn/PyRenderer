@@ -9,8 +9,8 @@ def randColor():
 	return [random.random() for i in range (0,3)]+[1.]
 
 r_IqmFile = b'quad.iqm'
-p = SND_DIR
-r_Sounds = [x for x in os.listdir(p) if os.path.isfile(p+os.sep+x)]
+#p = SND_DIR
+r_Sounds = []#x for x in os.listdir(p) if os.path.isfile(p+os.sep+x)]
 
 r_ColPrim = 'AABB'
 

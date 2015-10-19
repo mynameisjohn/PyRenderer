@@ -10,7 +10,8 @@ def randColor():
 
 r_IqmFile = b'circle.iqm'
 p = SND_DIR
-r_Sounds = [x for x in os.listdir(p) if os.path.isfile(p+os.sep+x)]
+separator = bytes(os.sep.encode('ascii')) # Thanks python 3...
+r_Sounds = [x for x in os.listdir(p) if os.path.isfile(p+separator+x)]
 
 r_ColPrim = 'Circle'
 

@@ -78,7 +78,7 @@ r_Entities.append(Entity(
 		module = 'OBB.py'
 	))
 
-'''
+
 r_Entities.append(Entity(
 		vel=[0.,0.],
 		pos = [5.,0.],
@@ -216,4 +216,3 @@ r_Entities.append(Entity(
 		# color = randColor(),
 		# module = b'OBB.py'
 	# ))	
-'''

@@ -10,7 +10,8 @@ def randColor():
 
 r_IqmFile = b'quad.iqm'
 p = SND_DIR
-r_Sounds = [x for x in os.listdir(p) if os.path.isfile(p+os.sep+x)]
+separator = bytes(os.sep.encode('ascii')) # Thanks python 3...
+r_Sounds = [x for x in os.listdir(p) if os.path.isfile(p+separator+x)]
 
 r_ColPrim = 'OBB'
 
@@ -23,7 +24,7 @@ def UpdateCollision(id):
 def HandleCollision(myID, theirID):
 	e1 = g_Entities[myID]
 	e1.PostMessage_v4(E_DR, E_DR_CLR, (randColor(),))
-	#PlaySound(random.choice(r_Sounds))
+	PlaySound(random.choice(r_Sounds))
 	
 def AddEntity(eID, ePtr):
 	g_Entities[eID] = Entity(ePtr)

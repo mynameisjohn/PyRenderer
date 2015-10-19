@@ -134,7 +134,7 @@ bool InitPython() {
     
     // Directories
     Python::GetPyLiaisonModule().set_attr("RES_DIR", RES_DIR);
-    Python::GetPyLiaisonModule().set_attr("SND_DIR", SOUND_DIR);
+    Python::GetPyLiaisonModule().set_attr("SND_DIR", RelPathToAbs(SOUND_DIR));
     Python::GetPyLiaisonModule().set_attr("SHD_DIR", SHADER_DIR);
     Python::GetPyLiaisonModule().set_attr("MOD_DIR", MODEL_DIR);
     
