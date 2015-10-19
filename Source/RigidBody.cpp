@@ -3,9 +3,6 @@
 #include "RigidBody.h"
 #include "SpeculativeContacts.h"
 
-// Smol
-const float kEPS = 0.001f;
-
 RigidBody_2D::RigidBody_2D() :
 	V(0),
 	C(0),

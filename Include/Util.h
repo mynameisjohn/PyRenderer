@@ -27,6 +27,8 @@
 // I can go back and forth in time
 const static float dT = 0.005f;
 extern float globalTimeStep;
+// Smol
+const float kEPS = 0.001f;
 
 // glm is important to me
 #include <glm/fwd.hpp>

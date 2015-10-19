@@ -73,7 +73,7 @@ r_Entities.append(Entity(
 		vel = [-10.,-10.],
 		pos = [8.,0.],
 		scale = [1.,1.],
-		rot = 5.,
+		rot = 50.,
 		color = randColor(),
 		module = 'OBB.py'
 	))

@@ -43,7 +43,7 @@ void Solver::operator()(std::list<Contact>& contacts) {
             
             // If the penetration distance at this iteration is negative,
             // apply an impulse and hope it resolves the pentration
-			if (c.curPenDist < 0.f) {
+			if (c.curPenDist < -kEPS) {
                 // Calculate collision
                 // A lot of this could be optimized, but right now
                 // I'm just interested in clarity
@@ -79,8 +79,9 @@ void Solver::operator()(std::list<Contact>& contacts) {
                 A->V += delV_A;
                 B->V += delV_B;
                 
-                A->w += delW_A;
-                B->w += delW_B;
+                // Exp to limit large values
+                A->w += delW_A * exp(-pow(delW_A, 2)/900.f);
+                B->w += delW_B * exp(-pow(delW_B, 2)/900.f);
 
 				// I don't like doing this
 				c.isColliding = true;
