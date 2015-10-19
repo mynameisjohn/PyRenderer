@@ -24,6 +24,8 @@ private:
 	Shader m_Shader; // May be a container soon
 	Camera m_Camera;
 
+    bool m_bShowContacts;
+    
 	std::vector<Entity> m_vEntities;
 	std::vector<Drawable> m_vDrawables;
 	std::vector<Circle> m_vCircles;

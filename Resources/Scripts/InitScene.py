@@ -3,6 +3,8 @@ import math
 from collections import namedtuple
 from platform import system
 
+CONTACT_DEBUG = False
+
 def makeQuat(x,y,z,theta):
 	r = math.radians(theta)/2.
 	c = math.cos(r)
@@ -215,4 +217,4 @@ r_Entities.append(Entity(
 		# rot = makeQuat(0.,0.,1.,0.),
 		# color = randColor(),
 		# module = b'OBB.py'
-	# ))	
+	# ))

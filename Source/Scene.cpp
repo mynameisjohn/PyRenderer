@@ -22,29 +22,20 @@ int Scene::Draw() {
 		dr.Draw();
 	}
 
-	//for (auto& wall : m_Walls) {
-	//	Drawable drWall(ToDrawable(wall));
-	//	mat4 PMV = m_Camera.GetMat() * drWall.GetMV();
-	//	vec4 c = drWall.GetColor();
-	//	glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
-	//	glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
-	//	drWall.Draw();
-	//}
-
-	for (auto& contact : m_SpeculativeContacts) {
-		float nrm(-1);
-		for (auto& p : contact.pos) {
-			fquat rot(1, 0, 0, 0);// = getQuatFromVec2(nrm*vec2(contact.normal.y, contact.normal.x));
-			
-			Drawable drContact("circle.iqm", vec4(contact.normal, 1.f, 1.f),quatvec(vec3(p, -1.f), rot), 0.2f);
-			mat4 PMV = m_Camera.GetMat() * drContact.GetMV();
-			vec4 c = drContact.GetColor();
-			glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
-			glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
-			drContact.Draw();
-			nrm = -nrm;
-		}
-	}
+    if (m_bShowContacts){
+        for (auto& contact : m_SpeculativeContacts) {
+            for (auto& p : contact.pos) {
+                fquat rot(1, 0, 0, 0);
+                
+                Drawable drContact("circle.iqm", vec4(contact.normal, 1.f, 1.f),quatvec(vec3(p, -1.f), rot), 0.2f);
+                mat4 PMV = m_Camera.GetMat() * drContact.GetMV();
+                vec4 c = drContact.GetColor();
+                glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
+                glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
+                drContact.Draw();
+            }
+        }
+    }
 
 	return int(m_vDrawables.size());
 }
@@ -255,4 +246,7 @@ Scene::Scene(std::string& pyinitScript) {
 	// PyDict_New...
 	for (auto& ent : m_vEntities)
 		ent.GetPyModule().call_function("AddEntity", ent.GetID(), &ent);
+    
+    // Contacts debug?
+    pyinitModule.get_attr("CONTACT_DEBUG").convert(m_bShowContacts);
 }

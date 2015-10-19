@@ -144,6 +144,11 @@ bool InitPython() {
     Python::GetPyLiaisonModule().set_attr("E_DR_TR", int(Entity::MsgID::DR_TRANSLATE));
     Python::GetPyLiaisonModule().set_attr("E_DR_CLR", int(Entity::MsgID::DR_COLOR));
     
+    // This map isn't actually used, but as long as an empty
+    // PyDict gets created I'm fine with it
+    std::map<uint32_t, Entity *> dummyMap;
+    Python::GetPyLiaisonModule().set_attr("g_Entities", dummyMap);
+    
 	return true;
 }
 
