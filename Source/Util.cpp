@@ -91,6 +91,9 @@ float maxEl(vec4 v) {
 	return ret;
 }
 
+vec2 perp(vec2& v){
+    return vec2(-v.y, v.x);
+}
 
 //This returns a rotation quat that will line something
 //up with the given vec2 in x,y (meaning rotation is about z)

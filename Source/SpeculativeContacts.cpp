@@ -18,8 +18,20 @@ void Contact::ApplyImpulse(float mag) {
 	pair[1]->V -= I/pair[1]->m;
 }
 
-vec2 Contact::relVel() const {
-	return pair[1]->V - pair[0]->V;
+// Get's the relative velocity of the two
+// body contact system along contact normal
+// (one contact's motion relative to the other)
+float Contact::relVel() const {
+    vec2 r0 = pos[0] - pair[0]->C;
+    vec2 V0 = pair[0]->V + perp(r0) * pair[0]->w;
+    
+    vec2 r1 = pos[1] - pair[1]->C;
+    vec2 V1 = pair[1]->V + perp(r1) * pair[1]->w;
+    
+    vec2 relV = V1 - V0;
+    
+    return glm::dot(normal, relV);
+//	return pair[1]->V - pair[0]->V;
 }
 
 void Solver::operator()(std::list<Contact>& contacts) {
@@ -30,11 +42,11 @@ void Solver::operator()(std::list<Contact>& contacts) {
 	{
 		for (auto& c : contacts) {
 			// Find the relative velocity of the system along the normal
-			float relNv = glm::dot(c.normal, c.relVel());
+//			float relNv = glm::dot(c.normal, c.relVel());
 
 			// Find the amount of velocity (along n) needed such that
 			// adding dV * dT makes the objects touch (penetration dist)
-			float dV = relNv + c.dist / globalTimeStep;
+            float dV = c.relVel() + c.dist / globalTimeStep;
             
             // Add it to the current penetration distance
             c.curPenDist += dV;

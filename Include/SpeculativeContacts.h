@@ -22,7 +22,7 @@ struct Contact {
 		const vec2 nrm, 
 		const float d);
 	void ApplyImpulse(float mag);
-	vec2 relVel() const;
+	float relVel() const;
 };
 
 // Really just a namespace...
