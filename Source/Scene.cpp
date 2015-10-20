@@ -27,7 +27,7 @@ int Scene::Draw() {
             for (auto& p : contact.pos) {
                 fquat rot(1, 0, 0, 0);
                 
-                Drawable drContact("circle.iqm", vec4(contact.normal, 1.f, 1.f),quatvec(vec3(p, -1.f), rot), 0.2f);
+                Drawable drContact("circle.iqm", vec4(contact.normal, 1.f, 1.f),quatvec(vec3(p, -1.f), rot), vec2(0.2f));
                 mat4 PMV = m_Camera.GetMat() * drContact.GetMV();
                 vec4 c = drContact.GetColor();
                 glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
@@ -54,7 +54,7 @@ int Scene::Update() {
 
 	for (auto& b : m_vOBB)
 		b.Integrate();
-
+    
 	// I think there's the same # of these every time...
 	Solver solve; 
 
@@ -179,7 +179,7 @@ Scene::Scene(std::string& pyinitScript) {
 		// Unpack tuple
 		vec2 vel(std::get<0>(ei));
 		vec3 pos(std::get<1>(ei), 0.f);
-		vec3 scale(std::get<2>(ei), 1.f);
+		vec2 scale(std::get<2>(ei));
 		float rot = std::get<3>(ei);
 		vec4 color = glm::clamp(std::get<4>(ei), vec4(0), vec4(1));
 		std::string pyEntModScript = std::get<5>(ei);
@@ -208,12 +208,12 @@ Scene::Scene(std::string& pyinitScript) {
 		// Make collision resource, (assume uniform scale, used for mass and r)
 		// TODO add mass, elasticity to init tuple
 		if (colPrim == "AABB") {  // AABBs are assumed to be "walls" of high mass for now
-			AABB box(vec2(0.f), vec2(pos), 1e6f, 1.f, vec2(scale));
+			AABB box(vec2(0.f), vec2(pos), 1e6f, 0.5f, scale);
 			box.SetEntity(&m_vEntities[i]);
 			m_vAABB.push_back(box);
 		}
 		else if (colPrim == "OBB") {
-			OBB box(vel, vec2(pos), maxEl(scale), 1.f, vec2(scale), rot);
+			OBB box(vel, vec2(pos), maxEl(scale), 0.5f, scale, rot);
 			box.SetEntity(&m_vEntities[i]);
 			m_vOBB.push_back(box);
 		}
@@ -225,7 +225,7 @@ Scene::Scene(std::string& pyinitScript) {
 
 		// Make drawable
 		fquat rotQ(cos(rot / 2.f), vec3(0, 0, sin(rot / 2.f)));
-		Drawable dr(iqmFile, color, quatvec(pos, rotQ), maxEl(scale));
+		Drawable dr(iqmFile, color, quatvec(pos, rotQ), scale);
 		dr.SetEntity(&m_vEntities[i]);
 		m_vDrawables.push_back(dr);
 	}

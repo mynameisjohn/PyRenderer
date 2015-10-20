@@ -12,11 +12,11 @@ Drawable::Drawable() :
 	m_VAO(0),
 	m_nIdx(0),
 	m_Color(1),
-	m_Scale(0)
+	m_Scale(1)
 {}
 
 // This will probably have to be a bit more flexible
-Drawable::Drawable(std::string iqmFileName, vec4 color, quatvec qv, float scale) :
+Drawable::Drawable(std::string iqmFileName, vec4 color, quatvec qv, vec2 scale) :
 	m_SrcFile(iqmFileName),
 	m_VAO(0),
 	m_nIdx(0),
@@ -43,7 +43,7 @@ Drawable::Drawable(std::string iqmFileName, vec4 color, quatvec qv, float scale)
 
 		IqmFile f(MODEL_DIR + iqmFileName);
 
-		std::array<GLuint, 2> vboBuf{ 0 };
+        std::array<GLuint, 2> vboBuf{ {0, 0} };
 
 		glGenVertexArrays(1, &VAO);
 		glBindVertexArray(VAO);
@@ -62,7 +62,7 @@ Drawable::Drawable(std::string iqmFileName, vec4 color, quatvec qv, float scale)
 
 		nIdx = idx.count();
 
-		s_VAOCache[m_SrcFile] = { VAO, nIdx };
+        s_VAOCache.emplace(m_SrcFile, std::array<GLuint, 2>{{VAO, nIdx}});
 	}
 	
 	m_VAO = s_VAOCache[m_SrcFile][0];
@@ -70,7 +70,7 @@ Drawable::Drawable(std::string iqmFileName, vec4 color, quatvec qv, float scale)
 }
 
 mat4 Drawable::GetMV() const {
-	return m_QV.ToMat4() * glm::scale(vec3(m_Scale));
+	return m_QV.ToMat4() * glm::scale(vec3(m_Scale, 1.f));
 }
 
 vec4 Drawable::GetColor() const {

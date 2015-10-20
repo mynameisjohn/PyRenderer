@@ -15,10 +15,10 @@ class Drawable : public OwnedByEnt {
 	GLuint m_nIdx;
 	vec4 m_Color;
 	quatvec m_QV;
-	float m_Scale; // Could be a part of quatvec...
+	vec2 m_Scale; // Could be a part of quatvec...
 public:
 	Drawable();
-	Drawable(std::string iqmSrc, vec4 clr, quatvec qv, float scale);
+	Drawable(std::string iqmSrc, vec4 clr, quatvec qv, vec2 scale);
 
 	mat4 GetMV() const;
 	vec4 GetColor() const;
