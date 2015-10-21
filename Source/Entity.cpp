@@ -99,6 +99,14 @@ uint32_t OwnedByEnt::GetEntID() const {
 	return 0;
 }
 
+Drawable * const Entity::GetDrawable() const{
+    return m_DrCmp;
+}
+
+RigidBody_2D * const Entity::GetCollision() const{
+    return m_ColCmp;
+}
+
 void OwnedByEnt::SetEntity(Entity * const pEnt) {
 	m_pEntity = pEnt;
 }

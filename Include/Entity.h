@@ -47,7 +47,6 @@ private:
 	MessageQueue m_MessageQ;
 	Python::Object m_PyModule;
 
-
 protected:
 	friend class Scene;
 	void SetColCmp(RigidBody_2D * colPtr);
@@ -59,6 +58,9 @@ public:
 	
 	Python::Object GetPyModule()  const;
 	int GetID() const;
+    
+    Drawable * const GetDrawable() const;
+    RigidBody_2D * const GetCollision() const;
 	
 	// Message handling stuff
 	//template <typename D>
