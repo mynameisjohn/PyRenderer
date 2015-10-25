@@ -170,6 +170,12 @@ bool AABB::IsOverlapping(const OBB& other) const {
 	return other.IsOverlapping(*this);
 }
 
+void AABB::Integrate(){
+    th=0.f;
+    w=0.f;
+    RigidBody_2D::Integrate();
+}
+
 std::list<Contact> AABB::GetClosestPoints(const Circle& other) const {
 	return other.GetClosestPoints(*this);
 }
@@ -207,6 +213,10 @@ OBB::OBB(vec2 vel, float m, float e, float x, float y, float w, float h, float t
 	AABB(vel, m, e, x, y, w, h)
 {
 	this->th = th;
+}
+
+void OBB::Integrate(){
+    RigidBody_2D::Integrate();
 }
 
 glm::mat2 OBB::getRotMat() const {

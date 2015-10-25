@@ -23,7 +23,7 @@ def UpdateCollision(id):
 
 def HandleCollision(myID, theirID):
 	e = g_Entities[myID]
-	e.PostMessage_v4(0,1,randColor())
+	e.PostMessage_v4(E_DR, E_DR_CLR, (randColor(),))
 	
 def AddEntity(eID, ePtr):
 	g_Entities[eID] = Entity(ePtr)

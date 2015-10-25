@@ -24,7 +24,7 @@ int main(int argc, char ** argv) {
     
     PlayState curState = PLAY;
     
-    const int nStep = 10;
+    const int nStep = 2;
 
 	while (curState != QUIT) {
 		while (SDL_PollEvent(&e)) {

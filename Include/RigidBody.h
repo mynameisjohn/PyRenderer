@@ -56,8 +56,8 @@ struct RigidBody_2D : public OwnedByEnt {
 	// Might phase out above
 	virtual void ChangeVel(vec2 newV, vec2 rad);
 
-	// Integrate velocity over time
-	void Integrate();
+	// Integrate velocity over time (virt for AABB)
+	virtual void Integrate();
 
 	// Get rotation/translation
 	quatvec GetQuatVec() const;
@@ -104,6 +104,9 @@ struct AABB : public RigidBody_2D {
 	vec2 clamp(vec2 p) const;
     
     vec2 GetFaceNormalFromPoint(vec2 p) const;
+    
+    // Override integrate to null out rotation
+    void Integrate() override;
 
 	// Collision Overrides
 	virtual bool IsOverlapping(const Circle& other) const override;
@@ -140,6 +143,9 @@ struct OBB : public AABB {
 
 	vec2 GetVert(uint32_t idx) const;
 	vec2 GetNormal(uint32_t idx) const;
+    
+    // Cancel AABB's override (this is stupid
+    void Integrate() override;
 
 	// Collision Overrides
 	bool IsOverlapping(const Circle& other) const override;
