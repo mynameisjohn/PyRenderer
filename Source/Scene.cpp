@@ -161,6 +161,8 @@ Scene::Scene(std::string& pyinitScript) {
 		vec2, // Position
 		vec2, // Scale
 		float, // Rotation about +z
+        float, // mass
+        float, // elasticity
 		vec4, // Color
 		std::string>;
 
@@ -181,8 +183,10 @@ Scene::Scene(std::string& pyinitScript) {
 		vec3 pos(std::get<1>(ei), 0.f);
 		vec2 scale(std::get<2>(ei));
 		float rot = std::get<3>(ei);
-		vec4 color = glm::clamp(std::get<4>(ei), vec4(0), vec4(1));
-		std::string pyEntModScript = std::get<5>(ei);
+        float m = std::get<4>(ei);
+        float e = clamp(std::get<5>(ei),0.f,1.f);
+		vec4 color = glm::clamp(std::get<6>(ei), vec4(0), vec4(1));
+		std::string pyEntModScript = std::get<7>(ei);
 
 		// Load the python module
 		auto pyEntModule = Python::Object::from_script(SCRIPT_DIR + pyEntModScript);
@@ -208,17 +212,17 @@ Scene::Scene(std::string& pyinitScript) {
 		// Make collision resource, (assume uniform scale, used for mass and r)
 		// TODO add mass, elasticity to init tuple
 		if (colPrim == "AABB") {  // AABBs are assumed to be "walls" of high mass for now
-			AABB box(vec2(0.f), vec2(pos), 1e6f, 0.5f, scale);
+			AABB box(vec2(0.f), vec2(pos), m, e, scale);
 			box.SetEntity(&m_vEntities[i]);
 			m_vAABB.push_back(box);
 		}
 		else if (colPrim == "OBB") {
-			OBB box(vel, vec2(pos), maxEl(scale), 0.5f, scale, rot);
+			OBB box(vel, vec2(pos), m, e, scale, rot);
 			box.SetEntity(&m_vEntities[i]);
 			m_vOBB.push_back(box);
 		}
 		else {
-			Circle circ(vel, vec2(pos), maxEl(scale), 1.f, maxEl(scale));
+			Circle circ(vel, vec2(pos), m, e, maxEl(scale));
 			circ.SetEntity(&m_vEntities[i]);;
 			m_vCircles.push_back(circ);
 		}
