@@ -391,6 +391,22 @@ static void featurePairJudgement(FeaturePair& mS, FeaturePair& mP, OBB * A, OBB 
 
 std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 	std::list<Contact> ret;
+    
+    // As an early out, see if they're practically alligned
+    // There are much better ways of doing this, but right now I can't care
+    float mCos = fabs(cos(th));
+    float oCos = fabs(cos(other.th));
+    float oSin = fabs(sin(other.th));
+    std::cout << mCos << ", " << oCos << ", " << oSin << std::endl;
+    if (feq(mCos, oCos) || feq(mCos, oSin)){
+        vec2 n = -glm::normalize(C-other.C);
+        vec2 pA = ws_clamp(other.C);
+        vec2 pB = other.ws_clamp(C);
+        Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, glm::length(pA-pB));
+        ret.push_back(c);
+        return ret;
+    }
+    
 	FeaturePair mostSeparated(FLT_MAX);
 	FeaturePair mostPenetrating(-FLT_MAX);
 
