@@ -37,7 +37,7 @@ Entity = namedtuple('Entity',
 	('vel', 'pos', 'scale', 'rot', 'mass', 'el', 'color', 'module'))
 
 r_Entities.append(Entity(
-		vel = [-10.,0.],
+		vel = [0.,0.],
 		pos = [5.,0.],
 		scale = [1.,1.],
 		rot = 3*math.pi/4.,
@@ -48,12 +48,12 @@ r_Entities.append(Entity(
 	))
 
 r_Entities.append(Entity(
-		vel = [0.,0.],
+		vel = [10.,0.],
 		pos = [0.,0.],
 		scale = [1.,1.],
-		rot = math.pi/4,
+		rot = 0,
 		mass = 1.,
 		el = 1.,
 		color = randColor(),
-		module = 'OBB.py'
+		module = 'AABB.py'
 	))

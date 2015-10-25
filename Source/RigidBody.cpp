@@ -494,11 +494,11 @@ std::list<Contact> OBB::GetClosestPoints(const AABB& other) const {
     
     // Find the vector from our center to theirs
     vec2 centerVecN = other.C - C;
+    // Make it a unit vector in the direction of largest magnitude
     if (fabs(centerVecN.x) > fabs(centerVecN.y))
         centerVecN = vec2(copysignf(1, centerVecN.x), 0.f);
     else
         centerVecN = vec2(0.f, copysignf(1, centerVecN.y));
-        
     
     // Get supporting vertex / vertices along that direction
     std::array<vec2, 2> supportVerts;
