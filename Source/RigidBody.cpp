@@ -239,7 +239,7 @@ int OBB::GetSupportVerts(vec2 n, std::array<vec2, 2>& sV) const {
         vec2 v = GetVert(i);
         float d = glm::dot(n, v);
         // That's pretty close...
-        if (fabs(d - dMin) < kEPS) {
+        if (feq(d, dMin, 1.f * kEPS)) {
             // Take it too
             dMin = d;
             sV[num++] = v;
@@ -270,7 +270,7 @@ int OBB::GetSupportIndices(vec2 n, std::array<int, 2>& sV) const {
 		vec2 v = GetVert(i);
 		float d = glm::dot(n, v);
 		// That's pretty close...
-		if (fabs(d - dMin) < kEPS) {
+		if (feq(d, dMin, 100.f * kEPS)) {
 			// Take it too
 			dMin = d;
 			sV[num++] = i;
@@ -492,6 +492,18 @@ vec2 AABB::GetFaceNormalFromPoint(vec2 p) const{
 std::list<Contact> OBB::GetClosestPoints(const AABB& other) const {
     std::list<Contact> ret;
     
+    // See if we're reasonably aligned with other
+    float mCos = fabs(cos(th));
+    float mSin = fabs(sin(th));
+    if (feq(mCos, 0.f) || feq(mSin, 0.f)){
+        vec2 n = -glm::normalize(C-other.C);
+        vec2 pA = ws_clamp(other.C);
+        vec2 pB = other.clamp(C);
+        Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, glm::length(pA-pB));
+        ret.push_back(c);
+        return ret;
+    }
+    
     // Find the vector from our center to theirs
     vec2 centerVecN = other.C - C;
     // Make it a unit vector in the direction of largest magnitude
@@ -502,7 +514,7 @@ std::list<Contact> OBB::GetClosestPoints(const AABB& other) const {
     
     // Get supporting vertex / vertices along that direction
     std::array<vec2, 2> supportVerts;
-    int nSupportVerts = GetSupportVerts(centerVecN, supportVerts);
+    int nSupportVerts = GetSupportVerts(-centerVecN, supportVerts);
     if (nSupportVerts == 1){
         vec2 pA = supportVerts[0];
         vec2 pB = other.clamp(pA);
