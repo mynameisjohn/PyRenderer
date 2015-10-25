@@ -70,6 +70,10 @@ std::string FixBackslash(const std::string& in) {
 	return out;
 }
 
+bool feq(float a, float b, float diff){
+    return fabs(a-b) < diff;
+}
+
 float maxEl(vec2 v) {
 	float ret(0.f);
 	for (int i = 0; i < 2; i++)

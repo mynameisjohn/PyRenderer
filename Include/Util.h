@@ -71,6 +71,8 @@ std::string FixBackslash(const std::string& in);
 //	return (bool)(std::stringstream(s) >> v);
 //}
 
+bool feq(float a, float b, float diff = kEPS);
+
 template <typename T>
 inline T remap(T v, T m1, T m2, T m3, T m4) {
 	return (((v - m1) / (m2 - m1))*(m4 - m3) + m3);
