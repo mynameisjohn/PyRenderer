@@ -399,7 +399,7 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
     float oSin = fabs(sin(other.th));
     std::cout << mCos << ", " << oCos << ", " << oSin << std::endl;
     if (feq(mCos, oCos) || feq(mCos, oSin)){
-        vec2 n = -glm::normalize(C-other.C);
+        vec2 n = glm::normalize(other.C - C);
         vec2 pA = ws_clamp(other.C);
         vec2 pB = other.ws_clamp(C);
         Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, glm::length(pA-pB));
@@ -496,7 +496,7 @@ std::list<Contact> OBB::GetClosestPoints(const AABB& other) const {
     float mCos = fabs(cos(th));
     float mSin = fabs(sin(th));
     if (feq(mCos, 0.f) || feq(mSin, 0.f)){
-        vec2 n = -glm::normalize(C-other.C);
+        vec2 n = glm::normalize(other.C - C);
         vec2 pA = ws_clamp(other.C);
         vec2 pB = other.clamp(C);
         Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, glm::length(pA-pB));
@@ -506,28 +506,32 @@ std::list<Contact> OBB::GetClosestPoints(const AABB& other) const {
     
     // Find the vector from our center to theirs
     vec2 centerVecN = other.C - C;
+    vec2 faceN(0);
     // Make it a unit vector in the direction of largest magnitude
-    if (fabs(centerVecN.x) > fabs(centerVecN.y))
-        centerVecN = vec2(copysignf(1, centerVecN.x), 0.f);
+    if (feq(centerVecN.x, centerVecN.y))
+        faceN = glm::normalize(centerVecN);
+    else if (fabs(centerVecN.x) > fabs(centerVecN.y))
+        faceN = vec2(copysignf(1, centerVecN.x), 0.f);
     else
-        centerVecN = vec2(0.f, copysignf(1, centerVecN.y));
+        faceN = vec2(0.f, copysignf(1, centerVecN.y));
     
     // Get supporting vertex / vertices along that direction
     std::array<vec2, 2> supportVerts;
-    int nSupportVerts = GetSupportVerts(-centerVecN, supportVerts);
+    int nSupportVerts = GetSupportVerts(centerVecN, supportVerts);
     if (nSupportVerts == 1){
         vec2 pA = supportVerts[0];
         vec2 pB = other.clamp(pA);
-        vec2 n = centerVecN;
         float d = glm::distance(pA, pB);
-        ret.emplace_back((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, d);
+        ret.emplace_back((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, faceN, d);
+        
+        // TODO
+        // Do I want the support neighbor?
     }
     else{
         vec2 pA = 0.5f * (supportVerts[0] + supportVerts[1]);
         vec2 pB = other.clamp(pA);
-        vec2 n = centerVecN;
         float d = glm::distance(pA, pB);
-        ret.emplace_back((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, d);
+        ret.emplace_back((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, faceN, d);
     }
     
     return ret;
