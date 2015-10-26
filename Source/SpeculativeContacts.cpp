@@ -51,11 +51,11 @@ void Solver::operator()(std::list<Contact>& contacts) {
             // Add it to the current penetration distance
             c.curPenDist += dV;
             
-            //std::cout << relNv << ", " << dV << ", " << c.curPenDist << std::endl;
+            //std::cout << c.relVel() << ", " << dV << ", " << c.curPenDist << std::endl;
             
             // If the penetration distance at this iteration is negative,
             // apply an impulse and hope it resolves the pentration
-			if (c.curPenDist < -kEPS) {
+			if (c.curPenDist < kEPS) {
                 // Calculate collision
                 // A lot of this could be optimized, but right now
                 // I'm just interested in clarity
