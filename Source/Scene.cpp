@@ -55,6 +55,9 @@ int Scene::Update() {
 	for (auto& b : m_vOBB)
 		b.Integrate();
     
+//    for (auto& b : m_vOBB)
+//        b.V.y -= 1.f;
+    
 	// I think there's the same # of these every time...
 	Solver solve; 
 

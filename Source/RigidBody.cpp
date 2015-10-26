@@ -249,7 +249,7 @@ int OBB::GetSupportVerts(vec2 n, std::array<vec2, 2>& sV) const {
         vec2 v = GetVert(i);
         float d = glm::dot(n, v);
         // That's pretty close...
-        if (feq(d, dMin, 1.f * kEPS)) {
+        if (feq(d, dMin, 100.f * kEPS)) {
             // Take it too
             dMin = d;
             sV[num++] = v;
@@ -288,6 +288,21 @@ int OBB::GetSupportIndices(vec2 n, std::array<int, 2>& sV) const {
 	}
 
 	return num;
+}
+
+vec2 OBB::GetSupportNormal(vec2 N) const{
+    uint32_t iMin(0);
+    float dMin(-FLT_MAX);
+    
+    for (uint32_t i=0; i<4; i++){
+        float d = glm::dot(N, GetNormal(i));
+        if (d > dMin){
+            dMin = d;
+            iMin = i;
+        }
+    }
+    
+    return GetNormal(iMin);
 }
 
 vec2 OBB::GetSupportNeighbor(vec2 n, int idx) const {
@@ -341,6 +356,8 @@ static vec2 projectOnEdge(vec2 p, vec2 e0, vec2 e1) {
 	// find the projection of u onto v, parameterize it
     float t = glm::dot(u, v) / glm::dot(v,v);
 
+    //std::cout << t << ", " << glm::dot(u, v) << ", " << glm::dot(v,v) << std::endl;
+    
     // Clamp between two edge points
 	return e0 + v * clamp(t, 0.f, 1.f);
 }
@@ -372,11 +389,21 @@ static void featurePairJudgement(FeaturePair& mS, FeaturePair& mP, OBB * A, OBB 
             float dist = glm::dot(mfp0, n);
             float c_dist = glm::length(sV - A->C);
             bool isPenetrating = dist < 0.f;
+            
             if (isPenetrating) {
                 // For penetrating features, we're interested in the
                 // largest negative distance (meaning closest to 0)
                 if (dist > mP.dist)
                     mP = FeaturePair(dist, c_dist, fIdx, sIdx, type);
+                else{
+                    float del = fabs(dist - mP.dist);
+                    // If they're very close, pick the one whose vertex
+                    // is closest to the face object's center
+                    if (del < kEPS) {
+                        if (c_dist < mP.c_dist)
+                            mP = FeaturePair(dist, c_dist, fIdx, sIdx, type);
+                    }
+                }
             }
             else {
                 // Reassign dist
@@ -402,20 +429,37 @@ static void featurePairJudgement(FeaturePair& mS, FeaturePair& mP, OBB * A, OBB 
 std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 	std::list<Contact> ret;
     
+    static int nIt(0);
+    nIt++;
+    
     // As an early out, see if they're practically alligned
     // There are much better ways of doing this, but right now I can't care
-    float mCos = fabs(cos(th));
-    float oCos = fabs(cos(other.th));
-    float oSin = fabs(sin(other.th));
-    std::cout << mCos << ", " << oCos << ", " << oSin << std::endl;
-    if (feq(mCos, oCos) || feq(mCos, oSin)){
-        vec2 n = glm::normalize(other.C - C);
-        vec2 pA = ws_clamp(other.C);
-        vec2 pB = other.ws_clamp(C);
-        Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, glm::length(pA-pB));
-        ret.push_back(c);
-        return ret;
-    }
+//    float mCos = fabs(cos(th));
+//    float oCos = fabs(cos(other.th));
+//    float oSin = fabs(sin(other.th));
+//    //std::cout << mCos << ", " << oCos << ", " << oSin << std::endl;
+//    if (feq(mCos, oCos) || feq(mCos, oSin)){
+//        // Find the overlap of the two
+//        float xMin = min(
+//        //
+//        std::array<vec2, 2> pts;
+//        vec2 n = other.C - C;
+//        vec2 sN = GetSupportNormal(n);
+//        
+//        GetSupportVerts(sN, pts);
+//        vec2 pA = 0.5f * (pts[0] + pts[1]);
+//        
+//        other.GetSupportVerts(-sN, pts);
+//        vec2 pB = 0.5f * (pts[0] + pts[1]);
+//        
+////        vec2 center = 0.5f * (C + other.C);
+////        vec2 n = glm::normalize(maxComp();
+////        vec2 pA = ws_clamp(center);
+////        vec2 pB = other.ws_clamp(center);
+//        Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, glm::length(pA-pB));
+//        ret.push_back(c);
+//        return ret;
+//    }
     
 	FeaturePair mostSeparated(FLT_MAX);
 	FeaturePair mostPenetrating(-FLT_MAX);
@@ -425,13 +469,19 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 	featurePairJudgement(mostSeparated, mostPenetrating, (OBB *)&other, (OBB *)this, FeaturePair::Type::V_F);
 
 	// Pick the correct feature pair
-	bool pen = (mostSeparated.dist < 0);
-	FeaturePair * fp = pen ? &mostPenetrating : &mostSeparated;
+    bool sep = (mostSeparated.dist > 0 && mostSeparated.T != FeaturePair::Type::N);
+
+	FeaturePair * fp = sep ? &mostSeparated : &mostPenetrating;
+    
+    if (nIt == 120){
+        int x = 0;
+        ++x;
+    }
+    
+    assert(fp->T != FeaturePair::Type::N);
 
     // Function that generates the actual contacts
 	auto makePoints = [fp, &ret](OBB * A, OBB * B) {
-		std::array<vec2, 4> contactPoints;
-
         // Get the world space normal and edge points
         // of the face feature
 		vec2 wN = A->GetNormal(fp->fIdx);
@@ -449,9 +499,21 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 
 		vec2 p3 = projectOnEdge(wV0, wE0, wE1);
 		vec2 p4 = projectOnEdge(wV1, wE0, wE1);
-
-		ret.emplace_back(A, B, p1, p3, wN, glm::length(p3 - p1));
-		ret.emplace_back(A, B, p2, p4, wN, glm::length(p4 - p2));
+        
+        float d1 = glm::distance(p1, p3);
+        float d2 = glm::distance(p2, p4);
+        
+        if (feq(d1, d2)){
+            vec2 pA = 0.5f * (p1+p2);
+            vec2 pB = 0.5f * (p3+p4);
+            std::cout << d1 << std::endl;
+            std::cout << p1 << ", " << p2 << ", " << p3 << ", " << p4 << "\n" << std::endl;
+            ret.emplace_back(A, B, pA, pB, wN, d1);
+        }
+        else{
+            ret.emplace_back(A, B, p1, p3, wN, d1);
+            ret.emplace_back(A, B, p2, p4, wN, d2);
+        }
 	};
 
 	if (fp->T == FeaturePair::Type::F_V)
@@ -503,27 +565,22 @@ std::list<Contact> OBB::GetClosestPoints(const AABB& other) const {
     std::list<Contact> ret;
     
     // See if we're reasonably aligned with other
-    float mCos = fabs(cos(th));
-    float mSin = fabs(sin(th));
-    if (feq(mCos, 0.f) || feq(mSin, 0.f)){
-        vec2 n = glm::normalize(other.C - C);
-        vec2 pA = ws_clamp(other.C);
-        vec2 pB = other.clamp(C);
-        Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, glm::length(pA-pB));
-        ret.push_back(c);
-        return ret;
-    }
+//    float mCos = fabs(cos(th));
+//    float mSin = fabs(sin(th));
+//    if (feq(mCos, 0.f) || feq(mSin, 0.f)){
+//        vec2 n = getNormal(other.C - C);
+//        vec2 pB = other.clamp(C);
+//        vec2 pA = ws_clamp(pB);
+//        Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, glm::length(pA-pB));
+//        ret.push_back(c);
+//        return ret;
+//    }
     
     // Find the vector from our center to theirs
     vec2 centerVecN = other.C - C;
     vec2 faceN(0);
     // Make it a unit vector in the direction of largest magnitude
-    if (feq(centerVecN.x, centerVecN.y))
-        faceN = glm::normalize(centerVecN);
-    else if (fabs(centerVecN.x) > fabs(centerVecN.y))
-        faceN = vec2(copysignf(1, centerVecN.x), 0.f);
-    else
-        faceN = vec2(0.f, copysignf(1, centerVecN.y));
+    faceN = glm::normalize(maxComp(centerVecN));
     
     // Get supporting vertex / vertices along that direction
     std::array<vec2, 2> supportVerts;

@@ -95,8 +95,17 @@ float maxEl(vec4 v) {
 	return ret;
 }
 
-vec2 perp(vec2& v){
+vec2 perp(vec2 v){
     return vec2(-v.y, v.x);
+}
+
+vec2 maxComp(vec2 v){
+    if (feq(v.x, v.y))
+        return v;
+    else if (fabs(v.x) > fabs(v.y))
+        return vec2(v.x, 0.f);
+    else
+        return vec2(0.f, v.y);
 }
 
 //This returns a rotation quat that will line something

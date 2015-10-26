@@ -91,7 +91,8 @@ inline float radToDeg(float r)  {
 	return float(r * 180.f / M_PI);
 }
 
-vec2 perp(vec2& v);
+vec2 perp(vec2 v);
+vec2 maxComp(vec2 v);
 
 float maxEl(vec2 v);
 float maxEl(vec3 v);

@@ -159,6 +159,7 @@ struct OBB : public AABB {
 	int GetSupportVerts(vec2 n, std::array<vec2, 2>&) const;
 	int GetSupportIndices(vec2 n, std::array<int, 2>&) const;
 	vec2 GetSupportNeighbor(vec2 n, int idx) const;
+    vec2 GetSupportNormal(vec2 N) const;
 
 	// AABB fucks it up
 	void ChangeVel(vec2 newV, vec2 rad) override;
