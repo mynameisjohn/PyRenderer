@@ -38,7 +38,7 @@ Entity = namedtuple('Entity',
 
 r_Entities.append(Entity(
 		vel = [0.,-10.],
-		pos = [2.,5.],
+		pos = [-1.,5.],
 		scale = [1.,1.],
 		rot = 0.,
 		mass = 1.,

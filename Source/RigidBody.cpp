@@ -312,9 +312,11 @@ vec2 OBB::GetSupportNeighbor(vec2 n, int idx) const {
     vec2 va = GetVert(idx-1);
     vec2 vc = GetVert(idx+1);
     
-	vec2 nab = glm::normalize(va - vb);
-	vec2 nbc = glm::normalize(vc - vb);
-	if (glm::dot(nab, n) > glm::dot(nbc, n))
+    vec2 nab = perp(vb-va);
+    vec2 nbc = perp(vc-vb);
+    float d1 = glm::dot(nab, n);
+    float d2 = glm::dot(nbc, n);
+	if (d1 > d2)
         return va;
     return vc;
 }
@@ -492,7 +494,9 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
         // and then get "supporting neighbor" of that vertex
         // along the direction of the face feature edge
         vec2 wV0 = B->GetVert(fp->vIdx);
-        vec2 wV1 = B->GetSupportNeighbor(wE1-wE0, fp->vIdx);
+        vec2 wV1 = B->GetSupportNeighbor(-wN, fp->vIdx);
+        
+        std::cout << wN << "\n" << wE0 << "\n" << wE1 << "\n" << wV0 << "\n" << wV1 << "\n" << std::endl;
 
 		vec2 p1 = projectOnEdge(wE0, wV0, wV1);
 		vec2 p2 = projectOnEdge(wE1, wV0, wV1);
@@ -506,8 +510,8 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
         if (feq(d1, d2)){
             vec2 pA = 0.5f * (p1+p2);
             vec2 pB = 0.5f * (p3+p4);
-            std::cout << d1 << std::endl;
-            std::cout << p1 << ", " << p2 << ", " << p3 << ", " << p4 << "\n" << std::endl;
+//            std::cout << d1 << std::endl;
+//            std::cout << p1 << ", " << p2 << ", " << p3 << ", " << p4 << "\n" << std::endl;
             ret.emplace_back(A, B, pA, pB, wN, d1);
         }
         else{
