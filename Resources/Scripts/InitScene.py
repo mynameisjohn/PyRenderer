@@ -37,8 +37,8 @@ Entity = namedtuple('Entity',
 	('vel', 'pos', 'scale', 'rot', 'mass', 'el', 'color', 'module'))
 
 r_Entities.append(Entity(
-		vel = [0.,-10.],
-		pos = [-1.,5.],
+		vel = [10.,10.],
+		pos = [0.,-8.],
 		scale = [1.,1.],
 		rot = 0.,
 		mass = 1.,
@@ -48,12 +48,67 @@ r_Entities.append(Entity(
 	))
 
 r_Entities.append(Entity(
-		vel = [0.,0.],
-		pos = [0.,-3.],
-		scale = [2.,1.],
+		vel = [-10.,10.],
+		pos = [0.,8.],
+		scale = [1.,1.],
 		rot = 0.,
 		mass = 1.,
 		el = 1.,
 		color = randColor(),
-		module = 'OBB.py'
+		module = 'circle.py'
+	))
+
+r_Entities.append(Entity(
+		vel = [0.,15.],
+		pos = [0.,0.],
+		scale = [1.,1.],
+		rot = 0.,
+		mass = 1.,
+		el = 1.,
+		color = randColor(),
+		module = 'circle.py'
+	))
+
+r_Entities.append(Entity(
+		vel = [0.,0.],
+		pos = [0.,18.],
+		scale = [9.,9.],
+		rot = 0.,
+		mass = 1.e10,
+		el = 1.,
+		color = randColor(),
+		module = 'AABB.py'
+	))
+
+r_Entities.append(Entity(
+		vel = [0.,0.],
+		pos = [0.,-18.],
+		scale = [9.,9.],
+		rot = 0.,
+		mass = 1.e10,
+		el = 1.,
+		color = randColor(),
+		module = 'AABB.py'
+	))
+
+r_Entities.append(Entity(
+		vel = [0.,0.],
+		pos = [18.,0.],
+		scale = [9.,9.],
+		rot = 0.,
+		mass = 1.e10,
+		el = 1.,
+		color = randColor(),
+		module = 'AABB.py'
+	))
+
+r_Entities.append(Entity(
+		vel = [0.,0.],
+		pos = [-18.,0.],
+		scale = [9.,9.],
+		rot = 0.,
+		mass = 1.e10,
+		el = 1.,
+		color = randColor(),
+		module = 'AABB.py'
 	))
