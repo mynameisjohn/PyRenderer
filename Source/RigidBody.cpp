@@ -526,57 +526,34 @@ vec2 AABB::GetFaceNormalFromPoint(vec2 p) const{
     return n;
 }
 
+// Right now there are some inconsistencies in the way this function behaves
+// compared to the OBB-OBB version. I think this one is correct, but it's tough to tell...
 std::list<Contact> OBB::GetClosestPoints(const AABB& other) const {
     std::list<Contact> ret;
-//    
-//    vec2 centerVecN = other.C - C;
-//    vec2 faceN = glm::normalize(maxComp(centerVecN));
-//    
-//    std::array<vec2, 2> supportVerts;
-//    int nSupportVerts = GetSupportVerts(centerVecN, supportVerts);
-//    if (nSupportVerts == 1){
-//        vec2& pA = supportVerts[0];
-//        vec2 pB = other.clamp(pA);
-//        float d = glm::dot(faceN, pB - pA);
-//        
-//    }
-//    else {
-//        
-//    }
-//    
-//    
-    // See if we're reasonably aligned with other
-//    float mCos = fabs(cos(th));
-//    float mSin = fabs(sin(th));
-//    if (feq(mCos, 0.f) || feq(mSin, 0.f)){
-//        vec2 n = getNormal(other.C - C);
-//        vec2 pB = other.clamp(C);
-//        vec2 pA = ws_clamp(pB);
-//        Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, n, glm::length(pA-pB));
-//        ret.push_back(c);
-//        return ret;
-//    }
     
     // Find the vector from our center to theirs
     vec2 centerVecN = other.C - C;
     vec2 faceN(0);
     // Make it a unit vector in the direction of largest magnitude
-    faceN =
+    faceN = glm::normalize(maxComp(centerVecN));
     
     // Get supporting vertex / vertices along that direction
-    std::array<vec2, 2> supportVerts;
-    int nSupportVerts = GetSupportVerts(centerVecN, supportVerts);
+    std::array<int, 2> sV;
+    int nSupportVerts = GetSupportIndices(faceN, sV);
+    
+    // one support vert means a vertex-face collision
     if (nSupportVerts == 1){
-        vec2 pA = supportVerts[0];
-        vec2 pB = other.clamp(pA);
-        float d = glm::distance(pA, pB);
-        ret.emplace_back((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, faceN, d);
-        
-        // TODO
-        // Do I want the support neighbor?
+        // Two contact points; the support vertex, and it's best neighbor
+        std::array<glm::vec2, 2> pA_arr = GetSupportNeighbor(faceN, sV[0]);
+        for (auto& pA : pA_arr){
+            vec2 pB = other.clamp(pA);
+            float d = glm::distance(pA, pB);
+            ret.emplace_back((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, faceN, d);
+        }
     }
+    // face-face collsion, average two support verts into one contact point
     else{
-        vec2 pA = 0.5f * (supportVerts[0] + supportVerts[1]);
+        vec2 pA = 0.5f * (GetVert(sV[0]) + GetVert(sV[1]));
         vec2 pB = other.clamp(pA);
         float d = glm::distance(pA, pB);
         ret.emplace_back((RigidBody_2D *)this, (RigidBody_2D *)&other, pA, pB, faceN, d);
