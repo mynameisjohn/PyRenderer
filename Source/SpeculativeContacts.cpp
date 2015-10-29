@@ -10,7 +10,9 @@ Contact::Contact(RigidBody_2D * a, RigidBody_2D * b, const vec2 p_a, const vec2 
 	dist(d),
     curPenDist(0),
 	isColliding(false)
-{}
+{
+    assert(a != b);
+}
 
 void Contact::ApplyImpulse(float mag) {
 	vec2 I = normal*mag;
