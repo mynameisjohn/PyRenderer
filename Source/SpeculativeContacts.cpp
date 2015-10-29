@@ -94,10 +94,14 @@ void Solver::operator()(std::list<Contact>& contacts) {
                 A->V += delV_A;
                 B->V += delV_B;
                 
-                // Exp to limit large values
-                A->w += delW_A * exp(-pow(delW_A, 2)/900.f);
-                B->w += delW_B * exp(-pow(delW_B, 2)/900.f);
-
+                // Clamp angular vel for now
+                auto adv = [](float x, float dX) {
+                    const float M = 10.f;
+                    return clamp(x+ dX, -M, M);
+                };
+                A->w += delW_A;
+                B->w += delW_B;
+                
 				// I don't like doing this
 				c.isColliding = true;
 			}

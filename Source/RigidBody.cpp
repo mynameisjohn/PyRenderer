@@ -27,7 +27,10 @@ void RigidBody_2D::Integrate() {
 //	const float dT = 0.005f; // TODO better integration methods?
 	vec2 delta = globalTimeStep * V;
 	C += delta;
+    
+    //  Decay anglar vel for now
 	th += w * globalTimeStep;
+    w *= 0.99f;
 
 	// I used to have python do this, but what's the point?
 	m_pEntity->HandleMessage(int(Entity::CompID::DRAWABLE),
