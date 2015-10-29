@@ -27,7 +27,16 @@ int Scene::Draw() {
             for (auto& p : contact.pos) {
                 fquat rot(1, 0, 0, 0);
                 
-                Drawable drContact("circle.iqm", vec4(contact.normal, 1.f, 1.f),quatvec(vec3(p, -1.f), rot), vec2(0.2f));
+                //std::cout << contact.normal << ", " << 0.5f * (contact.normal + vec2(1)) << std::endl;
+                
+                // Contact color is normal remapped to 0,1
+                const vec2 v1(1);
+                float rndBlue = uint32_t(rand()) / float(RAND_MAX);
+                vec4 ctColor = vec4(remap(contact.normal, -v1, v1, vec2(), v1), rndBlue, 1.f);
+                quatvec ctTr = quatvec(vec3(p, -1.f), rot);
+                vec2 ctScl = vec2(0.2f);
+                
+                Drawable drContact("circle.iqm", ctColor, ctTr, ctScl);
                 mat4 PMV = m_Camera.GetMat() * drContact.GetMV();
                 vec4 c = drContact.GetColor();
                 glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
