@@ -45,7 +45,7 @@ struct RigidBody_2D : public OwnedByEnt {
 	virtual bool IsOverlapping(const AABB& other) const = 0;
 	virtual bool IsOverlapping(const OBB& other) const = 0;
 
-	// Contacts
+	// Contacts (TODO pass a container around by reference)
 	virtual std::list<Contact> GetClosestPoints(const Circle& other) const = 0;
 	virtual std::list<Contact> GetClosestPoints(const AABB& other) const = 0;
 	virtual std::list<Contact> GetClosestPoints(const OBB& other) const = 0;

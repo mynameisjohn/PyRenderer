@@ -3,6 +3,9 @@
 #include "RigidBody.h"
 #include "SpeculativeContacts.h"
 
+////////////////////////////////////////////////////////////////////////////////////////
+// RigidBody_2D functions
+
 RigidBody_2D::RigidBody_2D() :
 	V(0),
 	C(0),
@@ -11,7 +14,6 @@ RigidBody_2D::RigidBody_2D() :
 	th(0),
 	w(0)
 {}
-
 
 RigidBody_2D::RigidBody_2D(vec2 V, vec2 C, float m, float e, float th) :
 	V(V),
@@ -37,6 +39,8 @@ void RigidBody_2D::Integrate() {
 		int(Entity::MsgID::DR_TRANSLATE));
 }
 
+// Return some basic physical quantities,
+// I'm fairly certain noone is calling these
 vec2 RigidBody_2D::GetMomentum() const {
 	return m * V;
 }
@@ -45,8 +49,14 @@ float RigidBody_2D::GetKineticEnergy() const {
 	return 0.5f * m * glm::dot(V, V);
 }
 
-// I don't think this is physically accurate,
-// doesn't really deal with angular momentum
+// Return the graphical quatvec transform of a rigid body
+quatvec RigidBody_2D::GetQuatVec() const {
+    vec3 T(C, 0.f);
+    fquat Q(cos(th/2.f), vec3(0.f, 0.f, sin(th/2.f)));
+    return quatvec(T, Q);
+}
+
+// TODO all of this is no being done in SpeculativeContacts.cpp
 void RigidBody_2D::ChangeVel(vec2 newV, vec2 rad) {
 	vec2 delV = newV - V;
 	V = newV;
@@ -54,14 +64,10 @@ void RigidBody_2D::ChangeVel(vec2 newV, vec2 rad) {
 	w += glm::dot(delV, perp);
 }
 
-//void RigidBody_2D::ApplyCollisionImpulse(vec2 imp){
-//    V += imp;
-//}
+////////////////////////////////////////////////////////////////////////////////////////
+// Circle functions
 
-void AABB::ChangeVel(vec2 newV, vec2 rad) {
-	V = newV;
-}
-
+// Should be moment of inertia....
 float Circle::GetInertia() const{
     return 0.5f * m * pow(r, 2);
 }
@@ -80,18 +86,59 @@ bool Circle::IsOverlapping(const AABB& other) const {
 }
 
 Circle::Circle() :
-	r(1),
-	RigidBody_2D()
+	RigidBody_2D(),
+	r(1)
 {}
 
 Circle::Circle(vec2 V, vec2 C, float m, float e, float radius, float th) :
-	r(radius),
-	RigidBody_2D(V, C, m, e, th)
+	RigidBody_2D(V, C, m, e, th),
+    r(radius)
 {}
 
+// Between circles
+std::list<Contact> Circle::GetClosestPoints(const Circle& other) const {
+    // watch for low values here
+    // find and normalize distance
+    vec2 d = other.C - C;
+    vec2 n = glm::normalize(d);
+    // contact points along circumference
+    vec2 a_pos = C + n*r;
+    vec2 b_pos = other.C - n*other.r;
+    // distance between circumferences
+    float dist = glm::length(a_pos - b_pos);
+    Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, dist);
+    return{ c };
+}
+
+// Between a circle and an AABB
+std::list<Contact> Circle::GetClosestPoints(const AABB& other) const {
+    // d points from the circle to the box, so negate and clamp
+    vec2 b_pos = other.clamp(C);
+    vec2 n = glm::normalize(b_pos - C);
+    
+    vec2 a_pos = C + r*n;
+    float dist = glm::length(a_pos - b_pos);
+    
+    Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, dist);
+    return{ c };
+}
+
+// Between Circle and OBB (see OBB impl)
+bool Circle::IsOverlapping(const OBB& other) const {
+    return other.IsOverlapping(*this);
+}
+
+// Also see OBB impl
+std::list<Contact> Circle::GetClosestPoints(const OBB& other) const {
+    return other.GetClosestPoints(*this);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// AABB functions
+
 AABB::AABB() :
-	R(1),
-	RigidBody_2D()
+	RigidBody_2D(),
+    R(1)
 {}
 
 AABB::AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r) :
@@ -100,10 +147,16 @@ AABB::AABB(vec2 vel, vec2 c, float mass, float elasticity, vec2 r) :
 {}
 
 AABB::AABB(vec2 v, float mass, float el, float x, float y, float w, float h) :
-	R(vec2(w, h) / 2.f),
-	RigidBody_2D(v, vec2(x, y) + vec2(w, h) / 2.f, mass, el, 0.f)
+	RigidBody_2D(v, vec2(x, y) + vec2(w, h) / 2.f, mass, el, 0.f),
+	R(vec2(w, h) / 2.f)
 {
 	R = vec2(w, h) / 2.f;
+}
+
+// This was written to prevent AABB rotation,
+// but something better must arise
+void AABB::ChangeVel(vec2 newV, vec2 rad) {
+    V = newV;
 }
 
 // I = (m/3) * (R.x^2 + R.y^2)
@@ -111,6 +164,7 @@ float AABB::GetInertia() const{
     return (m/3.f) * (pow(R.x, 2) + pow(R.y, 2));
 }
 
+// TODO write these for OBB
 float AABB::width()const { return 2.f*R.x; }
 float AABB::height()const { return 2.f*R.y; }
 float AABB::left()const { return C.x - R.x; }
@@ -118,75 +172,46 @@ float AABB::right()const { return C.x + R.x; }
 float AABB::top()const { return C.y + R.y; }
 float AABB::bottom()const { return C.y - R.y; }
 
+// Overlap of two AABBs
 bool AABB::IsOverlapping(const AABB& other) const {
 	return
 		(left() > other.right() || right() < other.left()) &&
 		(bottom() > other.top() || top() < other.bottom());
 }
 
+// Overlap of circle and AABB
 bool AABB::IsOverlapping(const Circle& other) const {
 	return other.IsOverlapping(*this);
 }
 
+// Overlap of AABB - OBB
+bool AABB::IsOverlapping(const OBB& other) const {
+    return other.IsOverlapping(*this);
+}
+
+// Clamp a point within the AABBs extent
 vec2 AABB::clamp(vec2 p) const {
 	return  glm::clamp(p, C - R, C + R);
 }
 
-// Closest Point methods
-
-// Kind of a waste
-std::list<Contact> Circle::GetClosestPoints(const Circle& other) const {
-	// watch for low values here
-	// find and normalize distance
-	vec2 d = other.C - C;
-	vec2 n = glm::normalize(d);
-	// contact points along circumference
-	vec2 a_pos = C + n*r;
-	vec2 b_pos = other.C - n*other.r;
-	// distance between circumferences
-	float dist = glm::length(a_pos - b_pos);
-	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, dist);
-	return{ c };
-}
-
-std::list<Contact> Circle::GetClosestPoints(const AABB& other) const {
-	// d points from the circle to the box, so negate and clamp
-	vec2 b_pos = other.clamp(C);
-	vec2 n = glm::normalize(b_pos - C);
-
-	vec2 a_pos = C + r*n;
-	float dist = glm::length(a_pos - b_pos);
-    
-	Contact c((Circle *)this, (Circle *)&other, a_pos, b_pos, n, dist);
-	return{ c };
-}
-
-bool Circle::IsOverlapping(const OBB& other) const {
-	return other.IsOverlapping(*this);
-}
-
-std::list<Contact> Circle::GetClosestPoints(const OBB& other) const {
-	return other.GetClosestPoints(*this);
-}
-
-bool AABB::IsOverlapping(const OBB& other) const {
-	return other.IsOverlapping(*this);
-}
-
+// I had to write this special to zero out angular stuff
 void AABB::Integrate(){
     th=0.f;
     w=0.f;
     RigidBody_2D::Integrate();
 }
 
+// Closest points between AABB and Circle (see circle impl)
 std::list<Contact> AABB::GetClosestPoints(const Circle& other) const {
 	return other.GetClosestPoints(*this);
 }
 
+// AABB-OBB, see OBB impl
 std::list<Contact> AABB::GetClosestPoints(const OBB& other) const {
 	return other.GetClosestPoints(*this);
 }
 
+// Closest points between two AABBs
 std::list<Contact> AABB::GetClosestPoints(const AABB& other) const {
 	// watch for low values here
 	vec2 d = C - other.C;
@@ -197,6 +222,30 @@ std::list<Contact> AABB::GetClosestPoints(const AABB& other) const {
 	Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, a_pos, b_pos, n, dist);
 	return{ c };
 }
+
+
+// Probably a cuter way of writing this
+vec2 AABB::GetFaceNormalFromPoint(vec2 p) const{
+    vec2 n;
+    
+    if (p.x < right() && p.x > left()){
+        if (p.y < bottom())
+            n = vec2(0,-1);
+        else
+            n = vec2(0,1);
+    }
+    else{
+        if (p.x < left())
+            n = vec2(-1,0);
+        else
+            n = vec2(1,0);
+    }
+    
+    return n;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// OBB functions
 
 OBB::OBB() :
 	AABB()
@@ -218,16 +267,19 @@ OBB::OBB(vec2 vel, float m, float e, float x, float y, float w, float h, float t
 	this->th = th;
 }
 
+// Had to be overriden because this is a subclass of AABB (should it be?)
 void OBB::Integrate(){
     RigidBody_2D::Integrate();
 }
 
+// Construct rotation matrix
 glm::mat2 OBB::getRotMat() const {
 	float c = cos(th);
 	float s = sin(th); // glm wants transpose
 	return glm::mat2(vec2(c, s), vec2(-s, c));
 }
 
+// Get one or two of the vertices furthest along n
 int OBB::GetSupportVerts(vec2 n, std::array<vec2, 2>& sV) const {
     int foundIdx(-1);
     
@@ -262,6 +314,7 @@ int OBB::GetSupportVerts(vec2 n, std::array<vec2, 2>& sV) const {
     return num;
 }
 
+// Indices of the vertices returned by the above function
 int OBB::GetSupportIndices(vec2 n, std::array<int, 2>& sV) const {
 	// Find the furthest vertex
 	float dMin = -FLT_MAX;
@@ -293,6 +346,7 @@ int OBB::GetSupportIndices(vec2 n, std::array<int, 2>& sV) const {
 	return num;
 }
 
+// Best face normal aligned with N
 vec2 OBB::GetSupportNormal(vec2 N) const{
     uint32_t iMin(0);
     float dMin(-FLT_MAX);
@@ -308,6 +362,7 @@ vec2 OBB::GetSupportNormal(vec2 N) const{
     return GetNormal(iMin);
 }
 
+// Pick the best support neighbor along n
 // It's critical that this function return an array where the vertices
 // are in the proper clockwise order
 std::array<vec2, 2> OBB::GetSupportNeighbor(vec2 n, int idx) const {
@@ -327,6 +382,7 @@ std::array<vec2, 2> OBB::GetSupportNeighbor(vec2 n, int idx) const {
     return {{vb, vc}};
 }
 
+// Get verts, clockwise
 vec2 OBB::GetVert(uint32_t idx) const {
 	vec2 ret(0);
 	switch (idx % 4) {
@@ -342,6 +398,7 @@ vec2 OBB::GetVert(uint32_t idx) const {
 	}
 }
 
+// Get normal, clockwise
 vec2 OBB::GetNormal(uint32_t idx) const {
 	switch (idx % 4) {
 	case 0:
@@ -356,6 +413,8 @@ vec2 OBB::GetNormal(uint32_t idx) const {
 	}
 }
 
+// Static function to project a point p along the edge
+// between points e0 and e1
 static vec2 projectOnEdge(vec2 p, vec2 e0, vec2 e1) {
 	// u and v form a little triangle
 	vec2 u = p - e0;
@@ -370,6 +429,7 @@ static vec2 projectOnEdge(vec2 p, vec2 e0, vec2 e1) {
 	return e0 + v * clamp(t, 0.f, 1.f);
 }
 
+// Pick the best feature pair (penetrating or separating); A is the "face" object, B is the "vertex" object
 static void featurePairJudgement(FeaturePair& mS, FeaturePair& mP, OBB * A, OBB * B, FeaturePair::Type type){
     // For all A's normals
     for (int fIdx = 0; fIdx < 4; fIdx++) {
@@ -411,7 +471,7 @@ static void featurePairJudgement(FeaturePair& mS, FeaturePair& mP, OBB * A, OBB 
             // See whether or not this new feature pair is a good candidate
             // For penetration, we want the largest negative value
             bool accept = false;
-            if ( isPenetrating ? dist > fp->dist : dist < fp->dist)
+            if ( isPenetrating ? (dist > fp->dist) : (dist < fp->dist) )
                 accept = true;
             else if (feq(dist, fp->dist)){
                 // If it's just about as close as the current best feature pair,
@@ -427,9 +487,11 @@ static void featurePairJudgement(FeaturePair& mS, FeaturePair& mP, OBB * A, OBB 
     }
 }
 
+// Closest points between two OBBs
 std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 	std::list<Contact> ret;
     
+    // TODO are penetrating features working?
 	FeaturePair mostSeparated(FLT_MAX);
 	FeaturePair mostPenetrating(-FLT_MAX);
 
@@ -439,11 +501,12 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
 
 	// Pick the correct feature pair
     bool sep = (mostSeparated.dist > 0 && mostSeparated.T != FeaturePair::Type::N);
-
 	FeaturePair * fp = sep ? &mostSeparated : &mostPenetrating;
 
+    // We better have something
     assert(fp->T != FeaturePair::Type::N);
 
+    // A is face feature, B is vertex feature
     OBB * A(nullptr), * B(nullptr);
     if (fp->T == FeaturePair::Type::F_V){
         A = (OBB *)this;
@@ -462,20 +525,25 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
     
     // Get the world space vertex of the vertex feature,
     // and then get "supporting neighbor" of that vertex
-    // along the direction of the face feature edge
+    // along the direction of the face feature edge, clockwise
     std::array<vec2, 2> wV = B->GetSupportNeighbor(-wN, fp->vIdx);
     
     //std::cout << wN << "\n" << wE0 << "\n" << wE1 << "\n" << wV0 << "\n" << wV1 << "\n" << std::endl;
     
+    // Project edge points along vertex feature edge
     vec2 p1 = projectOnEdge(wE0, wV[0], wV[1]);
     vec2 p2 = projectOnEdge(wE1, wV[0], wV[1]);
     
+    // Project vertex points along face feature edge
     vec2 p3 = projectOnEdge(wV[0], wE0, wE1);
     vec2 p4 = projectOnEdge(wV[1], wE0, wE1);
     
+    // distance is point distance along face (contact) normal
     float d1 = glm::dot(p1 - p3, wN);
     float d2 = glm::dot(p2 - p4, wN);
     
+    // If they're equal, collapse the two into one contact
+    // This could be used as an early out, if you have the balls
     if (feq(d1, d2)){
         vec2 pA = 0.5f * (p1+p2);
         vec2 pB = 0.5f * (p3+p4);
@@ -484,7 +552,7 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
         ret.emplace_back(A, B, pA, pB, wN, d1);
     }
     else
-    {
+    {   // Otherwise add two contacts points
         ret.emplace_back(A, B, p1, p4, wN, d1);
         ret.emplace_back(A, B, p2, p3, wN, d2);
     }
@@ -507,26 +575,6 @@ vec2 OBB::ws_clamp(vec2 p) const {
 	vec2 p1 = glm::inverse(getRotMat()) * (p - C);
 	p1 = glm::clamp(p1, -R, R);
 	return C + getRotMat() * p1;
-}
-
-// Probably a cuter way of writing this
-vec2 AABB::GetFaceNormalFromPoint(vec2 p) const{
-    vec2 n;
-    
-    if (p.x < right() && p.x > left()){
-        if (p.y < bottom())
-            n = vec2(0,-1);
-        else
-            n = vec2(0,1);
-    }
-    else{
-        if (p.x < left())
-            n = vec2(-1,0);
-        else
-            n = vec2(1,0);
-    }
-    
-    return n;
 }
 
 // Right now there are some inconsistencies in the way this function behaves
@@ -574,16 +622,12 @@ bool OBB::IsOverlapping(const AABB& other) const {
 	return false;
 }
 
-quatvec RigidBody_2D::GetQuatVec() const {
-    vec3 T(C, 0.f);
-    fquat Q(cos(th/2.f), vec3(0.f, 0.f, sin(th/2.f)));
-	return quatvec(T, Q);
-}
-
+// Overridden because AABB is special
 void OBB::ChangeVel(vec2 newV, vec2 rad) {
 	return RigidBody_2D::ChangeVel(newV, rad);
 }
 
+// FeaturePair stuff, not sure where this belongs
 FeaturePair::FeaturePair(float d, float cd, int f, int v, Type t) :
 dist(d),
 c_dist(cd),
