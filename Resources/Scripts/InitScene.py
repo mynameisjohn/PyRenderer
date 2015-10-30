@@ -37,6 +37,28 @@ Entity = namedtuple('Entity',
 	('vel', 'pos', 'scale', 'rot', 'mass', 'el', 'color', 'module'))
 
 r_Entities.append(Entity(
+		vel = [0.,0.],
+		pos = [-1.5,-1.5],
+		scale = [1.,1.],
+		rot = 0.,
+		mass = 1.,
+		el = 1.,
+		color = randColor(),
+		module = 'OBB.py'
+	))
+
+r_Entities.append(Entity(
+		vel = [0.,0.],
+		pos = [1.,1.],
+		scale = [1.,3.],
+		rot = math.pi/4,
+		mass = 1.,
+		el = 1.,
+		color = randColor(),
+		module = 'OBB.py'
+	))
+'''
+r_Entities.append(Entity(
 		vel = [10.,10.],
 		pos = [0.,-8.],
 		scale = [1.,1.],
@@ -62,6 +84,28 @@ r_Entities.append(Entity(
 		vel = [0.,15.],
 		pos = [0.,0.],
 		scale = [1.,1.],
+		rot = 0.,
+		mass = 1.,
+		el = 1.,
+		color = randColor(),
+		module = 'circle.py'
+	))
+
+r_Entities.append(Entity(
+		vel = [3.,3.],
+		pos = [-6.,-6.],
+		scale = [2.,2.8],
+		rot = 0.,
+		mass = 1.,
+		el = 1.,
+		color = randColor(),
+		module = 'OBB.py'
+	))
+
+r_Entities.append(Entity(
+		vel = [0.,15.],
+		pos = [6.,6.],
+		scale = [3.,3.],
 		rot = 0.,
 		mass = 1.,
 		el = 1.,
@@ -112,3 +156,4 @@ r_Entities.append(Entity(
 		color = randColor(),
 		module = 'AABB.py'
 	))
+'''
