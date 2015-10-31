@@ -32,5 +32,6 @@ private:
 	std::vector<AABB> m_vAABB;
 	std::vector<OBB> m_vOBB;
 	std::list<Contact> m_SpeculativeContacts; // no need to be a list, will be (n^2+n)/2
+    Solver m_ContactSolver;
 };
 

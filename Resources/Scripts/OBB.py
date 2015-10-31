@@ -17,8 +17,8 @@ r_ColPrim = 'OBB'
 
 def HandleCollision(myID, theirID):
 	e = g_Entities[myID]
-	#e.PostMessage_v4(E_DR, E_DR_CLR, (randColor(),))
-	#PlaySound(random.choice(r_Sounds))
+	e.PostMessage_v4(E_DR, E_DR_CLR, (randColor(),))
+	PlaySound(random.choice(r_Sounds))
 	
 def AddEntity(eID, ePtr):
 	g_Entities[eID] = Entity(ePtr)

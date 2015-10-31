@@ -31,7 +31,7 @@ int Scene::Draw() {
                 
                 // Contact color is normal remapped to 0,1
                 const vec2 v1(1);
-                float rndBlue = uint32_t(rand()) / float(RAND_MAX);
+                float rndBlue = 1.f;//uint32_t(rand()) / float(RAND_MAX);
                 vec4 ctColor = vec4(remap(contact.normal, -v1, v1, vec2(), v1), rndBlue, 1.f);
                 quatvec ctTr = quatvec(vec3(p, -1.f), rot);
                 vec2 ctScl = vec2(0.2f);
@@ -68,7 +68,7 @@ int Scene::Update() {
 //        b.V.y -= 1.f;
     
 	// I think there's the same # of these every time...
-	Solver solve; 
+	// Solver solve;
 
 	// For every circle
 	for (auto it1 = m_vCircles.begin(); it1 != m_vCircles.end(); ++it1) {
@@ -125,7 +125,7 @@ int Scene::Update() {
 	//std::cout << totalEnergy << "\n" << std::endl;
 
 	// I don't like using the bool here, so figure something else out
-	solve(m_SpeculativeContacts);
+	m_ContactSolver.Solve(m_SpeculativeContacts);
 	for (auto& c : m_SpeculativeContacts) {
 		if (c.isColliding) {
 			Entity * e1 = c.pair[0]->GetEntity();
@@ -221,6 +221,8 @@ Scene::Scene(std::string& pyinitScript) {
 		std::string colPrim;
 		check(pyEntModule.get_attr("r_ColPrim").convert(colPrim), "Getting basic collision primitive from ent module");
 
+        static int omegaDir(0);
+        
 		// Make collision resource, (assume uniform scale, used for mass and r)
 		// TODO add mass, elasticity to init tuple
 		if (colPrim == "AABB") {  // AABBs are assumed to be "walls" of high mass for now
@@ -231,6 +233,7 @@ Scene::Scene(std::string& pyinitScript) {
 		else if (colPrim == "OBB") {
 			OBB box(vel, vec2(pos), m, e, scale, rot);
 			box.SetEntity(&m_vEntities[i]);
+            //box.w = (omegaDir++ % 2 ? -10.f : 0.f);
 			m_vOBB.push_back(box);
 		}
 		else {

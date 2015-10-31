@@ -22,7 +22,7 @@ int main(int argc, char ** argv) {
         QUIT
     };
     
-    PlayState curState = PAUSE;
+    PlayState curState = PLAY;
     
     const int nStep = 1;
 

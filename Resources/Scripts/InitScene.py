@@ -38,7 +38,7 @@ Entity = namedtuple('Entity',
 
 r_Entities.append(Entity(
 		vel = [0.,0.],
-		pos = [-1.5,-1.5],
+		pos = [3.,0.],
 		scale = [1.,1.],
 		rot = 0.,
 		mass = 1.,
@@ -48,10 +48,10 @@ r_Entities.append(Entity(
 	))
 
 r_Entities.append(Entity(
-		vel = [0.,0.],
-		pos = [1.,1.],
-		scale = [1.,3.],
-		rot = math.pi/4,
+		vel = [-10.,0.],
+		pos = [6.,0.5],
+		scale = [1.,1.],
+		rot = 0.,
 		mass = 1.,
 		el = 1.,
 		color = randColor(),
@@ -113,6 +113,7 @@ r_Entities.append(Entity(
 		module = 'circle.py'
 	))
 
+
 r_Entities.append(Entity(
 		vel = [0.,0.],
 		pos = [0.,18.],
@@ -135,6 +136,7 @@ r_Entities.append(Entity(
 		module = 'AABB.py'
 	))
 
+'''
 r_Entities.append(Entity(
 		vel = [0.,0.],
 		pos = [18.,0.],
@@ -156,4 +158,4 @@ r_Entities.append(Entity(
 		color = randColor(),
 		module = 'AABB.py'
 	))
-'''
+#'''
