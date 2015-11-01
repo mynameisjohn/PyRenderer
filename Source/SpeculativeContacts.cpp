@@ -4,10 +4,13 @@
 #include "RigidBody.h"
 #include "Audible.h"
 Contact::Contact(RigidBody_2D * a, RigidBody_2D * b, const vec2 p_a, const vec2 p_b, const vec2 nrm, const float d) :
-	A(a),
-    B(b),
-    pA(p_a),
-    pB(p_b),
+
+pair{{a, b}},
+pos{{p_a, p_b}},
+//	A(a),
+//    B(b),
+//    pA(p_a),
+//    pB(p_b),
 	normal(nrm),
 	dist(d),
 //    curPenDist(0),
@@ -95,7 +98,7 @@ void Contact::ApplyImpulse(vec2 imp) {
         pair[i]->w += sgn * glm::dot(imp, rad[i]) / pair[i]->GetInertia();
     }
     
-    std::cout << A->GetKineticEnergy() + B->GetKineticEnergy() << std::endl;
+   // std::cout << A->GetKineticEnergy() + B->GetKineticEnergy() << std::endl;
 }
 
 inline vec2 relVel(const Contact * c, int i){
@@ -145,20 +148,32 @@ uint32_t Solver::Solve(std::list<Contact>& contacts) {
 	{
         uint32_t numColIt(0);
 		for (auto& c : contacts) {
-            float vA = c.GetRelVelN_A();
-            float vB = c.GetRelVelN_B();
             
-            float relNv = vB - vA;
+//            if (nIt == 0)
+//                std::cout << c.A << ", " << c.B << ", " << c.dist << std::endl;
+            
+//            float vA = c.GetRelVelN_A();
+//            float vB = c.GetRelVelN_B();
+        
+            vec2 vA = c.GetRelVel_A();
+            vec2 vB = c.GetRelVel_B();
+            vec2 relV = vB - vA;
+            float relNv = glm::dot(relV, c.normal);
+           
             
             float remove = relNv + c.dist / globalTimeStep;
             
-            if (remove < -kEPS){                
+            if (remove < -kEPS){
+                 //std::cout << relV << ", " << c.normal << "\n" << std::endl;
+                
+                float Cr_1 = 1.f + 0.5f * (c.pair[0]->e + c.pair[1]->e);
                 float mag = remove * c.invMassI;
                 
-                vec2 imp = c.normal * mag;
+                vec2 n = c.normal;
                 
-                float Cr = 0.5f * (c.A->e + c.B->e);
-                imp *= (1.f + Cr);
+                vec2 imp = n * (mag * Cr_1);
+                                
+                std::cout << imp << std::endl;
                 
                 c.ApplyImpulse(imp);
                 
