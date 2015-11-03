@@ -84,12 +84,13 @@ FIND_LIBRARY(SDL2_LIBRARY_TEMP
 NAMES SDL2
 HINTS
 $ENV{SDL2DIR}
-PATH_SUFFIXES lib64 lib
+PATH_SUFFIXES lib64 lib SDL2
 PATHS
 /sw
 /opt/local
 /opt/csw
 /opt
+/usr/lib
 )
 #MESSAGE("SDL2_LIBRARY_TEMP is ${SDL2_LIBRARY_TEMP}")
 IF(NOT SDL_BUILDING_LIBRARY)
@@ -99,15 +100,16 @@ IF(NOT ${SDL2_INCLUDE_DIR} MATCHES ".framework")
 # seem to provide SDLmain for compatibility even though they don't
 # necessarily need it.
 FIND_LIBRARY(SDLMAIN_LIBRARY
-NAMES SDLmain2
+NAMES SDL2main
 HINTS
 $ENV{SDLDIR}
-PATH_SUFFIXES lib64 lib
+PATH_SUFFIXES lib64 lib SDL2
 PATHS
 /sw
 /opt/local
 /opt/csw
 /opt
+/usr/lib
 )
 ENDIF(NOT ${SDL2_INCLUDE_DIR} MATCHES ".framework")
 ENDIF(NOT SDL_BUILDING_LIBRARY)
