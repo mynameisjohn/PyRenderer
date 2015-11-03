@@ -55,13 +55,18 @@ IqmFile::IqmFile( string src )
 	IQMASSERT( string( m_Header->magic ) == IQM_MAGIC, "IQM File contained wrong magic number" );
 
 	// Grab these things
-	m_WayPoints[IQM_T::MESH] = { m_Header->num_meshes, m_Header->ofs_meshes };
-	m_WayPoints[IQM_T::TRI] = { m_Header->num_triangles, m_Header->ofs_triangles };
-	m_WayPoints[IQM_T::JOINT] = { m_Header->num_joints, m_Header->ofs_joints };
-	m_WayPoints[IQM_T::POSE] = { m_Header->num_poses, m_Header->ofs_poses };
-	m_WayPoints[IQM_T::ANIM] = { m_Header->num_anims, m_Header->ofs_anims };
-	m_WayPoints[IQM_T::VARRAY] = { m_Header->num_vertexarrays, m_Header->ofs_vertexarrays };
-	m_WayPoints[IQM_T::FRAME] = { m_Header->num_frames, m_Header->ofs_frames };
+    auto maybeAdd = [this](IQM_T ID, uint32_t num, uint32_t ofs){
+        if (num && ofs)
+            m_WayPoints[ID] = {num, ofs};
+    };
+    maybeAdd(IQM_T::MESH, m_Header->num_meshes, m_Header->ofs_meshes);
+    maybeAdd(IQM_T::TRI, m_Header->num_triangles, m_Header->ofs_triangles);
+    maybeAdd(IQM_T::JOINT, m_Header->num_joints, m_Header->ofs_joints);
+    maybeAdd(IQM_T::POSE, m_Header->num_poses, m_Header->ofs_poses);
+    maybeAdd(IQM_T::ANIM, m_Header->num_anims, m_Header->ofs_anims);
+    maybeAdd(IQM_T::VARRAY, m_Header->num_vertexarrays, m_Header->ofs_vertexarrays);
+    maybeAdd(IQM_T::FRAME, m_Header->num_frames, m_Header->ofs_frames);
+    maybeAdd(IQM_T::BBOX, 1, m_Header->ofs_bounds);
 
 	// Loop through all vertex arrays
 	iqmvertexarray * vArrs( (iqmvertexarray *) &m_Data[m_Header->ofs_vertexarrays] );

@@ -31,6 +31,7 @@ public:
 		POSE = 11,
 		ANIM = 12,
 		FRAME = 13,
+        BBOX = 14,
 		CUSTOM = 0x10
 	};
 private:
