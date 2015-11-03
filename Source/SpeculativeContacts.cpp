@@ -5,8 +5,8 @@
 #include "Audible.h"
 Contact::Contact(RigidBody_2D * a, RigidBody_2D * b, const vec2 p_a, const vec2 p_b, const vec2 nrm, const float d) :
 
-pair{{a, b}},
-pos{{p_a, p_b}},
+pair{a, b},
+pos{p_a, p_b},
 //	A(a),
 //    B(b),
 //    pA(p_a),
