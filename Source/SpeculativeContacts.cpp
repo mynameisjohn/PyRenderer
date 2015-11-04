@@ -82,12 +82,12 @@ uint32_t Solver::Solve(std::list<Contact>& contacts) {
 			// Detect collision
 			bool colliding = (remove < -kEPS);
 			if (colliding) {
-				c.isColliding = true;
+				//c.isColliding = true;
 				colCount++;
 			}
 
 			// Get the magnitude of the collision (negative or zero)
-			float impulseMag = (remove < -kEPS) ? (Cr_1 * relNv * c.invMassI) : 0.f;
+			float impulseMag = colliding ? (Cr_1 * relNv * c.invMassI) : 0.f;
 
 			// Calculate the new impulse and apply the change
 			float n_Impulse = impulseMag + c.curImpulse;
