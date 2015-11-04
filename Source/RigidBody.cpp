@@ -548,7 +548,8 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
     if (feq(d1, d2)){
         vec2 pA = 0.5f * (p1+p2);
         vec2 pB = 0.5f * (p3+p4);
-        ret.emplace_back(A, B, pA, pB, wN, d1);
+        float d = glm::distance(pA, pB);
+        ret.emplace_back(A, B, pA, pB, wN, d);
     }
     else
     {   // Otherwise add two contacts points

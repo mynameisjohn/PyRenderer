@@ -22,8 +22,13 @@ def UpdateCollision(id):
     g_Entities[id].PostMessage(0,0)
 
 def HandleCollision(myID, theirID):
-	e = g_Entities[myID]
-	e.PostMessage_v4(E_DR, E_DR_CLR, (randColor(),))
+    e = g_Entities[myID]
+    e.PostMessage_v4(E_DR, E_DR_CLR, (randColor(),))
+    try: # random.choice can raise an IndexError if seq is empty
+        snd = random.choice(r_Sounds)
+        PlaySound(snd)
+    except IndexError:
+        pass
 	
 def AddEntity(eID, ePtr):
 	g_Entities[eID] = Entity(ePtr)

@@ -82,7 +82,7 @@ uint32_t Solver::Solve(std::list<Contact>& contacts) {
 			// Detect collision
 			bool colliding = (remove < -kEPS);
 			if (colliding) {
-				//c.isColliding = true;
+				c.isColliding = true;
 				colCount++;
 			}
 
