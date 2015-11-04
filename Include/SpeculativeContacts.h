@@ -8,33 +8,24 @@ class RigidBody_2D;
 
 // Speculative contacts stuff
 struct Contact {
-    // Pointers to the two objects that may collide
-    union{
+    union{ // Pointers to the two objects that may collide
         RigidBody_2D * pair[2];
         struct {RigidBody_2D * A, * B;};
     };
-    // The positions of the contact points
-    union{
+    union{ // The positions of the contact points
         vec2 pos[2];
         struct{ vec2 pA; vec2 pB; };
     };
-    // Radius arms
-    union{
+    union{ // Radius arms
         vec2 rad[2];
         struct{vec2 rA; vec2 rB;};
     };
-    // Collision normal
-	vec2 normal;
-    // Distance between contacts
-	float dist;
-    // Inverse impulse mass denominator
-    float invMassI;
-	// Accumulated impulse
-	float curImpulse;
     
-    //float curPenDist;
-    // Really just used to see if things are currently colliding, I can do better
-	bool isColliding;
+	vec2 normal; // Collision normal
+	float dist; // Distance between contacts
+    float invMassI; // Inverse impulse mass denominator
+	float curImpulse; // Accumulated impulse
+	bool isColliding; // Really just used to see if things are currently colliding, I can do better
     
     // Constructor
 	Contact(RigidBody_2D * a,
@@ -45,26 +36,23 @@ struct Contact {
 		const float d);
     
     // Apply some collision impulse
-	void ApplyImpulse(vec2 imp);
+	void ApplyImpulse(float mag);
     
     // Get the relative velocity of A and B
-    vec2 GetRelVel_A() const;
-    vec2 GetRelVel_B() const;
+    vec2 GetVel_A() const;
+    vec2 GetVel_B() const;
     
     // Same, along normal
-    float GetRelVelN_A() const;
-    float GetRelVelN_B() const;
-    
-    //std::array<float, 2> relVel() const;
-//	float relVel() const;
+    float GetVelN_A() const;
+    float GetVelN_B() const;
 };
 
 // Really just a namespace...
 class Solver {
 	uint32_t m_nIterations;
 public:
-	Solver(int nIt = 100) : m_nIterations(nIt) {}
+	Solver(int nIt) : m_nIterations(nIt) {}
     
     uint32_t Solve(std::list<Contact>& contacts);
-	//void operator()(std::list<Contact>& contacts);
+	uint32_t operator()(std::list<Contact>& contacts);
 };

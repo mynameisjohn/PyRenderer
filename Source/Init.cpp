@@ -15,17 +15,13 @@
 
 
 bool InitEverything(SDL_GLContext& g_Context, SDL_Window*& g_Window, std::unique_ptr<Scene>& pScene) {
-	if (!InitSDL())
-		return false;
-	if (!InitGL(g_Context, g_Window))
-		return false;
-	if (!InitSound())
-		return false;
-	if (!InitPython())
-		return false;
-	if (!InitScene(pScene))
-		return false;
-	return true;
+	if (InitSDL())
+		if (InitGL(g_Context, g_Window))
+			if (InitSound())
+				if (InitPython())
+					if (InitScene(pScene))
+						return true;
+	return false;
 }
 
 bool InitSDL() {

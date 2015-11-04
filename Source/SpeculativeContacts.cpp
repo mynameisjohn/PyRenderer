@@ -7,14 +7,9 @@
 Contact::Contact(RigidBody_2D * a, RigidBody_2D * b, const vec2 p_a, const vec2 p_b, const vec2 nrm, const float d) :
 	pair{ a, b },
 	pos{ p_a, p_b },
-	//	A(a),
-	//    B(b),
-	//    pA(p_a),
-	//    pB(p_b),
 	normal(nrm),
 	dist(d),
 	curImpulse(0),
-	//    curPenDist(0),
 	isColliding(false)
 {
 	assert(a != b);
@@ -33,7 +28,9 @@ Contact::Contact(RigidBody_2D * a, RigidBody_2D * b, const vec2 p_a, const vec2 
 	invMassI = 1.f / denom;
 }
 
-void Contact::ApplyImpulse(vec2 imp) {
+// Apply a 2D impulse 
+void Contact::ApplyImpulse(float mag) {
+	vec2 imp = normal * mag;
 	for (int i = 0; i < 2; i++) {
 		const float sgn = i % 2 ? -1.f : 1.f;
 		pair[i]->V += sgn * imp / pair[i]->m;
@@ -43,51 +40,74 @@ void Contact::ApplyImpulse(vec2 imp) {
 	// std::cout << A->GetKineticEnergy() + B->GetKineticEnergy() << std::endl;
 }
 
-inline vec2 relVel(const Contact * c, int i) {
+inline vec2 contactVel(const Contact * c, int i) {
 	return c->pair[i]->V + c->rad[i] * c->pair[i]->w;
 }
 
-vec2 Contact::GetRelVel_A() const {
-	return relVel(this, 0);
+vec2 Contact::GetVel_A() const {
+	return contactVel(this, 0);
 }
 
-vec2 Contact::GetRelVel_B() const {
-	return relVel(this, 1);
+vec2 Contact::GetVel_B() const {
+	return contactVel(this, 1);
 }
 
-float Contact::GetRelVelN_A() const {
-	return glm::dot(GetRelVel_A(), normal);
+float Contact::GetVelN_A() const {
+	return glm::dot(GetVel_A(), normal);
 }
 
-float Contact::GetRelVelN_B() const {
-	return glm::dot(GetRelVel_B(), normal);
+float Contact::GetVelN_B() const {
+	return glm::dot(GetVel_B(), normal);
 }
 
-
+// Detect and solve collisions, iteratively
 uint32_t Solver::Solve(std::list<Contact>& contacts) {
 	uint32_t numCollisions(0);
 
 	for (int nIt = 0; nIt < m_nIterations; nIt++)
 	{
-		uint32_t numColIt(0);
+		uint32_t colCount = 0;
 		for (auto& c : contacts) {
-			float vA_N = c.GetRelVelN_A();
-			float vB_N = c.GetRelVelN_B();
+			// Coeffcicient of restitution, plus 1
+			const float Cr_1 = 1.f + 0.5f * (c.pair[0]->e + c.pair[1]->e);
+
+			// Get the relative contact velocity - Vb - Va
+			float vA_N = c.GetVelN_A();
+			float vB_N = c.GetVelN_B();
 			float relNv = vB_N - vA_N;
 
-			float Cr_1 = 1.f + 0.5f * (c.pair[0]->e + c.pair[1]->e);
-
+			// Find out how much you'd remove to have them just touch
 			float remove = relNv + c.dist / globalTimeStep;
-			float mag = remove < -kEPS ? Cr_1 * relNv * c.invMassI : 0.f;
 
-			float newImpulse = mag + c.curImpulse;
-			if (newImpulse > kEPS)
-				newImpulse = 0.f;
-			float change = newImpulse - c.curImpulse;
-			vec2 imp = change * c.normal;
-			c.ApplyImpulse(imp);
+			// Detect collision
+			bool colliding = (remove < -kEPS);
+			if (colliding) {
+				c.isColliding = true;
+				colCount++;
+			}
+
+			// Get the magnitude of the collision (negative or zero)
+			float impulseMag = (remove < -kEPS) ? (Cr_1 * relNv * c.invMassI) : 0.f;
+
+			// Calculate the new impulse and apply the change
+			float n_Impulse = impulseMag + c.curImpulse;
+			float delImpulse = n_Impulse - c.curImpulse;
+			c.ApplyImpulse(delImpulse);
+
+			// Store new impulse
+			c.curImpulse = n_Impulse;
 		}
+
+		// Maybe break
+		if (colCount == 0)
+			break;
+		else
+			numCollisions += colCount;
 	}
 
 	return numCollisions;
+}
+
+uint32_t Solver::operator()(std::list<Contact>& contacts) {
+	return Solve(contacts);
 }

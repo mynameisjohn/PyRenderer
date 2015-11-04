@@ -9,11 +9,12 @@ SDL_GLContext g_Context;
 SDL_Window * g_Window = nullptr;
 
 int main(int argc, char ** argv) {
-	
+	// Start up OpenGL, SDL, Python, load resources
 	if (!InitEverything(g_Context, g_Window, sPtr))
 		return EXIT_FAILURE;
 	SDL_Event e;
     
+	// Play/pause
     enum PlayState{
         PLAY,
         PAUSE,
@@ -21,12 +22,13 @@ int main(int argc, char ** argv) {
         STEP_REV,
         QUIT
     };
-    
+
+	// Current state, iterations per step
     PlayState curState = PLAY;
-    
     const int nStep = 1;
 
 	while (curState != QUIT) {
+		// TODO Python event handler
 		while (SDL_PollEvent(&e)) {
 			switch (e.type) {
 			case SDL_KEYDOWN:
@@ -63,9 +65,11 @@ int main(int argc, char ** argv) {
 			}
 		}
         
+		// Update the scene
         if (curState == PLAY)
             sPtr->Update();
-
+		
+		// Update screen, draw (I don't care if it's paused)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		sPtr->Draw();
 		SDL_GL_SwapWindow(g_Window);

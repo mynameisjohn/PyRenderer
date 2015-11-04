@@ -143,7 +143,9 @@ int Scene::Update() {
 	return nCols;
 }
 
-Scene::Scene(std::string& pyinitScript) {
+Scene::Scene(std::string& pyinitScript) :
+	m_ContactSolver(100)
+{
 	auto check = [](bool cond, std::string msg = "") {
 		if (!msg.empty())
 			std::cout << msg << "----" << (cond ? " succeeded! " : " failed! ") << std::endl;

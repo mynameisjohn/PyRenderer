@@ -3,7 +3,7 @@ import math
 from collections import namedtuple
 from platform import system
 
-CONTACT_DEBUG = False
+CONTACT_DEBUG = True
 
 def makeQuat(x,y,z,theta):
 	r = math.radians(theta)/2.
@@ -36,9 +36,9 @@ r_Entities = []
 Entity = namedtuple('Entity', 
 	('vel', 'pos', 'scale', 'rot', 'mass', 'el', 'color', 'module'))
 
-'''
+
 r_Entities.append(Entity(
-		vel = [0.,0.],
+		vel = [3.,0.],
 		pos = [1.,0.],
 		scale = [1.,1.],
 		rot = math.pi/4,
@@ -56,11 +56,11 @@ r_Entities.append(Entity(
 		mass = 1.,
 		el = 1.,
 		color = randColor(),
-		module = 'circle.py'
+		module = 'OBB.py'
 	))
 
 r_Entities.append(Entity(
-		vel = [0.,0.],
+		vel = [1.,5.],
 		pos = [3.2,1.5],
 		scale = [.5,.5],
 		rot = 0.,
@@ -73,7 +73,7 @@ r_Entities.append(Entity(
 r_Entities.append(Entity(
 		vel = [0.,0.],
 		pos = [5.,0.],
-		scale = [1.,1.],
+		scale = [3.5,1.],
 		rot = math.pi/2,
 		mass = 1.e10,
 		el = 1.,
@@ -82,7 +82,7 @@ r_Entities.append(Entity(
 	))
 
 r_Entities.append(Entity(
-		vel = [10.,0.],
+		vel = [10.,-0.],
 		pos = [-8.,0.],
 		scale = [1.,1.],
 		rot = 0.,
@@ -105,7 +105,7 @@ r_Entities.append(Entity(
 
 r_Entities.append(Entity(
 		vel = [-10.,10.],
-		pos = [0.,6.],
+		pos = [0.,8.],
 		scale = [1.,1.],
 		rot = 0.,
 		mass = 1.,
@@ -138,7 +138,7 @@ r_Entities.append(Entity(
 
 r_Entities.append(Entity(
 		vel = [0.,15.],
-		pos = [4.,4.],
+		pos = [6.,6.],
 		scale = [3.,3.],
 		rot = 0.,
 		mass = 1.,
@@ -146,7 +146,7 @@ r_Entities.append(Entity(
 		color = randColor(),
 		module = 'circle.py'
 	))
-
+    '''
 
 r_Entities.append(Entity(
 		vel = [0.,0.],

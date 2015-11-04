@@ -430,6 +430,7 @@ static vec2 projectOnEdge(vec2 p, vec2 e0, vec2 e1) {
 }
 
 // Pick the best feature pair (penetrating or separating); A is the "face" object, B is the "vertex" object
+// Penetrating is a bit of a grey area atm
 static void featurePairJudgement(FeaturePair& mS, FeaturePair& mP, OBB * A, OBB * B, FeaturePair::Type type){
     // For all A's normals
     for (int fIdx = 0; fIdx < 4; fIdx++) {
@@ -547,9 +548,6 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
     if (feq(d1, d2)){
         vec2 pA = 0.5f * (p1+p2);
         vec2 pB = 0.5f * (p3+p4);
-		d1 = glm::distance(pA, pB);
-       // std::cout << d1 << std::endl;
-        // std::cout << p1 << ", " << p2 << ", " << p3 << ", " << p4 << "\n" << std::endl;
         ret.emplace_back(A, B, pA, pB, wN, d1);
     }
     else
