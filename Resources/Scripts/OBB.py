@@ -11,7 +11,7 @@ def randColor():
 r_IqmFile = b'quad.iqm'
 p = SND_DIR
 separator = bytes(os.sep.encode('ascii')) # Thanks python 3...
-r_Sounds = [x for x in os.listdir(p) if os.path.isfile(p+separator+x)]
+r_Sounds = []#x for x in os.listdir(p) if os.path.isfile(p+separator+x)]
 
 r_ColPrim = 'OBB'
 

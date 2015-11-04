@@ -29,6 +29,8 @@ struct Contact {
 	float dist;
     // Inverse impulse mass denominator
     float invMassI;
+	// Accumulated impulse
+	float curImpulse;
     
     //float curPenDist;
     // Really just used to see if things are currently colliding, I can do better
@@ -61,7 +63,7 @@ struct Contact {
 class Solver {
 	uint32_t m_nIterations;
 public:
-	Solver(int nIt = 10) : m_nIterations(nIt) {}
+	Solver(int nIt = 100) : m_nIterations(nIt) {}
     
     uint32_t Solve(std::list<Contact>& contacts);
 	//void operator()(std::list<Contact>& contacts);

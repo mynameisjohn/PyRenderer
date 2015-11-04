@@ -539,15 +539,16 @@ std::list<Contact> OBB::GetClosestPoints(const OBB& other) const {
     vec2 p4 = projectOnEdge(wV[1], wE0, wE1);
     
     // distance is point distance along face (contact) normal
-    float d1 = glm::dot(p1 - p3, wN);
-    float d2 = glm::dot(p2 - p4, wN);
+    float d1 = glm::dot(p1 - p4, wN);
+    float d2 = glm::dot(p2 - p3, wN);
     
     // If they're equal, collapse the two into one contact
     // This could be used as an early out, if you have the balls
     if (feq(d1, d2)){
         vec2 pA = 0.5f * (p1+p2);
         vec2 pB = 0.5f * (p3+p4);
-        // std::cout << d1 << std::endl;
+		d1 = glm::distance(pA, pB);
+       // std::cout << d1 << std::endl;
         // std::cout << p1 << ", " << p2 << ", " << p3 << ", " << p4 << "\n" << std::endl;
         ret.emplace_back(A, B, pA, pB, wN, d1);
     }

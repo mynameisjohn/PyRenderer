@@ -1,9 +1,9 @@
-from PyLiaison import *
+﻿from PyLiaison import *
 import math
 from collections import namedtuple
 from platform import system
 
-CONTACT_DEBUG = True
+CONTACT_DEBUG = False
 
 def makeQuat(x,y,z,theta):
 	r = math.radians(theta)/2.
@@ -36,11 +36,12 @@ r_Entities = []
 Entity = namedtuple('Entity', 
 	('vel', 'pos', 'scale', 'rot', 'mass', 'el', 'color', 'module'))
 
+'''
 r_Entities.append(Entity(
 		vel = [0.,0.],
 		pos = [1.,0.],
 		scale = [1.,1.],
-		rot = 0.,
+		rot = math.pi/4,
 		mass = 1.,
 		el = 1.,
 		color = randColor(),
@@ -55,15 +56,26 @@ r_Entities.append(Entity(
 		mass = 1.,
 		el = 1.,
 		color = randColor(),
-		module = 'OBB.py'
+		module = 'circle.py'
+	))
+
+r_Entities.append(Entity(
+		vel = [0.,0.],
+		pos = [3.2,1.5],
+		scale = [.5,.5],
+		rot = 0.,
+		mass = 1.,
+		el = 1.,
+		color = randColor(),
+		module = 'circle.py'
 	))
 
 r_Entities.append(Entity(
 		vel = [0.,0.],
 		pos = [5.,0.],
 		scale = [1.,1.],
-		rot = 0.,
-		mass = 1.,
+		rot = math.pi/2,
+		mass = 1.e10,
 		el = 1.,
 		color = randColor(),
 		module = 'OBB.py'
@@ -93,7 +105,7 @@ r_Entities.append(Entity(
 
 r_Entities.append(Entity(
 		vel = [-10.,10.],
-		pos = [0.,8.],
+		pos = [0.,6.],
 		scale = [1.,1.],
 		rot = 0.,
 		mass = 1.,
@@ -126,7 +138,7 @@ r_Entities.append(Entity(
 
 r_Entities.append(Entity(
 		vel = [0.,15.],
-		pos = [6.,6.],
+		pos = [4.,4.],
 		scale = [3.,3.],
 		rot = 0.,
 		mass = 1.,
@@ -179,5 +191,3 @@ r_Entities.append(Entity(
 		color = randColor(),
 		module = 'AABB.py'
 	))
-
-'''
