@@ -35,7 +35,7 @@ void RigidBody_2D::Integrate() {
     //w *= 0.99f;
 
 	// I used to have python do this, but what's the point?
-	m_pEntity->HandleMessage(int(Entity::CompID::DRAWABLE),
+	m_pEntity->SendMessage(int(Entity::CompID::DRAWABLE),
 		int(Entity::MsgID::DR_TRANSLATE));
 }
 

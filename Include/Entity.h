@@ -61,16 +61,12 @@ public:
     
     Drawable * const GetDrawable() const;
     RigidBody_2D * const GetCollision() const;
-	
-	// Message handling stuff
-	//template <typename D>
-	//bool PostMessage(int C, int M, D data);
 
 	// Void (no data) case
-	bool HandleMessage(int C, int M);
+	int SendMessage(int C, int M);
 
 	// Who knows what it'll be?
-	bool HandleRequest(int C, int M, Python::Object data);
+	int SendMessage_D(int C, int M, Python::Object data);
 
 	void Update();
 };

@@ -104,11 +104,11 @@ bool InitPython() {
 
 	//// Register Entity
 	Python::Register_Class<Entity>("Entity");
-	std::function<bool(Entity *, int, int)> ent_HandleMsg(&Entity::HandleMessage);
-	Python::Register_Mem_Function<Entity, struct EntHandleVoidMsg_t>("PostMessage", ent_HandleMsg, "Post a message to the Entity's queue");
+	std::function<int(Entity *, int, int)> ent_SendMsg(&Entity::SendMessage);
+	Python::Register_Mem_Function<Entity, struct EntHandleVoidMsg_t>("SendMessage", ent_SendMsg, "Post a message to the Entity's queue");
 	
-	std::function<bool(Entity *, int, int, Python::Object)> ent_HandleRequest(&Entity::HandleRequest);
-	Python::Register_Mem_Function<Entity, struct EntHandleMsg_t>("PostMessage_v4", ent_HandleRequest, "Post a message to the Entity's queue");
+	std::function<int(Entity *, int, int, Python::Object)> ent_SendMsg_D(&Entity::SendMessage_D);
+	Python::Register_Mem_Function<Entity, struct ent_SendMsg_D>("SendMessage_D", ent_SendMsg_D, "Post a message to the Entity's queue");
 
 	Python::Register_Function<struct AudPlaySnd_t>("PlaySound", Python::make_function(Audio::PlaySound), "Play a sound file");
 

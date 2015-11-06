@@ -19,8 +19,8 @@ Entity::Entity(int id, Scene * scnPtr, Python::Object module) :
 	m_PyModule(module)
 {}
 
-bool Entity::HandleMessage(int C, int M) {
-	bool handled = false;
+int Entity::SendMessage(int C, int M) {
+    int status = -1;
 
 	switch ((CompID)C) {
 	case CompID::DRAWABLE: // These casts are unfortunate
@@ -33,16 +33,17 @@ bool Entity::HandleMessage(int C, int M) {
 				drPtr->SetTransform(qv);
 				return true;
 			});
-			handled = 0;
+            status = 0;
 		}
 								  break;
 		}
 	}
 
-	return handled;
+	return status;
 }
 
-bool Entity::HandleRequest(int C, int M, Python::Object data) {
+int Entity::SendMessage_D(int C, int M, Python::Object data) {
+    int status = -1;
 	switch (C) {
 	case int(CompID::DRAWABLE) : // These casts are unfortunate
 		switch (M) {
@@ -59,13 +60,12 @@ bool Entity::HandleRequest(int C, int M, Python::Object data) {
 				});
                 return true;
 			}
+            status = 0;
 		}
 		}
 	}
-    
-    std::cout << "Error: Entity message " << C << ", " << M << " not handled!" << std::endl;
 
-	return false;
+	return status;
 }
 
 // Just run all posted messages
