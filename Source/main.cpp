@@ -20,8 +20,11 @@ int main(int argc, char ** argv) {
     InputManager input;
     
     // Expoes input manager (not here...)
-    // NOTE EXPOSE WANTS A REF, NOT A STRING, SO THIS IS BAD!   
-    Python::Expose_Object(&input, "inputMgr");
+    // NOTE EXPOSE WANTS A REF, NOT A STRING, SO THIS IS BAD!
+    // Also, a word: you can't expose this to PyLiaison, because
+    // that module is 'compiled' by now; figure something out!
+    auto mainMod = sPtr->GetPyModule();
+    Python::Expose_Object(&input, "inputMgr", mainMod.get());
     
 	// Play/pause
     enum PlayState{
@@ -31,10 +34,10 @@ int main(int argc, char ** argv) {
         STEP_REV,
         QUIT
     }; // Enums are sketch
-    Python::GetPyLiaisonModule().set_attr<int>("PLAY", PLAY);
-    Python::GetPyLiaisonModule().set_attr<int>("PAUSE", PAUSE);
-    Python::GetPyLiaisonModule().set_attr<int>("STEP_FWD", STEP_FWD);
-    Python::GetPyLiaisonModule().set_attr<int>("QUIT", QUIT);
+    mainMod.set_attr<int>("PLAY", PLAY);
+    mainMod.set_attr<int>("PAUSE", PAUSE);
+    mainMod.set_attr<int>("STEP_FWD", STEP_FWD);
+    mainMod.set_attr<int>("QUIT", QUIT);
 
 	// Current state, iterations per step
     PlayState curState = PLAY;

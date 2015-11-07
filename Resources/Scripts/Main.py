@@ -16,7 +16,12 @@ def GetPlayState(curState):
 			ret = STEP_FWD
 
 	if (inputMgr.IsKeyDown(K_c)):
+		print(CONTACT_DEBUG)
 		CONTACT_DEBUG = not CONTACT_DEBUG
+#		if (CONTACT_DEBUG):
+#			CONTACT_DEBUG = False
+#		else:
+#			CONTACT_DEBUG = True
 	return ret
 
 def HandleCollision(eID1, eID2):
@@ -24,3 +29,6 @@ def HandleCollision(eID1, eID2):
 	e2 = g_Entities[eID2]
 	e1.HandleCollision(e2)
 	e2.HandleCollision(e1)
+
+def Update():
+	pass

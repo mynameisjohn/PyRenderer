@@ -298,7 +298,4 @@ m_ContactSolver(100)
     // PyDict_New...
     for (auto& ent : m_vEntities)
         ent.GetPyModule().call_function("AddEntity", ent.GetID(), &ent);
-    
-    // Contacts debug?
-    pyinitModule.get_attr("CONTACT_DEBUG").convert(m_bShowContacts);
 }

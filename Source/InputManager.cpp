@@ -54,7 +54,7 @@ vec2 InputManager::GetDeltaMouse() const{
 }
 
 bool InputManager::IsKeyDown(int k) const{
-    return (m_KeyState.find(k) == m_KeyState.end());
+    return (m_KeyState.find(k) != m_KeyState.end());
 }
 
 void InputManager::HandleEvent(SDL_Event * e){
