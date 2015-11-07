@@ -162,3 +162,129 @@ bool InitScene(std::unique_ptr<Scene>& pScene) {
 }
 
 // This shouldn't go here... but it's so long
+Scene::Scene(std::string& pyinitScript) :
+m_ContactSolver(100)
+{
+    auto check = [](bool cond, std::string msg = "") {
+        if (!msg.empty())
+            std::cout << msg << "----" << (cond ? " succeeded! " : " failed! ") << std::endl;
+        assert(cond);
+    };
+    
+    // Convert the relative python path to the absolute, load module
+    std::string initStrPath = FixBackslash(RelPathToAbs(SCRIPT_DIR ) + "/" + pyinitScript);
+    auto pyinitModule = Python::Object::from_script(initStrPath);
+    
+    // Set up the shader
+    std::map<std::string, std::string> shaderInfo;
+    pyinitModule.call_function("GetShaderSrc").convert(shaderInfo);
+    m_Shader = Shader(shaderInfo["vert"], shaderInfo["frag"], SHADER_DIR);
+    
+    // Get position handle
+    auto sBind = m_Shader.ScopeBind();
+    GLint posHandle = m_Shader[shaderInfo["Position"]];
+    Drawable::SetPosHandle(posHandle);
+    
+    // Initialize Camera
+    pyinitModule.call_function("InitCamera", &m_Camera);
+    
+    // Like a mini factory (no collision info for now, just circles)
+    using EntInfo = std::tuple<
+    vec2, // velocity
+    vec2, // Position
+    vec2, // Scale
+    float, // Rotation about +z
+    float, // mass
+    float, // elasticity
+    vec4, // Color
+    std::string>;
+    
+    // Now loop through all named tuples in the script
+    std::vector<EntInfo> v_EntInfo;
+    pyinitModule.call_function("GetEntities").convert(v_EntInfo);
+    
+    // Preallocate all entities, since we'll need their pointers
+    m_vEntities.resize(v_EntInfo.size());
+    
+    // Create individual entities and components
+    for (int i = 0; i < m_vEntities.size(); i++) {
+        // Get the tuple
+        auto ei = v_EntInfo[i];
+        
+        // Unpack tuple
+        vec2 vel(std::get<0>(ei));
+        vec3 pos(std::get<1>(ei), 0.f);
+        vec2 scale(std::get<2>(ei));
+        float rot = std::get<3>(ei);
+        float m = std::get<4>(ei);
+        float e = clamp(std::get<5>(ei),0.f,1.f);
+        vec4 color = glm::clamp(std::get<6>(ei), vec4(0), vec4(1));
+        std::string pyEntModScript = std::get<7>(ei);
+        
+        // Load the python module
+        auto pyEntModule = Python::Object::from_script(SCRIPT_DIR + pyEntModScript);
+        
+        // Create Entity
+        Entity ent(i, this, pyEntModule);
+        m_vEntities[i] = ent;
+        
+        // IQM File
+        std::string iqmFile;
+        check(pyEntModule.get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module " + pyEntModScript);
+        
+        // Sounds
+        std::list<std::string> sndFiles;
+        check(pyEntModule.get_attr("r_Sounds").convert(sndFiles), "Getting all sounds from module " + pyEntModScript);
+        for (auto& file : sndFiles)
+            Audio::LoadSound(file);
+        
+        // Collision primitives (this will get more complicated)
+        std::string colPrim;
+        check(pyEntModule.get_attr("r_ColPrim").convert(colPrim), "Getting basic collision primitive from ent module");
+        
+        // Make collision resource, (assume uniform scale, used for mass and r)
+        // TODO add mass, elasticity to init tuple
+        if (colPrim == "AABB") {  // AABBs are assumed to be "walls" of high mass for now
+            AABB box(vel, vec2(pos), m, e, scale);
+            box.SetEntity(&m_vEntities[i]);
+            m_vAABB.push_back(box);
+        }
+        else if (colPrim == "OBB") {
+            OBB box(vel, vec2(pos), m, e, scale, rot);
+            box.SetEntity(&m_vEntities[i]);
+            //box.w = (omegaDir++ % 2 ? -10.f : 0.f);
+            m_vOBB.push_back(box);
+        }
+        else {
+            Circle circ(vel, vec2(pos), m, e, maxEl(scale));
+            circ.SetEntity(&m_vEntities[i]);;
+            m_vCircles.push_back(circ);
+        }
+        
+        // Make drawable
+        fquat rotQ(cos(rot / 2.f), vec3(0, 0, sin(rot / 2.f)));
+        Drawable dr(iqmFile, color, quatvec(pos, rotQ), scale);
+        dr.SetEntity(&m_vEntities[i]);
+        m_vDrawables.push_back(dr);
+    }
+    
+    // Fix entity pointers (I hate this)
+    for (auto& circle : m_vCircles)
+        circle.GetEntity()->SetColCmp(&circle);
+    for (auto& box : m_vAABB)
+        box.GetEntity()->SetColCmp(&box);
+    for (auto& box : m_vOBB)
+        box.GetEntity()->SetColCmp(&box);
+    for (auto& drawable : m_vDrawables)
+        drawable.GetEntity()->SetDrCmp(&drawable);
+    
+    // Expose in python, mapping ent ID to Exposed Entity
+    // TODO Entities should be globally accessible via the PyLiaison module,
+    // so find a way fo adding a container to it
+    // PyDict_New...
+    for (auto& ent : m_vEntities)
+        ent.GetPyModule().call_function("AddEntity", ent.GetID(), &ent);
+    
+    // Contacts debug?
+    pyinitModule.get_attr("CONTACT_DEBUG").convert(m_bShowContacts);
+}
