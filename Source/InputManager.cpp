@@ -12,23 +12,25 @@ InputManager::InputManager():
     m_DeltaMouse(0)
 {}
 
-KeyState::KeyState(SDL_KeyboardEvent * ke):
-    repeat(ke->repeat),
-    key(keyCode(ke))
-{}
-        
-KeyState::KeyState(int k):
-key(k)
-{}
+//KeyState::KeyState(SDL_KeyboardEvent * ke):
+//    repeat(ke->repeat),
+//    key(keyCode(ke))
+//{}
+//        
+//KeyState::KeyState(int k):
+//key(k)
+//{}
 
 void InputManager::setKeyState(SDL_KeyboardEvent * ke){
-    auto it = m_KeyState.find(keyCode(ke));
+    int k = keyCode(ke);
+    auto it = m_KeyState.find(k);
     if (it == m_KeyState.end())
-        m_KeyState.emplace(ke);
+        m_KeyState.emplace(k);
 }
 
 void InputManager::clearKeyState(SDL_KeyboardEvent *ke){
-    auto it = m_KeyState.find(keyCode(ke));
+    int k = keyCode(ke);
+    auto it = m_KeyState.find(k);
     if (it != m_KeyState.end())
         m_KeyState.erase(it);
 }
@@ -56,9 +58,6 @@ bool InputManager::IsKeyDown(int k) const{
 }
 
 void InputManager::HandleEvent(SDL_Event * e){
-    auto keyCode = [](SDL_KeyboardEvent& e){
-        return int(e.keysym.sym);
-    };
     switch (e->type) {
         case SDL_KEYDOWN:
             setKeyState(&e->key);

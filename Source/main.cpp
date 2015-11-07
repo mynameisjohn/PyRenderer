@@ -19,6 +19,10 @@ int main(int argc, char ** argv) {
 	SDL_Event e;
     InputManager input;
     
+    // Expoes input manager (not here...)
+    // NOTE EXPOSE WANTS A REF, NOT A STRING, SO THIS IS BAD!   
+    Python::Expose_Object(&input, "inputMgr");
+    
 	// Play/pause
     enum PlayState{
         PLAY,
@@ -26,11 +30,11 @@ int main(int argc, char ** argv) {
         STEP_FWD,
         STEP_REV,
         QUIT
-    };
-    Python::GetPyLiaisonModule().set_attr("PLAY", PLAY);
-    Python::GetPyLiaisonModule().set_attr("PAUSE", PAUSE);
-    Python::GetPyLiaisonModule().set_attr("STEP_FWD", STEP_FWD);
-    Python::GetPyLiaisonModule().set_attr("QUIT", QUIT);
+    }; // Enums are sketch
+    Python::GetPyLiaisonModule().set_attr<int>("PLAY", PLAY);
+    Python::GetPyLiaisonModule().set_attr<int>("PAUSE", PAUSE);
+    Python::GetPyLiaisonModule().set_attr<int>("STEP_FWD", STEP_FWD);
+    Python::GetPyLiaisonModule().set_attr<int>("QUIT", QUIT);
 
 	// Current state, iterations per step
     PlayState curState = PLAY;

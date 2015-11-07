@@ -20,7 +20,7 @@ public:
 	int Draw();
 	int Update();
     
-    Python::Object GetPyModule();
+    Python::Object GetPyModule() const;
 	//
 private:
 	Shader m_Shader; // May be a container soon

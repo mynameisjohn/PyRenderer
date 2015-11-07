@@ -141,3 +141,7 @@ int Scene::Update() {
 
 	return nCols;
 }
+
+Python::Object Scene::GetPyModule() const{
+    return m_MainPyModule;
+}

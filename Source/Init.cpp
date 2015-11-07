@@ -133,9 +133,9 @@ bool InitPython() {
     Python::Object PYL = Python::GetPyLiaisonModule();
     
     // Key Codes, this is unforunate (put in separate module)
-    PYL.set_attr("K_SPACE", SDLK_SPACE);
-    PYL.set_attr("K_RIGHT", SDLK_RIGHT);
-    PYL.set_attr("K_c", SDLK_c);
+    PYL.set_attr<int>("K_SPACE", SDLK_SPACE);
+    PYL.set_attr<int>("K_RIGHT", SDLK_RIGHT);
+    PYL.set_attr<int>("K_c", SDLK_c);
     
     // Directories
     PYL.set_attr("RES_DIR", RES_DIR);
