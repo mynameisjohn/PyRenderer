@@ -12,7 +12,7 @@
 
 #include <SDL_mixer.h>
 #include "Audible.h"
-
+#include "InputManager.h"
 
 bool InitEverything(SDL_GLContext& g_Context, SDL_Window*& g_Window, std::unique_ptr<Scene>& pScene) {
 	if (InitSDL())
@@ -119,31 +119,40 @@ bool InitPython() {
 	std::function<void(Drawable *, vec4)> dr_SetColor(&Drawable::SetColor);
 	Python::Register_Mem_Function<Drawable, struct DrSetColor_t>("SetColor", dr_SetColor, "Translate a drawable");
 
-
 	// Register Circle class (nothing to expose, really)
 	Python::Register_Class<Circle>("Circle");
+    
+    Python::Register_Class<InputManager>("InputManager");
+    std::function<bool(InputManager *, int)> inMgr_GetKey(&InputManager::IsKeyDown);
+    Python::Register_Mem_Function<InputManager, struct inIsKeyDwn_t>("IsKeyDown", inMgr_GetKey, "Check if key is down");
 
     // Init python
 	Python::initialize();
     
     // Expose some useful constants to the PyLiaison module
+    Python::Object PYL = Python::GetPyLiaisonModule();
+    
+    // Key Codes, this is unforunate (put in separate module)
+    PYL.set_attr("K_SPACE", SDLK_SPACE);
+    PYL.set_attr("K_RIGHT", SDLK_RIGHT);
+    PYL.set_attr("K_c", SDLK_c);
     
     // Directories
-    Python::GetPyLiaisonModule().set_attr("RES_DIR", RES_DIR);
-    Python::GetPyLiaisonModule().set_attr("SND_DIR", RelPathToAbs(SOUND_DIR));
-    Python::GetPyLiaisonModule().set_attr("SHD_DIR", SHADER_DIR);
-    Python::GetPyLiaisonModule().set_attr("MOD_DIR", MODEL_DIR);
+    PYL.set_attr("RES_DIR", RES_DIR);
+    PYL.set_attr("SND_DIR", RelPathToAbs(SOUND_DIR));
+    PYL.set_attr("SHD_DIR", SHADER_DIR);
+    PYL.set_attr("MOD_DIR", MODEL_DIR);
     
     // Entity messages
-    Python::GetPyLiaisonModule().set_attr("E_COL", int(Entity::CompID::COLLISION));
-    Python::GetPyLiaisonModule().set_attr("E_DR", int(Entity::CompID::DRAWABLE));
-    Python::GetPyLiaisonModule().set_attr("E_DR_TR", int(Entity::MsgID::DR_TRANSLATE));
-    Python::GetPyLiaisonModule().set_attr("E_DR_CLR", int(Entity::MsgID::DR_COLOR));
+    PYL.set_attr("E_COL", int(Entity::CompID::COLLISION));
+    PYL.set_attr("E_DR", int(Entity::CompID::DRAWABLE));
+    PYL.set_attr("E_DR_TR", int(Entity::MsgID::DR_TRANSLATE));
+    PYL.set_attr("E_DR_CLR", int(Entity::MsgID::DR_COLOR));
     
     // This map isn't actually used, but as long as an empty
     // PyDict gets created I'm fine with it
     std::map<uint32_t, Entity *> dummyMap;
-    Python::GetPyLiaisonModule().set_attr("g_Entities", dummyMap);
+    PYL.set_attr("g_Entities", dummyMap);
     
 	return true;
 }
@@ -173,7 +182,12 @@ m_ContactSolver(100)
     
     // Convert the relative python path to the absolute, load module
     std::string initStrPath = FixBackslash(RelPathToAbs(SCRIPT_DIR ) + "/" + pyinitScript);
-    auto pyinitModule = Python::Object::from_script(initStrPath);
+    Python::Object pyinitModule = Python::Object::from_script(initStrPath);
+    
+    // Get main module name and load it
+    std::string mainModName;
+    pyinitModule.call_function("GetMainModuleName").convert(mainModName);
+    m_MainPyModule = Python::Object::from_script(mainModName);
     
     // Set up the shader
     std::map<std::string, std::string> shaderInfo;

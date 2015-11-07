@@ -19,7 +19,9 @@ public:
     // Render function
 	int Draw();
 	int Update();
-	// 
+    
+    Python::Object GetPyModule();
+	//
 private:
 	Shader m_Shader; // May be a container soon
 	Camera m_Camera;
@@ -33,5 +35,7 @@ private:
 	std::vector<OBB> m_vOBB;
 	std::list<Contact> m_SpeculativeContacts; // no need to be a list, will be (n^2+n)/2
     Solver m_ContactSolver;
+    
+    Python::Object m_MainPyModule;
 };
 

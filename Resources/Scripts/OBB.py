@@ -10,22 +10,30 @@ random.seed()
 def randColor():
 	return [random.random() for i in range (0,3)]+[1.]
 
-
 # All of these resources should be accessed by
 # function, rather than just lying around loose
 # (things like sounds should be shared... maybe?
 #  what I really need is a class that this file 
 #  can correspond to. )
 class OBB(Entity):
-	def __init__(self):
-		self.r_IqmFile = 'quad.iqm'
-		self.r_ColPrim = 'OBB'
-		
-		sep = bytes(os.sep.encode('ascii'))
-		sndFiles = os.listdir(SND_DIR)
-		r_Sounds = [f for f in sndFiles if Util.isSoundFile(f)]
-	def GetType(self):
+	r_IqmFile = 'quad.iqm'
+	r_ColPrim = 'OBB'
+	r_Sounds = []
+
+	@staticmethod
+	def GetResources():
+		if (len(r_Sounds) == 0):
+			sep = bytes(os.sep.encode('ascii'))
+			sndFiles = os.listdir(SND_DIR)
+			r_Sounds = [f for f in sndFiles if Util.isSoundFile(f)]
+		return (r_IqmFile, r_ColPrim, r_Sounds)
+
+	@staticmethod
+	def GetType():
 		return OBB
+
+	def __init__(self):
+		pass
 
 ob = OBB()
 print(ob)

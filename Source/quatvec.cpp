@@ -2,6 +2,8 @@
 
 #include <glm/gtx/transform.hpp>
 
+#include <chrono>
+
 quatvec::quatvec() :
 	Q(cos(0), 0, 0, sin(0)),
 	V(0),

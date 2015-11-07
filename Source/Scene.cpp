@@ -22,7 +22,9 @@ int Scene::Draw() {
 		dr.Draw();
 	}
 
-    if (m_bShowContacts){
+    bool contactDebug(false);
+    m_MainPyModule.get_attr("CONTACT_DEBUG").convert(contactDebug);
+    if (contactDebug){
         for (auto& contact : m_SpeculativeContacts) {
             for (auto& p : contact.pos) {
                 fquat rot(1, 0, 0, 0);
@@ -54,7 +56,7 @@ int Scene::Update() {
 	float totalEnergy(0.f);
 	m_SpeculativeContacts.clear();
 
-	// Spec contacts will change all this
+    // Integrate objects
 	for (auto& c : m_vCircles)
 		c.Integrate();
 
@@ -63,14 +65,8 @@ int Scene::Update() {
 
 	for (auto& b : m_vOBB)
 		b.Integrate();
-    
-//    for (auto& b : m_vOBB)
-//        b.V.y -= 1.f;
-    
-	// I think there's the same # of these every time...
-	// Solver solve;
 
-	// For every circle
+	// Collisions - For every circle
 	for (auto it1 = m_vCircles.begin(); it1 != m_vCircles.end(); ++it1) {
 		// For every unique circle pair
 		for (auto it2 = it1 + 1; it2 != m_vCircles.end(); ++it2) {
@@ -120,23 +116,26 @@ int Scene::Update() {
 		totalEnergy += it1->GetKineticEnergy();
 	}
 
-
-	// Conservation of energy
-	//std::cout << totalEnergy << "\n" << std::endl;
-
+    // Let python ents know about collision
 	// I don't like using the bool here, so figure something else out
 	m_ContactSolver.Solve(m_SpeculativeContacts);
 	for (auto& c : m_SpeculativeContacts) {
-		if (c.isColliding) {
+		if (c.isColliding)
+        {
 			Entity * e1 = c.pair[0]->GetEntity();
 			Entity * e2 = c.pair[1]->GetEntity();
 			if (e1 && e2) {
-				e1->GetPyModule().call_function("HandleCollision", e1->GetID(), e2->GetID());
-				e2->GetPyModule().call_function("HandleCollision", e2->GetID(), e1->GetID());
+                m_MainPyModule.call_function("HandleCollision", e1->GetID(), e2->GetID());
+//				e1->GetPyModule().call_function("HandleCollision", e1->GetID(), e2->GetID());
+//				e2->GetPyModule().call_function("HandleCollision", e2->GetID(), e1->GetID());
 			}
 		}
 	}
+    
+    // Update python (wh
+    m_MainPyModule.call_function("Update");
 
+    // Handle all entity messages (Update is a bad name)
 	for (auto& e : m_vEntities)
 		e.Update();
 

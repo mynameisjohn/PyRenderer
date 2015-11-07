@@ -6,14 +6,11 @@ from platform import system
 import random
 random.seed()
 
-CONTACT_DEBUG = True
-
 def makeQuat(x,y,z,theta):
 	r = math.radians(theta)/2.
 	c = math.cos(r)
 	s = math.sin(r)
 	return [c, s*x, s*y, s*z] #normalize...
-
 
 def randColor():
 	return [random.random() for i in range (0,3)]+[1.]
@@ -32,6 +29,9 @@ def GetShaderSrc():
 def InitCamera(camPtr):
 	c_Camera = Camera(camPtr)
 	c_Camera.InitOrtho([-10., 10.], [-10., 10.], [-10., 10.])
+
+def GetMainModuleName():
+	return 'Main.py'
 
 def GetEntities():
 	r_Entities = []
