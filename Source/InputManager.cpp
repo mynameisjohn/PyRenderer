@@ -57,10 +57,15 @@ bool InputManager::IsKeyDown(int k) const{
     return (m_KeyState.find(k) != m_KeyState.end());
 }
 
+// Don't deal with repeat for now
 void InputManager::HandleEvent(SDL_Event * e){
     switch (e->type) {
         case SDL_KEYDOWN:
-            setKeyState(&e->key);
+            if (!e->key.repeat){
+                
+                std::cout << m_KeyState.size() << std::endl;
+                setKeyState(&e->key);
+            }
             break;
         case SDL_KEYUP:
             clearKeyState(&e->key);
@@ -70,4 +75,5 @@ void InputManager::HandleEvent(SDL_Event * e){
             break;
         // Mouse Button?
     }
+    
 }

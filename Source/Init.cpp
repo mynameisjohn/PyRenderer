@@ -242,19 +242,18 @@ m_ContactSolver(100)
         Entity ent(i, this, pyEntModule);
         m_vEntities[i] = ent;
         
-        // IQM File
-        std::string iqmFile;
-        check(pyEntModule.get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module " + pyEntModScript);
+        // Get the entity's resources as a tuple (wow)
+        std::tuple<std::string, std::string, std::list<std::string> > eRsrc;
+        pyEntModule.call_function("GetResources").convert(eRsrc);
         
-        // Sounds
-        std::list<std::string> sndFiles;
-        check(pyEntModule.get_attr("r_Sounds").convert(sndFiles), "Getting all sounds from module " + pyEntModScript);
-        for (auto& file : sndFiles)
-            Audio::LoadSound(file);
+        // IQM File
+        std::string iqmFile = std::get<0>(eRsrc);
+//        check(pyEntModule.get_attr("r_IqmFile").convert(iqmFile), "Getting IqmFile from module " + pyEntModScript);
+        
         
         // Collision primitives (this will get more complicated)
-        std::string colPrim;
-        check(pyEntModule.get_attr("r_ColPrim").convert(colPrim), "Getting basic collision primitive from ent module");
+        std::string colPrim = std::get<1>(eRsrc);
+       // check(pyEntModule.get_attr("r_ColPrim").convert(colPrim), "Getting basic collision primitive from ent module");
         
         // Make collision resource, (assume uniform scale, used for mass and r)
         // TODO add mass, elasticity to init tuple
@@ -274,6 +273,12 @@ m_ContactSolver(100)
             circ.SetEntity(&m_vEntities[i]);;
             m_vCircles.push_back(circ);
         }
+    
+        // Sounds
+        std::list<std::string> sndFiles = std::get<2>(eRsrc);
+        //check(pyEntModule.get_attr("r_Sounds").convert(sndFiles), "Getting all sounds from module " + pyEntModScript);
+        for (auto& file : sndFiles)
+            Audio::LoadSound(file);
         
         // Make drawable
         fquat rotQ(cos(rot / 2.f), vec3(0, 0, sin(rot / 2.f)));

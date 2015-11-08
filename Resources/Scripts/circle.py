@@ -1,19 +1,41 @@
 ﻿from PyLiaison import *
-
-import random
+import Util
 import os
 
-random.seed()
+# All of these resources should be accessed by
+# function, rather than just lying around loose
+# (things like sounds should be shared... maybe?
+#  what I really need is a class that this file 
+#  can correspond to. )
+class Circle:
+	def __init__(self, ePtr):
+		self.Ent = Entity(ePtr)
+	
+	def HandleCollision(self, otherID):
+		pass
 
-def randColor():
-	return [random.random() for i in range (0,3)]+[1.]
+# TODO make class static
+def GetResources():
+	r_IqmFile = 'circle.iqm'
+	r_ColPrim = 'circle'
+	r_Sounds = []
 
-r_IqmFile = b'circle.iqm'
-p = SND_DIR
+	if (len(r_Sounds) == 0):
+		sep = bytes(os.sep.encode('ascii'))
+		sndFiles = os.listdir(SND_DIR)
+		r_Sounds = [f for f in sndFiles if Util.isSoundFile(f)]
+	return (r_IqmFile, r_ColPrim, r_Sounds)
+
+'''
+ob = circle()
+print(ob)
+
+r_IqmFile = b'quad.iqm'
+sndFiles = os.listdir(SND_DIR)
 separator = bytes(os.sep.encode('ascii')) # Thanks python 3...
-r_Sounds = [x for x in os.listdir(p) if os.path.isfile(p+separator+x)]
+r_Sounds = [x for x in sndFiles if Util.isSoundFile(x)]
 
-r_ColPrim = 'Circle'
+r_ColPrim = 'circle'
 
 def HandleCollision(myID, theirID):
     e = g_Entities[myID]
@@ -23,6 +45,8 @@ def HandleCollision(myID, theirID):
         PlaySound(snd)
     except IndexError:
         pass
+'''
 	
+# This should go in some master file that isn't InitScene
 def AddEntity(eID, ePtr):
-	g_Entities[eID] = Entity(ePtr)
+	g_Entities[eID] = Circle(ePtr)

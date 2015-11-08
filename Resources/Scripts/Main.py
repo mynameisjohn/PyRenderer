@@ -27,8 +27,8 @@ def GetPlayState(curState):
 def HandleCollision(eID1, eID2):
 	e1 = g_Entities[eID1]
 	e2 = g_Entities[eID2]
-	e1.HandleCollision(e2)
-	e2.HandleCollision(e1)
+	e1.HandleCollision(eID1)
+	e2.HandleCollision(eID2)
 
 def Update():
 	pass
