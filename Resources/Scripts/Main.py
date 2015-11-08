@@ -3,21 +3,27 @@ from PyLiaison import *
 CONTACT_DEBUG = False
 
 # TODO handle more interesting key states
-def GetPlayState(curState):
+def HandleInput(curState):
 	ret = curState
-	if (inputMgr.GetKeyState(K_SPACE) == 1):
-		if (curState == PLAY):
-			ret = PAUSE
-		elif (curState == PAUSE):
-			ret = PLAY
-
-	elif (inputMgr.IsKeyDown(K_RIGHT)):
+	allKeys = inputMgr.GetKeys()
+	if K_ESC in allKeys:
+		return QUIT
+		
+	if K_SPACE in allKeys:
+		#print(allKeys[K_SPACE])
+		if not allKeys[K_SPACE][0]:
+			if (curState == PLAY):
+				ret = PAUSE
+			elif (curState == PAUSE):
+				ret = PLAY
+	elif K_RIGHT in allKeys:
 		if (curState == PAUSE):
 			ret = STEP_FWD
 
-	if (inputMgr.GetKeyState(K_c) == 1):
-		global CONTACT_DEBUG
-		CONTACT_DEBUG = not CONTACT_DEBUG
+	if K_c in allKeys:
+		if not allKeys[K_c][0]:
+			global CONTACT_DEBUG
+			CONTACT_DEBUG = not CONTACT_DEBUG
 
 	return ret
 

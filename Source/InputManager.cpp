@@ -12,22 +12,19 @@ InputManager::InputManager():
     m_DeltaMouse(0)
 {}
 
-//KeyState::KeyState(SDL_KeyboardEvent * ke):
-//    repeat(ke->repeat),
-//    key(keyCode(ke))
-//{}
-//        
-//KeyState::KeyState(int k):
-//key(k)
-//{}
+KeyState::KeyState(SDL_KeyboardEvent * ke /* = nullptr */):
+    repeat(ke ? ke->repeat : false),
+    tme(Time::now())
+{
+}
 
 void InputManager::setKeyState(SDL_KeyboardEvent * ke){
-    int k = keyCode(ke);
-    auto it = m_KeyState.find(k);
+    auto it = m_KeyState.find(keyCode(ke));
     if (it == m_KeyState.end())
-        m_KeyState.emplace(k, 1);
-    else if (ke->repeat)
-        clearKeyState(ke);
+        m_KeyState[keyCode(ke)] = KeyState(ke);
+    else
+        it->second.repeat = ke->repeat;
+    //std::cout << int(ke->repeat) << ", " << m_KeyState[keyCode(ke)].repeat << std::endl;
 }
 
 void InputManager::clearKeyState(SDL_KeyboardEvent *ke){
@@ -59,11 +56,15 @@ bool InputManager::IsKeyDown(int k) const{
     return (m_KeyState.find(k) != m_KeyState.end());
 }
 
-int InputManager::GetKeyState(int k) const{
+KeyState InputManager::GetKeyState(int k) const{
     auto it = m_KeyState.find(k);
     if (it != m_KeyState.end())
         return it->second;
-    return 0;
+    return KeyState();
+}
+
+std::map<int, KeyState> InputManager::GetKeys() const{
+    return m_KeyState;
 }
 
 // Don't deal with repeat for now
@@ -80,5 +81,26 @@ void InputManager::HandleEvent(SDL_Event * e){
             break;
         // Mouse Button?
     }
-    
+}
+
+// More o dis
+#include <pyliason.h>
+
+namespace Python
+{
+//    bool convert(PyObject * o, KeyState& v){
+//        
+//    }
+    // TODO look into PyStructSequence
+    PyObject * alloc_pyobject(const KeyState& v){
+        using std::chrono::duration_cast;
+        using std::chrono::milliseconds;
+
+        float keyTime = timeAsFloat(v.tme);
+        
+        PyObject * ksLst = PyList_New(2);
+        PyList_SetItem(ksLst, 0, alloc_pyobject(v.repeat));
+        PyList_SetItem(ksLst, 1, alloc_pyobject(keyTime));
+        return ksLst;
+    }
 }

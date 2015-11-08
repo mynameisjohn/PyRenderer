@@ -102,10 +102,9 @@ inline uint32_t wrapIdx(int dim, int idx)  {
 	return (dim + idx) % dim;
 }
 
-inline auto timeNow() -> decltype(std::chrono::high_resolution_clock::now()) {
-	return std::chrono::high_resolution_clock::now();
-}
+using Time = std::chrono::high_resolution_clock;
 
+float timeAsFloat(Time::time_point tp);
 
 //This returns a rotation quat that will line something
 //up with the given vec2 in x,y (meaning rotation is about z)
@@ -113,17 +112,17 @@ fquat getQuatFromVec2(vec2 r);
 
 // Always useful
 class StopWatch {
-	decltype(timeNow()) m_Begin, m_End;
+    decltype(Time::now()) m_Begin, m_End;
 	std::string m_Name;
 public:
 	StopWatch(std::string s) :
-		m_Begin(timeNow()),
+        m_Begin(Time::now()),
 		m_Name(s) {
 	}
 	~StopWatch() {
 		using std::chrono::duration_cast;
 		using std::chrono::milliseconds;
-		m_End = timeNow();
+        m_End = Time::now();
 		std::cout << m_Name << " took " << duration_cast<milliseconds>(m_End - m_Begin).count() << " mS";
 	}
 };

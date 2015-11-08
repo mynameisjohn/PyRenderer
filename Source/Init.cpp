@@ -125,8 +125,10 @@ bool InitPython() {
     Python::Register_Class<InputManager>("InputManager");
     std::function<bool(InputManager *, int)> inMgr_IsKeyDwn(&InputManager::IsKeyDown);
     Python::Register_Mem_Function<InputManager, struct inIsKeyDwn_t>("IsKeyDown", inMgr_IsKeyDwn, "Check if key is down");
-    std::function<int(InputManager *, int)> inMgr_GetKey(&InputManager::GetKeyState);
-    Python::Register_Mem_Function<InputManager, struct inIsKeyDwn_t>("GetKeyState", inMgr_GetKey, "Check if key is down");
+    std::function<KeyState(InputManager *, int)> inMgr_GetKey(&InputManager::GetKeyState);
+    Python::Register_Mem_Function<InputManager, struct inIsKeyDwn_t>("GetKeyState", inMgr_GetKey, "Get k's key state");
+    std::function< std::map<int, KeyState>(InputManager *)> inMgr_GetAllKey(&InputManager::GetKeys);
+    Python::Register_Mem_Function<InputManager, struct inIsKeyDwn_t>("GetKeys", inMgr_GetAllKey, "Get set of keystates");
     
     // Init python
 	Python::initialize();
@@ -135,6 +137,7 @@ bool InitPython() {
     Python::Object PYL = Python::GetPyLiaisonModule();
     
     // Key Codes, this is unforunate (put in separate module)
+    PYL.set_attr<int>("K_ESC", SDLK_ESCAPE);
     PYL.set_attr<int>("K_SPACE", SDLK_SPACE);
     PYL.set_attr<int>("K_RIGHT", SDLK_RIGHT);
     PYL.set_attr<int>("K_c", SDLK_c);

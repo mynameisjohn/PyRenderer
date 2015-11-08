@@ -45,13 +45,10 @@ int main(int argc, char ** argv) {
     
 	while (curState != QUIT) {
 		// TODO Python event handler
-		while (SDL_PollEvent(&e))
+        while (SDL_PollEvent(&e)){
             input.HandleEvent(&e);
-    
-        // Ugh
-        int pS;
-        if(sPtr->GetPyModule().call_function("GetPlayState", int(curState)).convert(pS))
-            curState = (PlayState)pS;
+            mainMod.call_function("HandleInput", (int)curState).convert((int&)curState);
+        }
         
         if (curState == QUIT)
             break;

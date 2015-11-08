@@ -27,21 +27,31 @@ struct SDL_KeyboardEvent;
 //    }
 //};
 
+struct KeyState{
+    bool repeat;
+    decltype(Time::now()) tme;
+    KeyState(SDL_KeyboardEvent * ke = nullptr);
+};
+
 class InputManager{
-    vec2 m_ScreenDim;
-    vec2 m_MousePos;
-    vec2 m_DeltaMouse;
-    std::map<int, int> m_KeyState;
-    
-    void setKeyState(SDL_KeyboardEvent * ke);
-    void clearKeyState(SDL_KeyboardEvent * ke);
-    void setMousePos(int x, int y);
 public:
     InputManager();
     void HandleEvent(SDL_Event * e);
     bool IsKeyDown(int k) const;
-    int GetKeyState(int k) const;
     vec2 GetScreenDim() const;
     vec2 GetMousePos() const;
     vec2 GetDeltaMouse() const;
+    KeyState GetKeyState(int k) const;
+    std::map<int, KeyState> GetKeys() const;
+    
+private:
+    std::map<int, KeyState> m_KeyState;
+    
+    vec2 m_ScreenDim;
+    vec2 m_MousePos;
+    vec2 m_DeltaMouse;
+    
+    void setKeyState(SDL_KeyboardEvent * ke);
+    void clearKeyState(SDL_KeyboardEvent * ke);
+    void setMousePos(int x, int y);
 };

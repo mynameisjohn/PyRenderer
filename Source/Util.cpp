@@ -117,3 +117,9 @@ fquat getQuatFromVec2(vec2 r) {
 
 	return fquat(c, s*vec3(0, 0, 1));
 }
+
+float timeAsFloat(Time::time_point tp){
+    using std::chrono::duration_cast;
+    using std::chrono::milliseconds;
+    return duration_cast<milliseconds>(tp.time_since_epoch()).count();
+}
