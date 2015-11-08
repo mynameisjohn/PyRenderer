@@ -15,13 +15,10 @@ def GetPlayState(curState):
 		if (curState == PAUSE):
 			ret = STEP_FWD
 
-	if (inputMgr.IsKeyDown(K_c)):
-		print(CONTACT_DEBUG)
+	if (inputMgr.GetKeyState(K_c) == 1):
+		global CONTACT_DEBUG
 		CONTACT_DEBUG = not CONTACT_DEBUG
-#		if (CONTACT_DEBUG):
-#			CONTACT_DEBUG = False
-#		else:
-#			CONTACT_DEBUG = True
+
 	return ret
 
 def HandleCollision(eID1, eID2):
