@@ -123,9 +123,11 @@ bool InitPython() {
 	Python::Register_Class<Circle>("Circle");
     
     Python::Register_Class<InputManager>("InputManager");
-    std::function<bool(InputManager *, int)> inMgr_GetKey(&InputManager::IsKeyDown);
-    Python::Register_Mem_Function<InputManager, struct inIsKeyDwn_t>("IsKeyDown", inMgr_GetKey, "Check if key is down");
-
+    std::function<bool(InputManager *, int)> inMgr_IsKeyDwn(&InputManager::IsKeyDown);
+    Python::Register_Mem_Function<InputManager, struct inIsKeyDwn_t>("IsKeyDown", inMgr_IsKeyDwn, "Check if key is down");
+    std::function<int(InputManager *, int)> inMgr_GetKey(&InputManager::GetKeyState);
+    Python::Register_Mem_Function<InputManager, struct inIsKeyDwn_t>("GetKeyState", inMgr_GetKey, "Check if key is down");
+    
     // Init python
 	Python::initialize();
     

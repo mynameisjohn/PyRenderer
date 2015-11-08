@@ -25,7 +25,9 @@ void InputManager::setKeyState(SDL_KeyboardEvent * ke){
     int k = keyCode(ke);
     auto it = m_KeyState.find(k);
     if (it == m_KeyState.end())
-        m_KeyState.emplace(k);
+        m_KeyState.emplace(k, 1);
+    else if (ke->repeat)
+        clearKeyState(ke);
 }
 
 void InputManager::clearKeyState(SDL_KeyboardEvent *ke){
@@ -57,15 +59,18 @@ bool InputManager::IsKeyDown(int k) const{
     return (m_KeyState.find(k) != m_KeyState.end());
 }
 
+int InputManager::GetKeyState(int k) const{
+    auto it = m_KeyState.find(k);
+    if (it != m_KeyState.end())
+        return it->second;
+    return 0;
+}
+
 // Don't deal with repeat for now
 void InputManager::HandleEvent(SDL_Event * e){
     switch (e->type) {
         case SDL_KEYDOWN:
-            if (!e->key.repeat){
-                
-                std::cout << m_KeyState.size() << std::endl;
-                setKeyState(&e->key);
-            }
+            setKeyState(&e->key);
             break;
         case SDL_KEYUP:
             clearKeyState(&e->key);

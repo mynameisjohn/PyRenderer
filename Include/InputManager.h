@@ -31,7 +31,7 @@ class InputManager{
     vec2 m_ScreenDim;
     vec2 m_MousePos;
     vec2 m_DeltaMouse;
-    std::set<int> m_KeyState;
+    std::map<int, int> m_KeyState;
     
     void setKeyState(SDL_KeyboardEvent * ke);
     void clearKeyState(SDL_KeyboardEvent * ke);
@@ -40,6 +40,7 @@ public:
     InputManager();
     void HandleEvent(SDL_Event * e);
     bool IsKeyDown(int k) const;
+    int GetKeyState(int k) const;
     vec2 GetScreenDim() const;
     vec2 GetMousePos() const;
     vec2 GetDeltaMouse() const;

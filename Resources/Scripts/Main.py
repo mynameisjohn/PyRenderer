@@ -5,7 +5,7 @@ CONTACT_DEBUG = False
 # TODO handle more interesting key states
 def GetPlayState(curState):
 	ret = curState
-	if (inputMgr.IsKeyDown(K_SPACE)):
+	if (inputMgr.GetKeyState(K_SPACE) == 1):
 		if (curState == PLAY):
 			ret = PAUSE
 		elif (curState == PAUSE):
