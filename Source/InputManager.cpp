@@ -24,7 +24,6 @@ void InputManager::setKeyState(SDL_KeyboardEvent * ke){
         m_KeyState[keyCode(ke)] = KeyState(ke);
     else
         it->second.repeat = ke->repeat;
-    //std::cout << int(ke->repeat) << ", " << m_KeyState[keyCode(ke)].repeat << std::endl;
 }
 
 void InputManager::clearKeyState(SDL_KeyboardEvent *ke){

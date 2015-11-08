@@ -3,7 +3,7 @@ from PyLiaison import *
 CONTACT_DEBUG = False
 
 # TODO handle more interesting key states
-def HandleInput(curState):
+def HandleKeyDown(curState):
 	ret = curState
 	allKeys = inputMgr.GetKeys()
 	if K_ESC in allKeys:

@@ -47,7 +47,12 @@ int main(int argc, char ** argv) {
 		// TODO Python event handler
         while (SDL_PollEvent(&e)){
             input.HandleEvent(&e);
-            mainMod.call_function("HandleInput", (int)curState).convert((int&)curState);
+            switch(e.type){
+                case SDL_KEYDOWN:
+                    mainMod.call_function("HandleKeyDown", (int)curState).convert((int&)curState);
+                    break;
+            }
+
         }
         
         if (curState == QUIT)
