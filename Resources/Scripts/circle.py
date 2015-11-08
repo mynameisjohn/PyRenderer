@@ -12,7 +12,8 @@ class Circle:
 		self.Ent = Entity(ePtr)
 	
 	def HandleCollision(self, otherID):
-		pass
+		other = g_Entities[otherID]
+		other.Ent.SendMessage_D(E_DR, E_DR_CLR, (Util.randColor(),))
 
 # TODO make class static
 def GetResources():

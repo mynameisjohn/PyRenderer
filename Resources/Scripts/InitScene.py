@@ -2,18 +2,8 @@
 import math
 from collections import namedtuple
 from platform import system
+import Util
 
-import random
-random.seed()
-
-def makeQuat(x,y,z,theta):
-	r = math.radians(theta)/2.
-	c = math.cos(r)
-	s = math.sin(r)
-	return [c, s*x, s*y, s*z] #normalize...
-
-def randColor():
-	return [random.random() for i in range (0,3)]+[1.]
 
 def GetShaderSrc():
 	r_ShaderSrc = { 'vert':'simple.vert', 
@@ -45,7 +35,7 @@ def GetEntities():
 			rot = math.pi/4,
 			mass = 1.,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'OBB.py'
 		))
 
@@ -56,18 +46,18 @@ def GetEntities():
 			rot = 0.,
 			mass = 1.,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'OBB.py'
 		))
 
 	r_Entities.append(Entity(
-			vel = [1.,5.],
+			vel = [2.,10.],
 			pos = [3.2,1.5],
 			scale = [.5,.5],
 			rot = 0.,
 			mass = 1.,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'circle.py'
 		))
 
@@ -78,7 +68,7 @@ def GetEntities():
 			rot = math.pi/2,
 			mass = 1.e10,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'OBB.py'
 		))
 
@@ -89,7 +79,7 @@ def GetEntities():
 			rot = 0.,
 			mass = 1.,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'OBB.py'
 		))
 	'''
@@ -100,7 +90,7 @@ def GetEntities():
 			rot = 0.,
 			mass = 1.,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'OBB.py'
 		))
 
@@ -111,7 +101,7 @@ def GetEntities():
 			rot = 0.,
 			mass = 1.,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'circle.py'
 		))
 
@@ -122,7 +112,7 @@ def GetEntities():
 			rot = 0.,
 			mass = 1.,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'circle.py'
 		))
 
@@ -133,7 +123,7 @@ def GetEntities():
 			rot = 0.,
 			mass = 1.,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'OBB.py'
 		))
 
@@ -144,7 +134,7 @@ def GetEntities():
 			rot = 0.,
 			mass = 1.,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'circle.py'
 		))
 		'''
@@ -155,7 +145,7 @@ def GetEntities():
 			rot = 0.,
 			mass = 1.e10,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'AABB.py'
 		))
 
@@ -166,7 +156,7 @@ def GetEntities():
 			rot = 0.,
 			mass = 1.e10,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'AABB.py'
 		))
 
@@ -177,7 +167,7 @@ def GetEntities():
 			rot = 0.,
 			mass = 1.e10,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'AABB.py'
 		))
 
@@ -188,7 +178,7 @@ def GetEntities():
 			rot = 0.,
 			mass = 1.e10,
 			el = 1.,
-			color = randColor(),
+			color = Util.randColor(),
 			module = 'AABB.py'
 		))
 

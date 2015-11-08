@@ -1,3 +1,9 @@
+from random import random, choice, seed
+from math import radians, sin, cos
+import abc
+
+seed()
+
 def isSoundFile(f):
 	w = '.wav'
 	if (type(f) is not str):
@@ -8,7 +14,14 @@ def isSoundFile(f):
 		return False
 	return True
 
-import abc
+def makeQuat(x,y,z,theta):
+	r = radians(theta)/2.
+	c = cos(r)
+	s = sin(r)
+	return [c, s*x, s*y, s*z] #normalize...
+
+def randColor():
+	return [random() for i in range (0,3)]+[1.]
 
 class PyType(abc.ABC):
 	@abc.abstractmethod
