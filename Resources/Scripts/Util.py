@@ -5,9 +5,13 @@ import abc
 seed()
 
 def isSoundFile(f):
-	w = '.wav'
-	if (type(f) is not str):
-		return False
+	w = None
+	if (type(f) == str):
+		w = '.wav'
+	elif (type(f) == bytes):
+		w = b'.wav'
+	else:
+		return false
 	if (len(f) <= len(w)):
 		return False
 	if (f[-len(w):len(f)] != w):

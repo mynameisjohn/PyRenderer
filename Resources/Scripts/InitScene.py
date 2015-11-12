@@ -4,7 +4,6 @@ from collections import namedtuple
 from platform import system
 import Util
 
-
 def GetShaderSrc():
 	r_ShaderSrc = { 'vert':'simple.vert', 
 					'frag':'simple.frag',

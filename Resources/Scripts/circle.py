@@ -1,6 +1,9 @@
-﻿from PyLiaison import *
+from PyLiaison import *
 import Util
 import os
+
+import random
+random.seed()
 
 # All of these resources should be accessed by
 # function, rather than just lying around loose
@@ -8,45 +11,28 @@ import os
 #  what I really need is a class that this file 
 #  can correspond to. )
 class Circle:
-	def __init__(self, ePtr):
-		self.Ent = Entity(ePtr)
-	
-	def HandleCollision(self, otherID):
-		other = g_Entities[otherID]
-		other.Ent.SendMessage_D(E_DR, E_DR_CLR, (Util.randColor(),))
+    r_IqmFile = 'circle.iqm'
+    r_ColPrim = 'circle'
+    r_Sounds = []
+    
+    def __init__(self, ePtr):
+        self.Ent = Entity(ePtr)
+    
+    def HandleCollision(self, otherID):
+        try:
+            snd = random.choice(Circle.r_Sounds)
+            PlaySound(snd)
+        except IndexError:
+            pass
 
 # TODO make class static
 def GetResources():
-	r_IqmFile = 'circle.iqm'
-	r_ColPrim = 'circle'
-	r_Sounds = []
+    if (len(Circle.r_Sounds) == 0):
+        sep = bytes(os.sep.encode('ascii'))
+        sndFiles = os.listdir(SND_DIR)
+        Circle.r_Sounds = [f for f in sndFiles if Util.isSoundFile(f)]
+    return (Circle.r_IqmFile, Circle.r_ColPrim, Circle.r_Sounds)
 
-	if (len(r_Sounds) == 0):
-		sep = bytes(os.sep.encode('ascii'))
-		sndFiles = os.listdir(SND_DIR)
-		r_Sounds = [f for f in sndFiles if Util.isSoundFile(f)]
-	return (r_IqmFile, r_ColPrim, r_Sounds)
-
-'''
-ob = circle()
-print(ob)
-
-r_IqmFile = b'quad.iqm'
-sndFiles = os.listdir(SND_DIR)
-separator = bytes(os.sep.encode('ascii')) # Thanks python 3...
-r_Sounds = [x for x in sndFiles if Util.isSoundFile(x)]
-
-r_ColPrim = 'circle'
-
-def HandleCollision(myID, theirID):
-    e = g_Entities[myID]
-    e.SendMessage_D(E_DR, E_DR_CLR, (randColor(),))
-    try: # random.choice can raise an IndexError if seq is empty
-        snd = random.choice(r_Sounds)
-        PlaySound(snd)
-    except IndexError:
-        pass
-'''
 	
 # This should go in some master file that isn't InitScene
 def AddEntity(eID, ePtr):
