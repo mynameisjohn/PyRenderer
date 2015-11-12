@@ -100,6 +100,8 @@ bool InitSound() {
 	if (Mix_OpenAudio(SR, MIX_DEFAULT_FORMAT, NCh, BufSize) < 0)
         return false;
     Mix_AllocateChannels(SDLChannelCnt);
+    
+    return true;
 }
 
 // TODO 
