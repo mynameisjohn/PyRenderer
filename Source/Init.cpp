@@ -24,6 +24,7 @@ bool InitEverything(SDL_GLContext& g_Context, SDL_Window*& g_Window, std::unique
 	return false;
 }
 
+// I should init Mixer (and image, TTF) here as well
 bool InitSDL() {
 	bool success = (SDL_Init(SDL_INIT_VIDEO) >= 0);
 	if (success == false)
@@ -89,8 +90,16 @@ bool InitGL(SDL_GLContext& g_Context, SDL_Window*& g_Window) {
 	return true;
 }
 
+// One day this'll be cool
 bool InitSound() {
-	return (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) >= 0);
+    const int SR = 44100;
+    const int NCh = 2;
+    const int BufSize = 2048;
+    const int SDLChannelCnt = 128; // From Python?
+    
+	if (Mix_OpenAudio(SR, MIX_DEFAULT_FORMAT, NCh, BufSize) < 0)
+        return false;
+    Mix_AllocateChannels(SDLChannelCnt);
 }
 
 // TODO 
@@ -155,7 +164,7 @@ bool InitPython() {
     PYL.set_attr("E_DR_CLR", int(Entity::MsgID::DR_COLOR));
     
     // This map isn't actually used, but as long as an empty
-    // PyDict gets created I'm fine with it
+    // PyDict gets created I'm fine with it (do I need to do it this way?)
     std::map<uint32_t, Entity *> dummyMap;
     PYL.set_attr("g_Entities", dummyMap);
     
