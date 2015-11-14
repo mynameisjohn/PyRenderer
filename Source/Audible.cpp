@@ -2,20 +2,19 @@
 
 #include <SDL_mixer.h>
 
-void ChunkDeleter::operator()(Mix_Chunk * chunk) {
-	Mix_FreeChunk(chunk);
-	chunk = nullptr;
-}
 
 namespace Audio {
 	std::map<std::string, ChunkPtr> s_ChunkMap;
 
+    //std::map<std::string, SndEffect> s_MapSndEffects;
+    
 	int PlaySound(std::string soundFile) {
 		if (s_ChunkMap.find(soundFile) == s_ChunkMap.end()) {
 			std::cout << "Error: attempt made to play unloaded sound file " << soundFile << std::endl;
 			if (!LoadSound(soundFile))
 				return -1;
 		}
+        
 		Mix_PlayChannel(-1, s_ChunkMap[soundFile].get(), 0);
 		//std::cout << "Playing sound " << soundFile << std::endl;
 		//std::cout <<  << std::endl;

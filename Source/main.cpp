@@ -1,6 +1,6 @@
 #include "Util.h"
 #include "Init.h"
-#include "Audible.h"
+#include "EffectManager.h"
 #include "InputManager.h"
 
 #include <SDL.h>

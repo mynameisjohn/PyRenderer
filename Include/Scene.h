@@ -3,12 +3,11 @@
 #include "Camera.h"
 #include "Shader.h"
 #include "Drawable.h"
+#include "EffectManager.h"
 #include "RigidBody.h"
 #include "SpeculativeContacts.h"
 
 #include <pyliason.h>
-
-#include <vector>
 
 class Scene
 {
@@ -35,6 +34,8 @@ private:
 	std::vector<OBB> m_vOBB;
 	std::list<Contact> m_SpeculativeContacts; // no need to be a list, will be (n^2+n)/2
     Solver m_ContactSolver;
+    
+    EffectManager m_EffectManager;
     
     Python::Object m_MainPyModule;
 };

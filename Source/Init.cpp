@@ -92,12 +92,11 @@ bool InitGL(SDL_GLContext& g_Context, SDL_Window*& g_Window) {
 
 // One day this'll be cool
 bool InitSound() {
-    const int SR = 44100;
     const int NCh = 2;
     const int BufSize = 2048;
     const int SDLChannelCnt = 128; // From Python?
     
-	if (Mix_OpenAudio(SR, MIX_DEFAULT_FORMAT, NCh, BufSize) < 0)
+	if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, NCh, BufSize) < 0)
         return false;
     Mix_AllocateChannels(SDLChannelCnt);
     
@@ -121,6 +120,8 @@ bool InitPython() {
 	std::function<int(Entity *, int, int, Python::Object)> ent_SendMsg_D(&Entity::SendMessage_D);
 	Python::Register_Mem_Function<Entity, struct ent_SendMsg_D>("SendMessage_D", ent_SendMsg_D, "Post a message to the Entity's queue");
 
+    // TODO expose Scene or some other interface for getting at
+    // Sound files. The effect manager doesn't need to be owned by Scene
 	Python::Register_Function<struct AudPlaySnd_t>("PlaySound", Python::make_function(Audio::PlaySound), "Play a sound file");
 
 	// Expose Drawable
@@ -188,7 +189,8 @@ bool InitScene(std::unique_ptr<Scene>& pScene) {
 
 // This shouldn't go here... but it's so long
 Scene::Scene(std::string& pyinitScript) :
-m_ContactSolver(100)
+    m_ContactSolver(100),   // 100 solver iterations
+    m_EffectManager(Mix_AllocateChannels(-1)) // -1 returns channel count
 {
     auto check = [](bool cond, std::string msg = "") {
         if (!msg.empty())
@@ -294,7 +296,7 @@ m_ContactSolver(100)
         std::list<std::string> sndFiles = std::get<2>(eRsrc);
         //check(pyEntModule.get_attr("r_Sounds").convert(sndFiles), "Getting all sounds from module " + pyEntModScript);
         for (auto& file : sndFiles)
-            Audio::LoadSound(file);
+            m_EffectManager.RegisterEffect(file);
         
         // Make drawable
         fquat rotQ(cos(rot / 2.f), vec3(0, 0, sin(rot / 2.f)));
