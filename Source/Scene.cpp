@@ -138,6 +138,8 @@ int Scene::Update() {
     // Handle all entity messages (Update is a bad name)
 	for (auto& e : m_vEntities)
 		e.Update();
+    
+    m_EffectManager.Update();
 
 	return nCols;
 }

@@ -2,10 +2,12 @@
 
 #include "Util.h"
 
+#include <SDL_Mixer.h>
 
-EffectManager::PlayingSound::PlayingSound(const SndEffect * pSnd /*= nullptr*/):
+EffectManager::PlayingSound::PlayingSound(const SndEffect * pSnd /*= nullptr*/, int chanNum /* = -1 */):
     m_pSndEffect(pSnd),
-    m_fTimePlayed(0)
+    m_fTimePlayed(pSnd ? pSnd->GetDuration() : 0),
+    m_nChanID(chanNum)
 {}
 
 float EffectManager::PlayingSound::GetPlayedRatio() const{
@@ -15,13 +17,26 @@ float EffectManager::PlayingSound::GetPlayedRatio() const{
 }
 
 void EffectManager::PlayingSound::Tick(float delT){
-    m_fTimePlayed -= delT;
-    if (m_fTimePlayed < 0)
-        m_pSndEffect = nullptr;
+    if (m_pSndEffect){
+        m_fTimePlayed -= delT;
+        //std::cout << m_fTimePlayed << ", " << delT << std::endl;
+        if (m_fTimePlayed < 0.f){
+            m_pSndEffect = nullptr;
+            m_fTimePlayed = 0.f;
+        }
+    }
 }
 
 bool EffectManager::PlayingSound::StillLive() const{
     return m_pSndEffect != nullptr;
+}
+
+void EffectManager::PlayingSound::Halt(){
+    if (m_nChanID >= 0)
+        Mix_HaltChannel(m_nChanID);
+    m_fTimePlayed = 0.f;
+    m_pSndEffect = nullptr;
+    m_nChanID = -1;
 }
 
 EffectManager::EffectManager(int nChannels /* = 0 */):
@@ -30,6 +45,7 @@ EffectManager::EffectManager(int nChannels /* = 0 */):
 {
     // Given the # of SDL Channels, split them out amongst the priorities
     m_PriorityChannels[SndEff_P::ALPHA].resize(nChannels);
+    m_PriorityOffset[SndEff_P::ALPHA] = 0;
 }
 
 bool EffectManager::RegisterEffect(std::string effName){
@@ -41,7 +57,13 @@ bool EffectManager::RegisterEffect(std::string effName){
 }
 
 // Bear in mind that a channel can play multiple effects at once...
-bool EffectManager::PlaySound(SndEff_P priority, std::string effName){
+bool EffectManager::PlaySound(int iPriority, std::string effName){
+    // Cast to enum, find best match (lower bound?)
+    SndEff_P priority = static_cast<SndEff_P>(std::max(0, iPriority));
+    auto offsetIt = m_PriorityOffset.find(priority);
+    if (offsetIt == m_PriorityOffset.end())
+        std::advance(offsetIt, -1);
+    
     auto itEff = m_EffectMap.find(effName);
     if (itEff == m_EffectMap.end()){
         if (!RegisterEffect(effName))
@@ -57,11 +79,18 @@ bool EffectManager::PlaySound(SndEff_P priority, std::string effName){
         return pS.StillLive();
     });
     if (itFree == sndVec.end()){
-        auto itMin = std::min_element(sndVec.begin(), sndVec.end(), [](const PlayingSound& a, const PlayingSound& b){
+        itFree = std::min_element(sndVec.begin(), sndVec.end(), [](const PlayingSound& a, const PlayingSound& b){
             return a.GetPlayedRatio() < b.GetPlayedRatio();
         });
-        *itMin = PlayingSound(&itEff->second);
+        itFree->Halt();
     }
+    
+    *itFree = PlayingSound(&itEff->second);
+    
+    int chanNum = m_PriorityOffset[priority] + std::distance(sndVec.begin(), itFree);
+    Mix_PlayChannel(chanNum, itEff->second.GetChunk(), 0);
+
+    //std::cout << chanNum << std::endl;
     
     return true;
 }
@@ -80,9 +109,13 @@ void EffectManager::Update(){
     float del = tNow - m_fLastTime;
     
     for (auto& el : m_PriorityChannels){
-        std::vector<PlayingSound>& sndVec = el.second;
-        for (auto& pS : sndVec){
-            pS.Tick(del);
+        std::vector<PlayingSound>& psVec = el.second;
+        for (auto psIt = psVec.begin(); psIt != psVec.end(); ++psIt){
+            if (psIt->StillLive()){
+                psIt->Tick(del * 0.001f);
+                if (psIt->StillLive() == false)
+                    psIt->Halt();
+            }
         }
     }
     

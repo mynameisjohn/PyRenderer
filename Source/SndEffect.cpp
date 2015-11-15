@@ -9,7 +9,8 @@ void ChunkDeleter::operator()(Mix_Chunk * chunk) {
 }
 
 ChunkPtr LoadChunk(std::string fileName){
-    Mix_Chunk * chnk = Mix_LoadWAV(fileName.c_str());
+    std::string path = SOUND_DIR + fileName;
+    Mix_Chunk * chnk = Mix_LoadWAV(path.c_str());
     
     if (chnk == nullptr)
         return nullptr;

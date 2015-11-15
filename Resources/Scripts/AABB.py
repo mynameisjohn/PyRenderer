@@ -21,7 +21,7 @@ class AABB:
 	def HandleCollision(self, otherID):
 		try:
 			snd = random.choice(AABB.r_Sounds)
-			PlaySound(snd)
+			SndEffManager.PlaySound(S_ALPHA, snd)
 		except IndexError:
 			pass
 

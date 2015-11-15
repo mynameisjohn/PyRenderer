@@ -134,6 +134,7 @@ bool InitPython() {
 	// Register Circle class (nothing to expose, really)
 	Python::Register_Class<Circle>("Circle");
     
+    // Input manager
     Python::Register_Class<InputManager>("InputManager");
     std::function<bool(InputManager *, int)> inMgr_IsKeyDwn(&InputManager::IsKeyDown);
     Python::Register_Mem_Function<InputManager, struct inIsKeyDwn_t>("IsKeyDown", inMgr_IsKeyDwn, "Check if key is down");
@@ -141,6 +142,11 @@ bool InitPython() {
     Python::Register_Mem_Function<InputManager, struct inIsKeyDwn_t>("GetKeyState", inMgr_GetKey, "Get k's key state");
     std::function< std::map<int, KeyState>(InputManager *)> inMgr_GetAllKey(&InputManager::GetKeys);
     Python::Register_Mem_Function<InputManager, struct inIsKeyDwn_t>("GetKeys", inMgr_GetAllKey, "Get set of keystates");
+    
+    // Sound Effect Manager
+    Python::Register_Class<EffectManager>("EffectManager");
+    std::function<bool(EffectManager *, int, std::string)> sndeff_Play(&EffectManager::PlaySound);
+    Python::Register_Mem_Function<EffectManager, struct effplaysnd_t>("PlaySound", sndeff_Play, "Request sound to play");
     
     // Init python
 	Python::initialize();
@@ -165,6 +171,9 @@ bool InitPython() {
     PYL.set_attr("E_DR", int(Entity::CompID::DRAWABLE));
     PYL.set_attr("E_DR_TR", int(Entity::MsgID::DR_TRANSLATE));
     PYL.set_attr("E_DR_CLR", int(Entity::MsgID::DR_COLOR));
+    
+    // Sound effect priorities
+    PYL.set_attr("S_ALPHA", int(SndEff_P::ALPHA));
     
     // This map isn't actually used, but as long as an empty
     // PyDict gets created I'm fine with it (do I need to do it this way?)
@@ -197,6 +206,9 @@ Scene::Scene(std::string& pyinitScript) :
             std::cout << msg << "----" << (cond ? " succeeded! " : " failed! ") << std::endl;
         assert(cond);
     };
+    
+    // Expose sound effect manager
+    Python::Expose_Object(&m_EffectManager, "SndEffManager", Python::GetPyLiaisonModule().get());
     
     // Convert the relative python path to the absolute, load module
     std::string initStrPath = FixBackslash(RelPathToAbs(SCRIPT_DIR ) + "/" + pyinitScript);
