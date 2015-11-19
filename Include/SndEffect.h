@@ -2,32 +2,28 @@
 
 #include <memory>
 
+// This used to be a unique_ptr
+// I opted out because I don't trust or
+// really want my move syntax right now,
+// but I could easily cache these off and
+// instance them.
 struct Mix_Chunk;
-struct ChunkDeleter {
-    void operator()(Mix_Chunk * chunk);
-};
-using ChunkPtr = std::unique_ptr<Mix_Chunk, ChunkDeleter>;
+using ChunkPtr = std::shared_ptr<Mix_Chunk>;
+ChunkPtr MakeChunkPtr(Mix_Chunk *);
 
+// Basically a wrapper class for Mix_Chunk
+// Right now it just caches off duration as a
+// float (in seconds, I believe). It would be
+// cool to store format as well to do some
+// real DSP, but I really don't need it right now
 class SndEffect{
 public:
     // Standard constructors
     SndEffect();
     SndEffect(std::string);
     
-    // Copy/move constructors
-    SndEffect(const SndEffect&);
-    SndEffect(const SndEffect&&);
-    
-    // Copy/move assignments
-    SndEffect& operator=(const SndEffect&);
-    SndEffect& operator=(const SndEffect&&);
-    
     // Default destructor
     ~SndEffect() = default;
-    
-    // Comparison
-    //    bool operator==(const SndEffect&);
-    //    bool operator<(const SndEffect& other);
     
     Mix_Chunk * GetChunk() const;
     float GetDuration() const;
