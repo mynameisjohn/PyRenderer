@@ -109,11 +109,13 @@ std::array<vec2, 2> Capsule::GetEndpoints() const {
 	vec2 ofs = getRotMat() * vec2(L / 2, 0.f);
 	vec2 pA = C - ofs;
 	vec2 pB = C + ofs;
+
+	return{ pA, pB };
 }
 
 // Calls OBB(this), which calls AABB(this), which calls above (big stack, who cares)
 std::list<Contact> Capsule::GetClosestPoints(const OBB& other) const {
-	return other.GetClosestPoints(*this);
+	return ((AABB&)other).GetClosestPoints(*this);
 }
 
 std::list<Contact>Capsule::GetClosestPoints(const Capsule& other) const {

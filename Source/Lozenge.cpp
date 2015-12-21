@@ -76,8 +76,3 @@ bool Lozenge::IsOverlapping(const Capsule& other) const {
 	// NYI
 	return false;
 }
-
-bool Lozenge::IsOverlapping(const Lozenge& other) const {
-	// NYI
-	return false;
-}
