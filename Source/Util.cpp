@@ -95,6 +95,28 @@ float maxEl(vec4 v) {
 	return ret;
 }
 
+float minEl(vec2 v) {
+	float ret(0.f);
+	for (int i = 0; i < 2; i++)
+		ret = std::min(ret, v[i]);
+	return ret;
+}
+
+float minEl(vec3 v) {
+	float ret(0.f);
+	for (int i = 0; i < 3; i++)
+		ret = std::min(ret, v[i]);
+	return ret;
+}
+
+float minEl(vec4 v) {
+	float ret(0.f);
+	for (int i = 0; i < 4; i++)
+		ret = std::min(ret, v[i]);
+	return ret;
+}
+
+
 vec2 perp(vec2 v){
     return vec2(-v.y, v.x);
 }

@@ -168,16 +168,12 @@ struct OBB : public AABB {
 	// Collision Overrides
 	virtual bool IsOverlapping(const Circle& other) const override;
 	virtual bool IsOverlapping(const AABB& other) const override;
-	virtual bool IsOverlapping(const Capsule& other) const override;
-	virtual bool IsOverlapping(const Lozenge& other) const override;
 
 	// Contacts
 	virtual std::list<Contact> GetClosestPoints(const Circle& other) const override;
 	virtual std::list<Contact> GetClosestPoints(const AABB& other) const override;
 	virtual std::list<Contact> GetClosestPoints(const OBB& other) const override;
-	virtual std::list<Contact> GetClosestPoints(const Capsule& other) const override;
-	virtual std::list<Contact> GetClosestPoints(const Lozenge& other) const override;
-
+	
 	int GetSupportVerts(vec2 n, std::array<vec2, 2>&) const;
 	int GetSupportIndices(vec2 n, std::array<int, 2>&) const;
 	std::array<vec2, 2> GetSupportNeighbor(vec2 n, int idx) const;

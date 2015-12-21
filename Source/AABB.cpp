@@ -54,6 +54,14 @@ bool AABB::IsOverlapping(const OBB& other) const {
 	return other.IsOverlapping(*this);
 }
 
+bool AABB::IsOverlapping(const Capsule& other) const {
+	return other.IsOverlapping(*this);
+}
+
+bool AABB::IsOverlapping(const Lozenge& other) const {
+	return other.IsOverlapping(*this);
+}
+
 // Clamp a point within the AABBs extent
 vec2 AABB::clamp(vec2 p) const {
 	return  glm::clamp(p, C - R, C + R);
@@ -86,6 +94,16 @@ std::list<Contact> AABB::GetClosestPoints(const AABB& other) const {
 	float dist = glm::length(a_pos - b_pos);
 	Contact c((RigidBody_2D *)this, (RigidBody_2D *)&other, a_pos, b_pos, n, dist);
 	return{ c };
+}
+
+// Closest points between two AABBs
+std::list<Contact> AABB::GetClosestPoints(const Lozenge& other) const {
+	return other.GetClosestPoints(*this);
+}
+
+// Closest points between two AABBs
+std::list<Contact> AABB::GetClosestPoints(const Lozenge& other) const {
+	return other.GetClosestPoints(*this);
 }
 
 

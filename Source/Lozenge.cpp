@@ -1,81 +1,83 @@
 #include "RigidBody.h"
 #include "SpeculativeContacts.h"
 
+// Most of this isn't implemented, since I don't know what utility
+// Lozenges really give me over OBB (besides being rounded at edges)
+
 Lozenge::Lozenge() :
 	RigidBody_2D(),
-	r(1)
+	r(0.5f),
+	R(0.f)
 {}
 
 Lozenge::Lozenge(vec2 vel, vec2 c, float mass, float elasticity, vec2 s, float th) :
-	RigidBody_2D(V, C, m, e, th),
-	r(radius)
-{}
+	RigidBody_2D(V, C, m, e, th) {
+	float diameter = minEl(s);
+	r = Lozenge::ALPHA * diameter / 2.f;
+	R = (1.f - Lozenge::ALPHA) * (s - vec2(diameter));
+}
 
 // Between Lozenges
 std::list<Contact> Lozenge::GetClosestPoints(const Lozenge& other) const {
-	// watch for low values here
-	// find and normalize distance
-	vec2 d = other.C - C;
-	vec2 n = glm::normalize(d);
-	// contact points along circumference
-	vec2 a_pos = C + n*r;
-	vec2 b_pos = other.C - n*other.r;
-	// distance between circumferences
-	float dist = glm::length(a_pos - b_pos);
-	Contact c((Lozenge *)this, (Lozenge *)&other, a_pos, b_pos, n, dist);
-	return{ c };
+	// NYI
+	std::list<Contact> ret;
+	return ret;
 }
 
 // Between a Lozenge and an AABB
 std::list<Contact> Lozenge::GetClosestPoints(const AABB& other) const {
-	// d points from the Lozenge to the box, so negate and clamp
-	vec2 b_pos = other.clamp(C);
-	vec2 n = glm::normalize(b_pos - C);
-
-	vec2 a_pos = C + r*n;
-	float dist = glm::length(a_pos - b_pos);
-
-	Contact c((Lozenge *)this, (Lozenge *)&other, a_pos, b_pos, n, dist);
-	return{ c };
+	// NYI
+	std::list<Contact> ret;
+	return ret;
 }
 
 // Between a Lozenge and a Capsule
 std::list<Contact> Lozenge::GetClosestPoints(const Capsule& other) const {
-	return other.GetClosestPoints(*this);
+	// NYI
+	std::list<Contact> ret;
+	return ret;
 }
 
-// Between a Lozenge and a Lozenge
-std::list<Contact> Lozenge::GetClosestPoints(const Lozenge& other) const {
-	return other.GetClosestPoints(*this);
+// Between a Lozenge and a Circle
+std::list<Contact> Lozenge::GetClosestPoints(const Circle& other) const {
+	// NYI
+	std::list<Contact> ret;
+	return ret;
 }
 
-// Also see OBB impl
 std::list<Contact> Lozenge::GetClosestPoints(const OBB& other) const {
-	return other.GetClosestPoints(*this);
+	// NYI
+	std::list<Contact> ret;
+	return ret;
+}
+
+bool Lozenge::IsOverlapping(const Circle& other) const {
+	// NYI
+	return false;
 }
 
 // Between Lozenge and OBB (see OBB impl)
 bool Lozenge::IsOverlapping(const OBB& other) const {
-	return other.IsOverlapping(*this);
+	// NYI
+	return false;
 }
 
 bool Lozenge::IsOverlapping(const Lozenge& other) const {
-	float dist = glm::length(C - other.C);
-	float totalRadius = r + other.r;
-
-	return (dist < totalRadius);
+	// NYI
+	return false;
 }
 
 bool Lozenge::IsOverlapping(const AABB& other) const {
-	bool x = (other.left() > C.x + r) || (other.right() > C.y - r);
-	bool y = (other.bottom() > C.x + r) || (other.top() > C.y - r);
-	return x && y;
+	// NYI
+	return false;
 }
 
 bool Lozenge::IsOverlapping(const Capsule& other) const {
-	return other.IsOverlapping(*this);
+	// NYI
+	return false;
 }
 
 bool Lozenge::IsOverlapping(const Lozenge& other) const {
-	return other.IsOverlapping(*this);
+	// NYI
+	return false;
 }
