@@ -9,6 +9,12 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+// TODO
+// Make a static container in Drawable
+// that holds generic primitives (like
+// circle, quad, etc.) that can be 
+// drawn on request via static functions
+
 class Drawable : public OwnedByEnt {
 	std::string m_SrcFile;
 	GLuint m_VAO;
@@ -44,4 +50,9 @@ protected:
 private:
 	// Static VAO cache (string to VAO/nIdx)
 	static std::map<std::string, std::array<GLuint, 2> > s_VAOCache;
+	// Static Drawable Cache for common primitives
+	static std::map<std::string, Drawable> s_PrimitiveMap;
+
+public:
+	static bool DrawPrimitive(std::string prim);
 };

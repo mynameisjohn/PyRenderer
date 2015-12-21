@@ -4,6 +4,12 @@
 #include "RigidBody.h"
 #include "Scene.h"
 
+#ifdef _WIN32
+#ifdef SendMessage
+#undef SendMessage
+#endif
+#endif
+
 Entity::Entity() :
 	m_UniqueID(-1),
 	m_ColCmp(nullptr),

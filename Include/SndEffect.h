@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 // This used to be a unique_ptr
 // I opted out because I don't trust or

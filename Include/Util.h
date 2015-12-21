@@ -98,6 +98,10 @@ float maxEl(vec2 v);
 float maxEl(vec3 v);
 float maxEl(vec4 v);
 
+float minEl(vec2 v);
+float minEl(vec3 v);
+float minEl(vec4 v);
+
 inline uint32_t wrapIdx(int dim, int idx)  {
 	return (dim + idx) % dim;
 }

@@ -1,5 +1,6 @@
 #include "RigidBody.h"
 #include "SpeculativeContacts.h"
+#include "Drawable.h"
 
 #include <glm/mat2x2.hpp>
 
@@ -7,7 +8,10 @@ Capsule::Capsule() :
 	RigidBody_2D(),
 	r(0.5f),
 	L(0.f)
-{}
+{
+	// These would make a drawable version
+	
+}
 
 Capsule::Capsule(vec2 vel, vec2 c, float mass, float elasticity, vec2 s, float th) :
 	RigidBody_2D(vel, c, mass, elasticity, th),

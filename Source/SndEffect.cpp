@@ -20,7 +20,7 @@ ChunkPtr LoadChunk(std::string fileName){
 }
 
 // Constexpr, will handle more formats hopefully
-size_t constexpr DefaultSampleSize() {
+size_t DefaultSampleSize() {
     switch(MIX_DEFAULT_FORMAT){
         case AUDIO_S16SYS:
         default:

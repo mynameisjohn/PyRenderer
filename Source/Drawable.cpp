@@ -7,6 +7,7 @@
 
 GLint Drawable::s_PosHandle(-1);
 std::map<std::string, std::array<GLuint, 2> > Drawable::s_VAOCache;
+std::map<std::string, Drawable > Drawable::s_PrimitiveMap;
 
 Drawable::Drawable() :
 	m_VAO(0),
@@ -117,4 +118,12 @@ void Drawable::Draw() {
 
 /*static*/ void Drawable::SetPosHandle(GLint pH) {
 	s_PosHandle = pH;
+}
+
+/*static*/ bool Drawable::DrawPrimitive(std::string prim) {
+	auto it = s_PrimitiveMap.find(prim);
+	if (it == s_PrimitiveMap.end())
+		return false;
+	it->second.Draw();
+	return true;
 }

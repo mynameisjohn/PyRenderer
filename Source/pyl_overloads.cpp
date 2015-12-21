@@ -18,3 +18,25 @@ namespace Python
 		return convert_buf(o, &v[0], 4);
 	}
 }
+
+#include "Util.h"
+#include "InputManager.h"
+
+namespace Python
+{
+	//    bool convert(PyObject * o, KeyState& v){
+	//        
+	//    }
+	// TODO look into PyStructSequence
+	PyObject * alloc_pyobject(const KeyState& v) {
+		using std::chrono::duration_cast;
+		using std::chrono::milliseconds;
+
+		float keyTime = timeAsFloat(v.tme);
+
+		PyObject * ksLst = PyList_New(2);
+		PyList_SetItem(ksLst, 0, alloc_pyobject(v.repeat));
+		PyList_SetItem(ksLst, 1, alloc_pyobject(keyTime));
+		return ksLst;
+	}
+}

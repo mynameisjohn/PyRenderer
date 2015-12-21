@@ -14,12 +14,41 @@ std::array<Drawable, 2> ToDrawable(Contact con);
 
 int Scene::Draw() {
 	auto sBind = m_Shader.ScopeBind();
+
+	GLuint pmvHandle = m_Shader["u_PMV"];
+	GLuint clrHandle = m_Shader["u_Color"];
+	mat4 P = m_Camera.GetMat();
+	auto drawIt = [pmvHandle, clrHandle, &P](Drawable& dr, vec4 c) {
+		mat4 PMV = P * dr.GetMV();
+		glUniformMatrix4fv(pmvHandle, 1, GL_FALSE, glm::value_ptr(PMV));
+		glUniform4f(clrHandle, c[0], c[1], c[2], c[3]);
+		dr.Draw();
+	};
+
+
+	
 	for (auto& dr : m_vDrawables) {
 		mat4 PMV = m_Camera.GetMat() * dr.GetMV();
 		vec4 c = dr.GetColor();
-		glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
-		glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
-		dr.Draw();
+		drawIt(dr, c);
+	}
+
+	// Until I can think of a better way to do this
+	for (auto& cap : m_vCapsules) {
+		auto endPoints = cap.GetEndpoints();
+		Circle left(vec2(0), endPoints[0], 0, 0, cap.r);
+		Circle right(vec2(0), endPoints[1], 0, 0, cap.r);
+		OBB rect(vec2(0), cap.C, 0, 0, vec2(cap.L, 2.f * cap.r), cap.th);
+		vec4 color(1);
+
+		Drawable circ("circle.iqm", vec4(1), left.GetQuatVec(), vec2(left.r));
+		drawIt(circ, color);
+		
+		circ.Translate(vec3(endPoints[1] - endPoints[0], 0.f));
+		drawIt(circ, color);
+
+		Drawable quad("quad.iqm", vec4(1), rect.GetQuatVec(), rect.R);
+		drawIt(quad, color);
 	}
 
     bool contactDebug(false);
@@ -39,11 +68,7 @@ int Scene::Draw() {
                 vec2 ctScl = vec2(0.2f);
                 
                 Drawable drContact("circle.iqm", ctColor, ctTr, ctScl);
-                mat4 PMV = m_Camera.GetMat() * drContact.GetMV();
-                vec4 c = drContact.GetColor();
-                glUniformMatrix4fv(m_Shader["u_PMV"], 1, GL_FALSE, glm::value_ptr(PMV));
-                glUniform4f(m_Shader["u_Color"], c[0], c[1], c[2], c[3]);
-                drContact.Draw();
+				drawIt(drContact, ctColor);
             }
         }
     }

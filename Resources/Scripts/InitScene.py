@@ -1,4 +1,6 @@
-﻿from PyLiaison import *
+﻿print('fuck')
+
+from PyLiaison import *
 import math
 from collections import namedtuple
 from platform import system

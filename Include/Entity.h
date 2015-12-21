@@ -6,6 +6,12 @@
 
 class Entity;
 
+#ifdef _WIN32
+#ifdef SendMessage
+#undef SendMessage
+#endif
+#endif
+
 // I'm conflicted by this
 // On one hand it's cumbersome to add inheritance
 // to things and feels like a house of cards

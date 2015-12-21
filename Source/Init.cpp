@@ -14,6 +14,12 @@
 #include "Audible.h"
 #include "InputManager.h"
 
+#ifdef _WIN32
+#ifdef SendMessage
+#undef SendMessage
+#endif
+#endif
+
 bool InitEverything(SDL_GLContext& g_Context, SDL_Window*& g_Window, std::unique_ptr<Scene>& pScene) {
 	if (InitSDL())
 		if (InitGL(g_Context, g_Window))
@@ -211,7 +217,7 @@ Scene::Scene(std::string& pyinitScript) :
     Python::Expose_Object(&m_EffectManager, "SndEffManager", Python::GetPyLiaisonModule().get());
     
     // Convert the relative python path to the absolute, load module
-    std::string initStrPath = FixBackslash(RelPathToAbs(SCRIPT_DIR ) + "/" + pyinitScript);
+    std::string initStrPath = FixBackslash(RelPathToAbs(SCRIPT_DIR ) + pyinitScript);
     Python::Object pyinitModule = Python::Object::from_script(initStrPath);
     
     // Get main module name and load it
