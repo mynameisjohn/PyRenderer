@@ -22,6 +22,8 @@ struct Contact;
 struct Circle;
 struct AABB;
 struct OBB;
+struct Capsule;
+struct Lozenge;
 
 // I don't know if the base collision primitive should be a pycomponent
 struct RigidBody_2D : public OwnedByEnt {
@@ -44,11 +46,15 @@ struct RigidBody_2D : public OwnedByEnt {
 	virtual bool IsOverlapping(const Circle& other) const = 0;
 	virtual bool IsOverlapping(const AABB& other) const = 0;
 	virtual bool IsOverlapping(const OBB& other) const = 0;
+	virtual bool IsOverlapping(const Capsule& other) const = 0;
+	virtual bool IsOverlapping(const Lozenge& other) const = 0;
 
 	// Contacts (TODO pass a container around by reference)
 	virtual std::list<Contact> GetClosestPoints(const Circle& other) const = 0;
 	virtual std::list<Contact> GetClosestPoints(const AABB& other) const = 0;
 	virtual std::list<Contact> GetClosestPoints(const OBB& other) const = 0;
+	virtual std::list<Contact> GetClosestPoints(const Capsule& other) const = 0;
+	virtual std::list<Contact> GetClosestPoints(const Lozenge& other) const = 0;
 
 	// Applying collision between objects
 	//void ApplyCollisionImpulse(RigidBody_2D * const other, vec2 n);
@@ -61,6 +67,8 @@ struct RigidBody_2D : public OwnedByEnt {
 
 	// Get rotation/translation
 	quatvec GetQuatVec() const;
+
+	glm::mat2 getRotMat() const;
 };
 
 
@@ -76,12 +84,16 @@ struct Circle : public RigidBody_2D {
 	// Collision Overrides
 	bool IsOverlapping(const Circle& other) const override;
 	bool IsOverlapping(const AABB& other) const override;
-	virtual bool IsOverlapping(const OBB& other) const override;
+	bool IsOverlapping(const OBB& other) const override;
+	bool IsOverlapping(const Capsule& other) const override;
+	bool IsOverlapping(const Lozenge& other) const override;
 
 	// Contacts
 	std::list<Contact> GetClosestPoints(const Circle& other) const override;
 	std::list<Contact> GetClosestPoints(const AABB& other) const override;
-	virtual std::list<Contact> GetClosestPoints(const OBB& other) const override;
+	std::list<Contact> GetClosestPoints(const OBB& other) const override;
+	std::list<Contact> GetClosestPoints(const Capsule& other) const override;
+	std::list<Contact> GetClosestPoints(const Lozenge& other) const override;
 };
 
 // 2D Axis Aligned Bounding Box
@@ -112,14 +124,21 @@ struct AABB : public RigidBody_2D {
 	virtual bool IsOverlapping(const Circle& other) const override;
 	virtual bool IsOverlapping(const AABB& other) const override;
 	virtual bool IsOverlapping(const OBB& other) const override;
+	virtual bool IsOverlapping(const Capsule& other) const override;
+	virtual bool IsOverlapping(const Lozenge& other) const override;
 
 	// Contacts
 	virtual std::list<Contact> GetClosestPoints(const Circle& other) const override;
 	virtual std::list<Contact> GetClosestPoints(const AABB& other) const override;
 	virtual std::list<Contact> GetClosestPoints(const OBB& other) const override;
+	virtual std::list<Contact> GetClosestPoints(const Capsule& other) const override;
+	virtual std::list<Contact> GetClosestPoints(const Lozenge& other) const override;
 
 	// No rotation applied
 	void ChangeVel(vec2 newV, vec2 rad) override;
+
+	virtual vec2 GetVert(uint32_t idx) const;
+	virtual vec2 GetNormal(uint32_t idx) const;
 };
 
 // 2D Oriented Bounding Box (should this inherit from AABB?)
@@ -139,22 +158,25 @@ struct OBB : public AABB {
 	//float ws_top() const;
 	//float ws_bottom() const;
 	vec2 ws_clamp(vec2 p) const;
-	glm::mat2 getRotMat() const;
 
-	vec2 GetVert(uint32_t idx) const;
-	vec2 GetNormal(uint32_t idx) const;
+	vec2 GetVert(uint32_t idx) const override;
+	vec2 GetNormal(uint32_t idx) const override;
     
     // Cancel AABB's override (this is stupid
     void Integrate() override;
 
 	// Collision Overrides
-	bool IsOverlapping(const Circle& other) const override;
-	bool IsOverlapping(const AABB& other) const override;
+	virtual bool IsOverlapping(const Circle& other) const override;
+	virtual bool IsOverlapping(const AABB& other) const override;
+	virtual bool IsOverlapping(const Capsule& other) const override;
+	virtual bool IsOverlapping(const Lozenge& other) const override;
 
 	// Contacts
-	std::list<Contact> GetClosestPoints(const Circle& other) const override;
-	std::list<Contact> GetClosestPoints(const AABB& other) const override;
-	std::list<Contact> GetClosestPoints(const OBB& other) const override;
+	virtual std::list<Contact> GetClosestPoints(const Circle& other) const override;
+	virtual std::list<Contact> GetClosestPoints(const AABB& other) const override;
+	virtual std::list<Contact> GetClosestPoints(const OBB& other) const override;
+	virtual std::list<Contact> GetClosestPoints(const Capsule& other) const override;
+	virtual std::list<Contact> GetClosestPoints(const Lozenge& other) const override;
 
 	int GetSupportVerts(vec2 n, std::array<vec2, 2>&) const;
 	int GetSupportIndices(vec2 n, std::array<int, 2>&) const;
@@ -163,6 +185,55 @@ struct OBB : public AABB {
 
 	// AABB fucks it up
 	void ChangeVel(vec2 newV, vec2 rad) override;
+};
+
+struct Capsule : public RigidBody_2D {
+	float r;	// Circle radius
+	float L;	// length between pA, pB
+
+	Capsule();
+	Capsule(vec2 vel, vec2 c, float mass, float elasticity, vec2 s, float th = 0.f);
+
+	// Collision Overrides
+	bool IsOverlapping(const Circle& other) const override;
+	bool IsOverlapping(const AABB& other) const override;
+	bool IsOverlapping(const OBB& other) const override;
+	bool IsOverlapping(const Capsule& other) const override;
+	bool IsOverlapping(const Lozenge& other) const override;
+
+	// Contacts
+	std::list<Contact> GetClosestPoints(const Circle& other) const override;
+	std::list<Contact> GetClosestPoints(const AABB& other) const override;
+	std::list<Contact> GetClosestPoints(const OBB& other) const override;
+	std::list<Contact> GetClosestPoints(const Capsule& other) const override;
+	std::list<Contact> GetClosestPoints(const Lozenge& other) const override;
+
+	std::array<vec2, 2> GetEndpoints() const;
+};
+
+struct Lozenge : public RigidBody_2D {
+	float r;	// Circle radius
+	vec2 R;		// box dims
+
+	Lozenge();
+	Lozenge(vec2 vel, vec2 c, float mass, float elasticity, vec2 s, float th = 0.f);
+
+	// This controls roundness - hardcode for now
+	const float ALPHA = 0.5f;
+
+	// Collision Overrides
+	virtual bool IsOverlapping(const Circle& other) const override;
+	virtual bool IsOverlapping(const AABB& other) const override;
+	virtual bool IsOverlapping(const OBB& other) const override;
+	virtual bool IsOverlapping(const Capsule& other) const override;
+	virtual bool IsOverlapping(const Lozenge& other) const override;
+
+	// Contacts
+	virtual std::list<Contact> GetClosestPoints(const Circle& other) const override;
+	virtual std::list<Contact> GetClosestPoints(const AABB& other) const override;
+	virtual std::list<Contact> GetClosestPoints(const OBB& other) const override;
+	virtual std::list<Contact> GetClosestPoints(const Capsule& other) const override;
+	virtual std::list<Contact> GetClosestPoints(const Lozenge& other) const override;
 };
 
 // Feature Pair definition; does this belong here?
