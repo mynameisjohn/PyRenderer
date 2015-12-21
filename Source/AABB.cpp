@@ -97,7 +97,7 @@ std::list<Contact> AABB::GetClosestPoints(const AABB& other) const {
 }
 
 // Closest points between two AABBs
-std::list<Contact> AABB::GetClosestPoints(const Lozenge& other) const {
+std::list<Contact> AABB::GetClosestPoints(const Capsule& other) const {
 	return other.GetClosestPoints(*this);
 }
 

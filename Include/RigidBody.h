@@ -166,13 +166,13 @@ struct OBB : public AABB {
     void Integrate() override;
 
 	// Collision Overrides
-	virtual bool IsOverlapping(const Circle& other) const override;
-	virtual bool IsOverlapping(const AABB& other) const override;
+	bool IsOverlapping(const Circle& other) const override;
+	bool IsOverlapping(const AABB& other) const override;
 
 	// Contacts
-	virtual std::list<Contact> GetClosestPoints(const Circle& other) const override;
-	virtual std::list<Contact> GetClosestPoints(const AABB& other) const override;
-	virtual std::list<Contact> GetClosestPoints(const OBB& other) const override;
+	std::list<Contact> GetClosestPoints(const Circle& other) const override;
+	std::list<Contact> GetClosestPoints(const AABB& other) const override;
+	std::list<Contact> GetClosestPoints(const OBB& other) const override;
 	
 	int GetSupportVerts(vec2 n, std::array<vec2, 2>&) const;
 	int GetSupportIndices(vec2 n, std::array<int, 2>&) const;
@@ -218,18 +218,18 @@ struct Lozenge : public RigidBody_2D {
 	const float ALPHA = 0.5f;
 
 	// Collision Overrides
-	virtual bool IsOverlapping(const Circle& other) const override;
-	virtual bool IsOverlapping(const AABB& other) const override;
-	virtual bool IsOverlapping(const OBB& other) const override;
-	virtual bool IsOverlapping(const Capsule& other) const override;
-	virtual bool IsOverlapping(const Lozenge& other) const override;
+	bool IsOverlapping(const Circle& other) const override;
+	bool IsOverlapping(const AABB& other) const override;
+	bool IsOverlapping(const OBB& other) const override;
+	bool IsOverlapping(const Capsule& other) const override;
+	bool IsOverlapping(const Lozenge& other) const override;
 
 	// Contacts
-	virtual std::list<Contact> GetClosestPoints(const Circle& other) const override;
-	virtual std::list<Contact> GetClosestPoints(const AABB& other) const override;
-	virtual std::list<Contact> GetClosestPoints(const OBB& other) const override;
-	virtual std::list<Contact> GetClosestPoints(const Capsule& other) const override;
-	virtual std::list<Contact> GetClosestPoints(const Lozenge& other) const override;
+	std::list<Contact> GetClosestPoints(const Circle& other) const override;
+	std::list<Contact> GetClosestPoints(const AABB& other) const override;
+	std::list<Contact> GetClosestPoints(const OBB& other) const override;
+	std::list<Contact> GetClosestPoints(const Capsule& other) const override;
+	std::list<Contact> GetClosestPoints(const Lozenge& other) const override;
 };
 
 // Feature Pair definition; does this belong here?
